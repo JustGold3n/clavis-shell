@@ -52,3 +52,6 @@ core/**/meta_types/
 
 # Local packaging and CI artifacts
 .packaging/
+
+# Nix build output
+result/
