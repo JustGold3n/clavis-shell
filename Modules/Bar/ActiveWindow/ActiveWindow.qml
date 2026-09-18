@@ -6,7 +6,7 @@ import qs.Components
 import qs.Services
 import qs.Widgets.common
 
-Item {
+TopBarPill {
     id: root
 
     property bool vertical: false
@@ -43,10 +43,6 @@ Item {
 
     implicitHeight: vertical ? layout.implicitHeight + 16 : Sizes.barPillThickness
     implicitWidth: vertical ? Sizes.barVisualThickness : layout.implicitWidth + 24
-
-    TopBarPillBackground {
-        anchors.fill: parent
-    }
 
     GridLayout {
         id: layout
@@ -156,19 +152,5 @@ Item {
     PopupToolTip {
         extraVisibleCondition: root.vertical && activeHover.containsMouse
         text: root.detailedTooltipText
-    }
-
-    Behavior on implicitWidth {
-        NumberAnimation {
-            duration: 300
-            easing.type: Easing.OutCubic
-        }
-    }
-
-    Behavior on implicitHeight {
-        NumberAnimation {
-            duration: 300
-            easing.type: Easing.OutCubic
-        }
     }
 }

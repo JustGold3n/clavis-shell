@@ -115,3 +115,63 @@ operations are untouched. Files retains its generation/cancellation protocol and
 receives an active query only in Files. Wallpaper's dedicated provider retains
 its original explicit refresh, while Search reads only the already loaded path
 list. Thumbnails are small, first-frame images instantiated by visible list rows.
+
+## Session commands and tools
+
+`SpotlightSessionController` wraps pure `SpotlightSession.js` transitions. Six base
+modes are independent of the foreground tool. A tool keeps one lightweight parent
+snapshot (query, literal identity, stable selection, at most one override of each
+kind). Replacing a tool reuses that parent. Overrides never write UiPreferences;
+Apps provider limits/order, panel geometry and grid navigation consume the same
+effective values. Closing and explicit mode navigation clear the transient state.
+
+`SpotlightCatalog` exposes the shared command whitelist from `SpotlightCommands`.
+Both slash dispatch and palette activation use its IDs; the palette excludes
+presentation overrides. Existing Settings/IPC results retain their generated
+catalog and deferred activation. `/map` opens the shared location picker as a standalone map window after Spotlight
+closes. It includes a draggable marker, floating coordinates and controls for save, automatic
+location, return to the saved location and recentering. Draft edits remain local
+until Save; automatic location uses the existing location-reset action. Default Search's data sources are unchanged.
+Tool and command contexts deactivate unrelated providers, including their queries.
+
+Tab/Shift+Tab expand and cycle the existing mode rail. Ctrl immediately displays
+file paths while held; there is no tap/hold recognizer or Tab completion. Slash
+commands execute exact names on Enter without a suggestion panel. Entering Commands
+with `>` preserves the previous context: Esc or a fresh Backspace on empty input
+returns to it, including its query and presentation overrides. Tools opened from
+that palette return to Commands first. Explicit mode switches discard this history.
+
+`SpotlightTemplateController` presents two Time Zone templates: current time to
+another zone, or a conversion between two zones. After choosing a template,
+Time Zone and Currency share `SpotlightConversionEditor`: plain text slots,
+text selection, local unit candidates, and whole-expression copying. In the
+explicit time template is seeded with the current local date and time each time
+it is chosen; the backend resolves its local IANA zone. Either time slot can then
+drive the conversion (a copied tzfile without an IANA name requires choosing an
+explicit source zone before reverse editing); derived times
+retain their date across midnight. The current-time template keeps its source
+read-only. Ctrl+A followed by Backspace/Delete, or a fresh Backspace on an empty
+field, returns to template selection. UTC offsets, day differences and DST
+ambiguity choices remain visible.
+
+Currency has an independent `SpotlightCurrencyController`.
+The confirmed pair drives a unit-rate request through `SpotlightToolService`;
+slot focus, currency drafts, amounts and driver changes never submit requests.
+`SpotlightCurrency` performs bounded decimal-string multiplication/division and
+local candidate ranking. Reverse conversion rounds half-even to 24 decimal
+places. Derived output reads the current driver and a generation-checked rate
+for the confirmed pair; it never writes into the driving slot. Clipboard writes
+reuse the service or the active TextInput's native selection copy.
+
+The existing Web press/shadow/pill progress is reused for every temporary state.
+Replacement exits the displayed label before presenting the next label. Input and
+blur share the transformed search surface. The four-button shader/motion is unchanged.
+
+`SpotlightToolService` is the only tool process owner. It negotiates `key tool status`,
+caches local catalogs and serializes evaluation with debounce, cancellation and a
+bounded deadline. Request generation plus session instance rejects obsolete output.
+Input edits clear the copyable result before evaluation. Tool errors do not disable
+command navigation. Calculator uses isolated qalc; currency uses fixed ECB reference
+rates with a dated 24-hour on-demand cache; time uses system IANA transition rules.
+The public key-cli protocol documents exact limits and error/result fields; neither
+repository imports implementation code or build artifacts from the other.

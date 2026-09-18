@@ -307,6 +307,44 @@ var catalog = {
     },
     {
       "aliases": [
+        "weather",
+        "sidebar"
+      ],
+      "args": [
+        "weather"
+      ],
+      "availability": "always",
+      "confirmation": "none",
+      "context": "SpotlightActions",
+      "description": "Toggle the weather sidebar",
+      "icon": "partly_cloudy_day",
+      "id": "clavis:sidebar:toggle:weather",
+      "method": "toggle",
+      "policy": "include",
+      "target": "sidebar",
+      "title": "Weather sidebar"
+    },
+    {
+      "aliases": [
+        "drawer",
+        "sidebar"
+      ],
+      "args": [
+        "drawer"
+      ],
+      "availability": "always",
+      "confirmation": "none",
+      "context": "SpotlightActions",
+      "description": "Toggle the sidebar drawer",
+      "icon": "widgets",
+      "id": "clavis:sidebar:toggle:drawer",
+      "method": "toggle",
+      "policy": "include",
+      "target": "sidebar",
+      "title": "Sidebar drawer"
+    },
+    {
+      "aliases": [
         "keys"
       ],
       "args": [],
@@ -1856,6 +1894,8 @@ function title(id) {
     case "clavis:keystone:tools": return qsTranslate("SpotlightActions", "Keystone tools");
     case "clavis:sidebar:open:dashboard": return qsTranslate("SpotlightActions", "Notifications");
     case "clavis:sidebar:open:quicksettings": return qsTranslate("SpotlightActions", "Quick settings");
+    case "clavis:sidebar:toggle:weather": return qsTranslate("SpotlightActions", "Weather sidebar");
+    case "clavis:sidebar:toggle:drawer": return qsTranslate("SpotlightActions", "Sidebar drawer");
     case "clavis:shortcut-map:open": return qsTranslate("SpotlightActions", "Shortcut map");
     case "clavis:power-menu:open": return qsTranslate("SpotlightActions", "Power menu");
     default: return "";
@@ -1882,6 +1922,8 @@ function description(id) {
     case "clavis:keystone:tools": return qsTranslate("SpotlightActions", "Toggle the Keystone tools panel");
     case "clavis:sidebar:open:dashboard": return qsTranslate("SpotlightActions", "Open the notifications sidebar");
     case "clavis:sidebar:open:quicksettings": return qsTranslate("SpotlightActions", "Open the Quick settings sidebar");
+    case "clavis:sidebar:toggle:weather": return qsTranslate("SpotlightActions", "Toggle the weather sidebar");
+    case "clavis:sidebar:toggle:drawer": return qsTranslate("SpotlightActions", "Toggle the sidebar drawer");
     case "clavis:shortcut-map:open": return qsTranslate("SpotlightActions", "Show keyboard shortcuts");
     case "clavis:power-menu:open": return qsTranslate("SpotlightActions", "Choose a session or power action");
     default: return "";

@@ -7,7 +7,7 @@ import qs.Components
 import qs.Services
 import qs.Widgets.common
 
-Item {
+TopBarPill {
     id: root
 
     property bool trayOverflowOpen: false
@@ -82,45 +82,37 @@ Item {
         const surfaceHeight = Math.max(1, overflowSurface.implicitHeight);
         const screenWidth = root.screen ? (root.screen.width || 0) : 0;
         const screenHeight = root.screen ? (root.screen.height || 0) : 0;
-        const availableWidth = Math.max(surfaceWidth + root.overflowEdgeMargin * 2, overflowPopup.width, screenWidth);
-        const availableHeight = Math.max(surfaceHeight + root.overflowEdgeMargin * 2, overflowPopup.height, screenHeight);
+        const availableWidth = Math.max(surfaceWidth + root.overflowEdgeMargin * 2, overflowPopup.width,
+                                        screenWidth);
+        const availableHeight = Math.max(surfaceHeight + root.overflowEdgeMargin * 2, overflowPopup.height,
+                                         screenHeight);
         const anchorX = root.overflowAnchorReady ? root.overflowAnchorX : root.overflowEdgeMargin;
         const anchorY = root.overflowAnchorReady ? root.overflowAnchorY : root.overflowEdgeMargin;
         const anchorWidth = root.overflowAnchorReady ? root.overflowAnchorWidth : 0;
         const anchorHeight = root.overflowAnchorReady ? root.overflowAnchorHeight : 0;
         const barBounds = root.barVisualBounds();
 
-        const rightX = barBounds
-            ? barBounds.x + barBounds.width + root.overflowPopupGap
-                - root.overflowSurfacePadding
-            : anchorX + anchorWidth + root.overflowPopupGap;
-        const leftX = barBounds
-            ? barBounds.x - surfaceWidth - root.overflowPopupGap
-                + root.overflowSurfacePadding
-            : anchorX - surfaceWidth - root.overflowPopupGap;
+        const rightX = barBounds ? barBounds.x + barBounds.width + root.overflowPopupGap - root.overflowSurfacePadding :
+                                   anchorX + anchorWidth + root.overflowPopupGap;
+        const leftX = barBounds ? barBounds.x - surfaceWidth - root.overflowPopupGap
+                                  + root.overflowSurfacePadding : anchorX - surfaceWidth
+                                  - root.overflowPopupGap;
         const maxX = availableWidth - surfaceWidth - root.overflowEdgeMargin;
-        root.overflowX = root.edge === "left"
-            ? root.clamp(rightX, root.overflowEdgeMargin, maxX)
-            : root.edge === "right"
-                ? root.clamp(leftX, root.overflowEdgeMargin, maxX)
-                : root.clamp(anchorX + anchorWidth / 2 - surfaceWidth / 2,
-                    root.overflowEdgeMargin, maxX);
+        root.overflowX = root.edge === "left" ? root.clamp(rightX, root.overflowEdgeMargin, maxX) : root.edge === "right"
+                                                ? root.clamp(leftX, root.overflowEdgeMargin, maxX) :
+                                                  root.clamp(anchorX + anchorWidth / 2 - surfaceWidth / 2,
+                                                             root.overflowEdgeMargin, maxX);
 
-        const belowY = barBounds
-            ? barBounds.y + barBounds.height + root.overflowPopupGap
-                - root.overflowSurfacePadding
-            : anchorY + anchorHeight + root.overflowPopupGap;
-        const aboveY = barBounds
-            ? barBounds.y - surfaceHeight - root.overflowPopupGap
-                + root.overflowSurfacePadding
-            : anchorY - surfaceHeight - root.overflowPopupGap;
+        const belowY = barBounds ? barBounds.y + barBounds.height + root.overflowPopupGap - root.overflowSurfacePadding :
+                                   anchorY + anchorHeight + root.overflowPopupGap;
+        const aboveY = barBounds ? barBounds.y - surfaceHeight - root.overflowPopupGap
+                                   + root.overflowSurfacePadding : anchorY - surfaceHeight
+                                   - root.overflowPopupGap;
         const maxY = availableHeight - surfaceHeight - root.overflowEdgeMargin;
-        root.overflowY = root.vertical
-            ? root.clamp(anchorY + anchorHeight / 2 - surfaceHeight / 2,
-                root.overflowEdgeMargin, maxY)
-            : root.edge === "bottom"
-                ? root.clamp(aboveY, root.overflowEdgeMargin, maxY)
-                : root.clamp(belowY, root.overflowEdgeMargin, maxY);
+        root.overflowY = root.vertical ? root.clamp(anchorY + anchorHeight / 2 - surfaceHeight / 2,
+                                                    root.overflowEdgeMargin, maxY) : root.edge === "bottom"
+                                         ? root.clamp(aboveY, root.overflowEdgeMargin, maxY) : root.clamp(
+                                               belowY, root.overflowEdgeMargin, maxY);
     }
 
     function setActiveMenu(window) {
@@ -149,8 +141,6 @@ Item {
             Qt.callLater(root.updateOverflowPosition);
     }
 
-    TopBarPillBackground { anchors.fill: parent }
-
     GridLayout {
         id: content
 
@@ -168,7 +158,8 @@ Item {
             implicitHeight: 24
             buttonRadius: Appearance.rounding.full
             containerColor: root.trayOverflowOpen ? Appearance.colors.colSecondaryContainer : "transparent"
-            stateLayerColor: root.trayOverflowOpen ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colSecondaryContainer
+            stateLayerColor: root.trayOverflowOpen ? Appearance.colors.colSecondaryContainerHover :
+                                                     Appearance.colors.colSecondaryContainer
             pressedStateLayerColor: Appearance.colors.colSecondaryContainerActive
             rippleColor: Appearance.colors.colOnSecondaryContainer
             Layout.alignment: Qt.AlignVCenter
@@ -190,11 +181,9 @@ Item {
                 text: "expand_more"
                 iconSize: 19
                 color: root.trayOverflowOpen || trayOverflowButton.pointerHovered
-                    ? Appearance.colors.colOnSecondaryContainer
-                    : Appearance.colors.colOnLayer0
-                rotation: (root.edge === "left" ? -90
-                    : root.edge === "right" ? 90 : 0)
-                    + (root.trayOverflowOpen ? 180 : 0)
+                       ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer0
+                rotation: (root.edge === "left" ? -90 : root.edge === "right" ? 90 : 0) + (
+                              root.trayOverflowOpen ? 180 : 0)
 
                 Behavior on rotation {
                     NumberAnimation {
@@ -244,10 +233,13 @@ Item {
 
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "clavis-shell-tray-overflow"
-        WlrLayershell.keyboardFocus: overflowPopup.visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: overflowPopup.visible ? WlrKeyboardFocus.Exclusive :
+                                                             WlrKeyboardFocus.None
         WlrLayershell.exclusionMode: ExclusionMode.Ignore
 
-        mask: Region { item: overflowInputRegion }
+        mask: Region {
+            item: overflowInputRegion
+        }
 
         onVisibleChanged: {
             if (visible)
@@ -269,10 +261,9 @@ Item {
             z: -1
 
             onClicked: event => {
-                const outsideMenu = event.x < overflowSurface.x
-                    || event.x > overflowSurface.x + overflowSurface.width
-                    || event.y < overflowSurface.y
-                    || event.y > overflowSurface.y + overflowSurface.height;
+                const outsideMenu = event.x < overflowSurface.x || event.x > overflowSurface.x
+                      + overflowSurface.width || event.y < overflowSurface.y || event.y > overflowSurface.y
+                      + overflowSurface.height;
                 if (outsideMenu) {
                     root.trayOverflowOpen = false;
                     root.closeActiveMenu();
@@ -297,10 +288,8 @@ Item {
 
                 x: root.overflowX
                 y: root.overflowY
-                implicitWidth: popupBackground.implicitWidth
-                    + root.overflowSurfacePadding * 2
-                implicitHeight: popupBackground.implicitHeight
-                    + root.overflowSurfacePadding * 2
+                implicitWidth: popupBackground.implicitWidth + root.overflowSurfacePadding * 2
+                implicitHeight: popupBackground.implicitHeight + root.overflowSurfacePadding * 2
                 width: implicitWidth
                 height: implicitHeight
 
@@ -321,8 +310,7 @@ Item {
                     y: root.overflowSurfacePadding
                     implicitWidth: overflowLayout.implicitWidth + popupPadding * 2
                     implicitHeight: overflowLayout.implicitHeight + popupPadding * 2
-                    color: BlurService.backgroundColor(
-                        Appearance.colors.colLayer0)
+                    color: BlurService.backgroundColor(Appearance.colors.colLayer0)
                     radius: 18
                     border.width: 1
                     border.color: Appearance.colors.colLayer0Border

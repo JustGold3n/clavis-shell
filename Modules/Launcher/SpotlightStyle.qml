@@ -77,7 +77,6 @@ QtObject {
     readonly property int windowBottomMargin: 40
     readonly property int emptyHeight: 150
     readonly property int enginePillHeight: 34
-    readonly property int enginePillWidth: 86
     readonly property int windowOpenDuration: 210
     readonly property int windowCloseDuration: 175
     readonly property int railDuration: 620

@@ -48,7 +48,8 @@ Item {
             }
             return false;
         case "sidebar":
-            return sidebarHost.setSidebarOpen(action.args[0], true) !== "INVALID_SIDE";
+            return (action.method === "toggle" ? sidebarHost.toggleSidebar(action.args[0]) : sidebarHost.setSidebarOpen(
+                                                     action.args[0], true)) !== "INVALID_SIDE";
         case "shortcut-map":
             ShortcutMapService.open();
             return true;
@@ -254,6 +255,14 @@ Item {
                 function web(): string {
                     spotlightLauncher.openWebMode();
                     return "WEB";
+                }
+
+                function command(name: string): string {
+                    return spotlightLauncher.runCommand(name);
+                }
+
+                function commands(): string {
+                    return openMode("commands");
                 }
 
                 function files(): string {

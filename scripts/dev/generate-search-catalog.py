@@ -28,6 +28,7 @@ DISPATCH = {
     ('keystone', 'lyrics'): [[]],
     ('keystone', 'tools'): [[]],
     ('sidebar', 'open'): [['dashboard'], ['quicksettings']],
+    ('sidebar', 'toggle'): [['weather'], ['drawer']],
     ('shortcut-map', 'open'): [[]],
     ('power-menu', 'open'): [[]],
 }

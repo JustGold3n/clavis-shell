@@ -26,8 +26,10 @@ Item {
     property string query: ""
     property bool previewActive: false
     property string selectedClipboardId: ""
-    readonly property bool clipboardDetails: mode === "clipboard" && UiPreferences.spotlightClipboardStyle
-                                             === "details"
+    property string clipboardLayout: UiPreferences.spotlightClipboardStyle
+    property string appsLayout: UiPreferences.spotlightAppStyle
+    readonly property bool commandList: ["commands", "settings", "actions", "slash"].includes(mode)
+    readonly property bool clipboardDetails: mode === "clipboard" && clipboardLayout === "details"
     signal previewKey(var event)
 
     property bool controlHeld: false
@@ -50,7 +52,7 @@ Item {
     property real contentOpacity: 1
     property real targetWidth: width
     property bool animationsEnabled: true
-    readonly property bool appGridActive: mode === "apps" && UiPreferences.spotlightAppStyle === "grid"
+    readonly property bool appGridActive: mode === "apps" && appsLayout === "grid"
     readonly property int modeIndex: mode === "wallpapers" ? 1 : (mode === "clipboard" ? 2 : 0)
     readonly property int clipboardHeaderHeight: mode === "clipboard" ? 46 : 0
     readonly property int wallpaperColumnCount: style.wallpaperColumnsForWidth(wallpaperGrid.width)
@@ -295,7 +297,8 @@ Item {
                 visible: !root.appGridActive
                 clip: true
                 spacing: 0
-                model: (root.mode === "apps" || root.fileMode) && !root.appGridActive ? root.results : []
+                model: (root.mode === "apps" || root.fileMode || root.commandList) && !root.appGridActive ? root.results :
+                                                                                                            []
                 currentIndex: root.selectedIndex
                 boundsBehavior: Flickable.StopAtBounds
                 keyNavigationEnabled: false
@@ -340,14 +343,24 @@ Item {
                         }
 
                         Image {
-                            visible: !root.fileMode
+                            visible: !root.fileMode && !root.commandList
                             Layout.preferredWidth: root.style.resultIconSize
                             Layout.preferredHeight: root.style.resultIconSize
-                            source: root.fileMode ? "" : root.iconSource(appDelegate.modelData.icon)
+                            source: root.fileMode || root.commandList ? "" : root.iconSource(
+                                                                            appDelegate.modelData.icon)
                             sourceSize.width: root.style.resultIconSize * 2
                             sourceSize.height: root.style.resultIconSize * 2
                             asynchronous: true
                             fillMode: Image.PreserveAspectFit
+                        }
+
+                        MaterialSymbol {
+                            visible: root.commandList
+                            text: appDelegate.modelData.icon || "terminal"
+                            iconSize: root.style.resultIconSize
+                            Layout.preferredWidth: root.style.resultIconSize
+                            Layout.preferredHeight: root.style.resultIconSize
+                            color: Appearance.colors.colOnSurfaceVariant
                         }
 
                         ColumnLayout {

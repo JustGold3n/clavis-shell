@@ -7,6 +7,8 @@ Item {
     id: root
     property bool active: false
     property string query: ""
+    property string filter: ""
+    onFilterChanged: rebuild()
     property var results: []
     property var capacities: ({
                                   apps: 6,
@@ -22,6 +24,23 @@ Item {
     function rebuild() {
         if (!active)
             return;
+        if (filter === "settings" || filter === "actions") {
+            const catalog = filter === "settings" ? SpotlightCatalog.settings : SpotlightCatalog.actions;
+            const matches = filter === "actions" && !query.trim() ? catalog : LocalSearch.matchCatalog(catalog,
+                                                                                                       query);
+            results = matches.map(entry => ({
+                id: filter + ":" + entry.id,
+                sourceId: entry.id,
+                provider: filter,
+                query: query,
+                title: entry.title,
+                icon: entry.icon,
+                symbol: entry.icon,
+                subtitle: SpotlightCatalog.available(entry) ? (entry.breadcrumb || entry.description || "") : qsTr(
+                                                                  "Currently unavailable")
+            }));
+            return;
+        }
         if (!query.trim()) {
             results = [];
             return;

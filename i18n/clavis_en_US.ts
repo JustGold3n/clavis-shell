@@ -5763,6 +5763,35 @@ Scroll to adjust</translation>
     </message>
 </context>
 <context>
+    <name>MediaBar</name>
+    <message>
+        <location filename="../Modules/Bar/Media/MediaBar.qml" line="14"/>
+        <location filename="../Modules/Bar/Media/MediaBar.qml" line="14"/>
+        <source>No media</source>
+        <translation>No media</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Bar/Media/MediaBar.qml" line="81"/>
+        <source>Previous track</source>
+        <translation>Previous track</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Bar/Media/MediaBar.qml" line="88"/>
+        <source>Pause</source>
+        <translation>Pause</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Bar/Media/MediaBar.qml" line="88"/>
+        <source>Play</source>
+        <translation>Play</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Bar/Media/MediaBar.qml" line="96"/>
+        <source>Next track</source>
+        <translation>Next track</translation>
+    </message>
+</context>
+<context>
     <name>MediaCard</name>
     <message>
         <location filename="../Modules/Lock/Cards/MediaCard.qml" line="16"/>
@@ -7654,6 +7683,61 @@ Click to open network settings</translation>
         <source>Power menu: toggle</source>
         <translation>Power menu: toggle</translation>
     </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="4"/>
+        <source>Spotlight: Commands</source>
+        <translation>Spotlight: Commands</translation>
+    </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="5"/>
+        <source>Spotlight: Calculator</source>
+        <translation>Spotlight: Calculator</translation>
+    </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="6"/>
+        <source>Spotlight: Currency</source>
+        <translation>Spotlight: Currency</translation>
+    </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="7"/>
+        <source>Spotlight: Time zone</source>
+        <translation>Spotlight: Time zone</translation>
+    </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="8"/>
+        <source>Spotlight: Light theme</source>
+        <translation>Spotlight: Light theme</translation>
+    </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="9"/>
+        <source>Spotlight: Dark theme</source>
+        <translation>Spotlight: Dark theme</translation>
+    </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="10"/>
+        <source>Spotlight: Search settings</source>
+        <translation>Spotlight: Search settings</translation>
+    </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="11"/>
+        <source>Spotlight: Search IPC actions</source>
+        <translation>Spotlight: Search IPC actions</translation>
+    </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="12"/>
+        <source>Spotlight: Location picker</source>
+        <translation>Spotlight: Location picker</translation>
+    </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="4"/>
+        <source>Weather sidebar: toggle</source>
+        <translation>Weather sidebar: toggle</translation>
+    </message>
+    <message>
+        <location filename="../Common/NiriActionNames.js" line="5"/>
+        <source>Sidebar drawer: toggle</source>
+        <translation>Sidebar drawer: toggle</translation>
+    </message>
 </context>
 <context>
     <name>NiriCommands</name>
@@ -8140,13 +8224,13 @@ Click to open network settings</translation>
     </message>
     <message>
         <location filename="../Services/PersonalizationConfig.qml" line="344"/>
-        <location filename="../Services/PersonalizationConfig.qml" line="462"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="467"/>
         <source>Weather</source>
         <translation>Weather</translation>
     </message>
     <message>
         <location filename="../Services/PersonalizationConfig.qml" line="348"/>
-        <location filename="../Services/PersonalizationConfig.qml" line="383"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="387"/>
         <source>Quick Settings</source>
         <translation>Quick Settings</translation>
     </message>
@@ -8157,106 +8241,111 @@ Click to open network settings</translation>
     </message>
     <message>
         <location filename="../Services/PersonalizationConfig.qml" line="363"/>
+        <source>Media</source>
+        <translation>Media</translation>
+    </message>
+    <message>
+        <location filename="../Services/PersonalizationConfig.qml" line="367"/>
         <source>Workspaces</source>
         <translation>Workspaces</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="367"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="371"/>
         <source>Information</source>
         <translation>Information</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="371"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="375"/>
         <source>Active Window</source>
         <translation>Active Window</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="375"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="379"/>
         <source>Tray</source>
         <translation>Tray</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="379"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="383"/>
         <source>System Monitor</source>
         <translation>System Monitor</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="391"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="396"/>
         <source>Network</source>
         <translation>Network</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="395"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="400"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="399"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="404"/>
         <source>Brightness</source>
         <translation>Brightness</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="403"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="408"/>
         <source>Volume</source>
         <translation>Volume</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="407"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="412"/>
         <source>Microphone</source>
         <translation>Microphone</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="411"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="416"/>
         <source>Battery</source>
         <translation>Battery</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="416"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="421"/>
         <source>Settings</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="421"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="426"/>
         <source>Power</source>
         <translation>Power</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="438"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="443"/>
         <source>Do not open</source>
         <translation>Do not open</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="442"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="447"/>
         <source>Media controls</source>
         <translation>Media controls</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="446"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="451"/>
         <source>Lyrics</source>
         <translation>Lyrics</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="450"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="455"/>
         <source>Dashboard</source>
         <translation>Dashboard</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="454"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="459"/>
         <source>Media library</source>
         <translation>Media library</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="458"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="463"/>
         <source>Upload</source>
         <translation>Upload</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="466"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="471"/>
         <source>Tools</source>
         <translation>Tools</translation>
     </message>
     <message>
-        <location filename="../Services/PersonalizationConfig.qml" line="473"/>
+        <location filename="../Services/PersonalizationConfig.qml" line="478"/>
         <source>Peak</source>
         <translation>Peak</translation>
     </message>
@@ -9262,11 +9351,31 @@ Right click: Control Center</translation>
         <source>Choose a session or power action</source>
         <translation>Choose a session or power action</translation>
     </message>
+    <message>
+        <location filename="../Common/generated/SearchCatalog.js" line="1897"/>
+        <source>Weather sidebar</source>
+        <translation>Weather sidebar</translation>
+    </message>
+    <message>
+        <location filename="../Common/generated/SearchCatalog.js" line="1898"/>
+        <source>Sidebar drawer</source>
+        <translation>Sidebar drawer</translation>
+    </message>
+    <message>
+        <location filename="../Common/generated/SearchCatalog.js" line="1925"/>
+        <source>Toggle the weather sidebar</source>
+        <translation>Toggle the weather sidebar</translation>
+    </message>
+    <message>
+        <location filename="../Common/generated/SearchCatalog.js" line="1926"/>
+        <source>Toggle the sidebar drawer</source>
+        <translation>Toggle the sidebar drawer</translation>
+    </message>
 </context>
 <context>
     <name>SpotlightCatalog</name>
     <message>
-        <location filename="../Services/SpotlightCatalog.qml" line="72"/>
+        <location filename="../Services/SpotlightCatalog.qml" line="89"/>
         <source>Action unavailable</source>
         <translation>Action unavailable</translation>
     </message>
@@ -9447,6 +9556,198 @@ Right click: Control Center</translation>
         <location filename="../Modules/Launcher/SpotlightClipboardProvider.qml" line="334"/>
         <source>This format cannot be restored reliably</source>
         <translation>This format cannot be restored reliably</translation>
+    </message>
+</context>
+<context>
+    <name>SpotlightCommandProvider</name>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightCommandProvider.qml" line="23"/>
+        <source>Available in %1 only</source>
+        <translation>Available in %1 only</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightCommandProvider.qml" line="26"/>
+        <source>Apps</source>
+        <translation>Apps</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightCommandProvider.qml" line="27"/>
+        <source>Clipboard</source>
+        <translation>Clipboard</translation>
+    </message>
+</context>
+<context>
+    <name>SpotlightCommands</name>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="59"/>
+        <source>Default search</source>
+        <translation>Default search</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="60"/>
+        <source>Apps</source>
+        <translation>Apps</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="61"/>
+        <source>Wallpapers</source>
+        <translation>Wallpapers</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="62"/>
+        <source>Clipboard</source>
+        <translation>Clipboard</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="63"/>
+        <source>Files</source>
+        <translation>Files</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="64"/>
+        <source>Commands</source>
+        <translation>Commands</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="65"/>
+        <source>Web search</source>
+        <translation>Web search</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="66"/>
+        <source>Calculator</source>
+        <translation>Calculator</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="67"/>
+        <source>Currency</source>
+        <translation>Currency</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="68"/>
+        <source>Time zone</source>
+        <translation>Time zone</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="69"/>
+        <source>Light theme</source>
+        <translation>Light theme</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="70"/>
+        <source>Dark theme</source>
+        <translation>Dark theme</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="71"/>
+        <source>Open settings</source>
+        <translation>Open settings</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="72"/>
+        <source>Search settings</source>
+        <translation>Search settings</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="73"/>
+        <source>Search IPC actions</source>
+        <translation>Search IPC actions</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="74"/>
+        <source>Location picker</source>
+        <translation>Location picker</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="75"/>
+        <source>List</source>
+        <translation>List</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="76"/>
+        <source>Grid</source>
+        <translation>Grid</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="77"/>
+        <source>Smart</source>
+        <translation>Smart</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="78"/>
+        <source>Most used</source>
+        <translation>Most used</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="79"/>
+        <source>Recently used</source>
+        <translation>Recently used</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="80"/>
+        <source>Name</source>
+        <translation>Name</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="81"/>
+        <source>Compact</source>
+        <translation>Compact</translation>
+    </message>
+    <message>
+        <location filename="../Common/functions/SpotlightCommands.js" line="82"/>
+        <source>Details</source>
+        <translation>Details</translation>
+    </message>
+</context>
+<context>
+    <name>SpotlightConversionEditor</name>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightConversionEditor.qml" line="127"/>
+        <source>Source time</source>
+        <translation>Source time</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightConversionEditor.qml" line="127"/>
+        <source>Source time zone</source>
+        <translation>Source time zone</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightConversionEditor.qml" line="127"/>
+        <source>Target time</source>
+        <translation>Target time</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightConversionEditor.qml" line="127"/>
+        <source>Target time zone</source>
+        <translation>Target time zone</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightConversionEditor.qml" line="127"/>
+        <source>Source amount</source>
+        <translation>Source amount</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightConversionEditor.qml" line="127"/>
+        <source>Source currency</source>
+        <translation>Source currency</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightConversionEditor.qml" line="127"/>
+        <source>Target amount</source>
+        <translation>Target amount</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightConversionEditor.qml" line="127"/>
+        <source>Target currency</source>
+        <translation>Target currency</translation>
+    </message>
+</context>
+<context>
+    <name>SpotlightCurrencyController</name>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightCurrencyController.qml" line="30"/>
+        <source>Enter a valid amount</source>
+        <translation>Enter a valid amount</translation>
     </message>
 </context>
 <context>
@@ -9686,73 +9987,115 @@ Right click: Control Center</translation>
 <context>
     <name>SpotlightSearchBar</name>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="205"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="291"/>
         <source>Search apps</source>
         <translation>Search apps</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="200"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="286"/>
         <source>Search files and folders</source>
         <translation>Search files and folders</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="154"/>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="159"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="186"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="191"/>
         <source>Search (Ctrl+0)</source>
         <translation>Search (Ctrl+0)</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="198"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="239"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="253"/>
+        <source>Return to previous context (Backspace)</source>
+        <translation>Return to previous context (Backspace)</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="282"/>
+        <source>Search commands</source>
+        <translation>Search commands</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="284"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="316"/>
         <source>Search</source>
         <translation>Search</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="202"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="288"/>
         <source>Search clipboard history</source>
         <translation>Search clipboard history</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="204"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="290"/>
         <source>Search wallpapers</source>
         <translation>Search wallpapers</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="217"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="304"/>
+        <source>Enter an expression</source>
+        <translation>Enter an expression</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="305"/>
+        <source>Amount and currency</source>
+        <translation>Amount and currency</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="305"/>
+        <source>Choose a time conversion template</source>
+        <translation>Choose a time conversion template</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="309"/>
+        <source>Search settings</source>
+        <translation>Search settings</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="312"/>
+        <source>Search actions</source>
+        <translation>Search actions</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="315"/>
         <source>Search the web</source>
         <translation>Search the web</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="241"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="342"/>
         <source>Web search</source>
         <translation>Web search</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="241"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="342"/>
         <source>Spotlight search</source>
         <translation>Spotlight search</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="265"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="344"/>
+        <source>Tab to show and cycle modes</source>
+        <translation>Tab to show and cycle modes</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="368"/>
         <source>Apply</source>
         <translation>Apply</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="269"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="372"/>
         <source>Wallpaper</source>
         <translation>Wallpaper</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="273"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="376"/>
         <source>Clipboard</source>
         <translation>Clipboard</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="277"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="380"/>
         <source>Files</source>
         <translation>Files</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="344"/>
+        <location filename="../Modules/Launcher/SpotlightSearchBar.qml" line="447"/>
         <source>%1 (Ctrl+%2)</source>
         <translation>%1 (Ctrl+%2)</translation>
     </message>
@@ -9760,54 +10103,247 @@ Right click: Control Center</translation>
 <context>
     <name>SpotlightSearchProvider</name>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="39"/>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="37"/>
+        <source>Currently unavailable</source>
+        <translation>Currently unavailable</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="56"/>
         <source>Settings · %1</source>
         <translation>Settings · %1</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="46"/>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="63"/>
         <source>Action · %1</source>
         <translation>Action · %1</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="46"/>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="63"/>
         <source>Action · Currently unavailable</source>
         <translation>Action · Currently unavailable</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="67"/>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="84"/>
         <source>Apps</source>
         <translation>Apps</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="68"/>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="85"/>
         <source>Settings</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="69"/>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="86"/>
         <source>Actions</source>
         <translation>Actions</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="70"/>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="87"/>
         <source>Wallpapers</source>
         <translation>Wallpapers</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="71"/>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="88"/>
         <source>Search files for “%1”</source>
         <translation>Search files for “%1”</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="72"/>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="89"/>
         <source>Search the web for “%1”</source>
         <translation>Search the web for “%1”</translation>
     </message>
     <message>
-        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="119"/>
+        <location filename="../Modules/Launcher/SpotlightSearchProvider.qml" line="136"/>
         <source>This result is currently unavailable</source>
         <translation>This result is currently unavailable</translation>
+    </message>
+</context>
+<context>
+    <name>SpotlightSessionController</name>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSessionController.qml" line="81"/>
+        <source>Available in %1 only</source>
+        <translation>Available in %1 only</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSessionController.qml" line="82"/>
+        <source>Apps</source>
+        <translation>Apps</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSessionController.qml" line="82"/>
+        <source>Clipboard</source>
+        <translation>Clipboard</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSessionController.qml" line="83"/>
+        <source>This command does not accept arguments</source>
+        <translation>This command does not accept arguments</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightSessionController.qml" line="109"/>
+        <source>Unknown command. Open Commands to browse available commands.</source>
+        <translation>Unknown command. Open Commands to browse available commands.</translation>
+    </message>
+</context>
+<context>
+    <name>SpotlightTemplateController</name>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightTemplateController.qml" line="33"/>
+        <source>Now to a time zone</source>
+        <translation>Now to a time zone</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightTemplateController.qml" line="34"/>
+        <source>Convert between two time zones</source>
+        <translation>Convert between two time zones</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightTemplateController.qml" line="62"/>
+        <source>Local time</source>
+        <translation>Local time</translation>
+    </message>
+</context>
+<context>
+    <name>SpotlightToolPanel</name>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightToolPanel.qml" line="111"/>
+        <source>No matching currencies</source>
+        <translation>No matching currencies</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightToolPanel.qml" line="113"/>
+        <source>No matching time zones</source>
+        <translation>No matching time zones</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightToolPanel.qml" line="114"/>
+        <source>Calculating…</source>
+        <translation>Calculating…</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightToolPanel.qml" line="116"/>
+        <source>Enter an expression to begin</source>
+        <translation>Enter an expression to begin</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightToolPanel.qml" line="117"/>
+        <source>This time occurs twice. Choose a UTC offset.</source>
+        <translation>This time occurs twice. Choose a UTC offset.</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightToolPanel.qml" line="42"/>
+        <source>Approximate · ECB · %1 · %2</source>
+        <translation>Approximate · ECB · %1 · %2</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightToolPanel.qml" line="39"/>
+        <source>UTC%1 → UTC%2 · Day difference: %3</source>
+        <translation>UTC%1 → UTC%2 · Day difference: %3</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightToolPanel.qml" line="42"/>
+        <source>Older cached rate</source>
+        <translation>Older cached rate</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightToolPanel.qml" line="44"/>
+        <source>Reference rate</source>
+        <translation>Reference rate</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Launcher/SpotlightToolPanel.qml" line="158"/>
+        <source>Enter to copy</source>
+        <translation>Enter to copy</translation>
+    </message>
+</context>
+<context>
+    <name>SpotlightToolService</name>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="37"/>
+        <source>qalc is unavailable</source>
+        <translation>qalc is unavailable</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="38"/>
+        <source>Enter a supported expression</source>
+        <translation>Enter a supported expression</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="39"/>
+        <source>The expression could not be calculated</source>
+        <translation>The expression could not be calculated</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="40"/>
+        <source>Calculation timed out</source>
+        <translation>Calculation timed out</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="41"/>
+        <source>Calculation cancelled</source>
+        <translation>Calculation cancelled</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="42"/>
+        <source>Choose an ECB reference currency</source>
+        <translation>Choose an ECB reference currency</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="43"/>
+        <source>Exchange rate unavailable; try again later</source>
+        <translation>Exchange rate unavailable; try again later</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="44"/>
+        <source>This local time does not exist</source>
+        <translation>This local time does not exist</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="45"/>
+        <source>Time zone data is unavailable for this zone</source>
+        <translation>Time zone data is unavailable for this zone</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="46"/>
+        <source>Enter a valid date and an unambiguous IANA time zone</source>
+        <translation>Enter a valid date and an unambiguous IANA time zone</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="48"/>
+        <source>Tool request failed</source>
+        <translation>Tool request failed</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="81"/>
+        <source>This tool&apos;s dependency is unavailable</source>
+        <translation>This tool's dependency is unavailable</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="81"/>
+        <source>Update key-cli to enable this tool</source>
+        <translation>Update key-cli to enable this tool</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="134"/>
+        <source>Tool request timed out</source>
+        <translation>Tool request timed out</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="134"/>
+        <location filename="../Services/SpotlightToolService.qml" line="149"/>
+        <source>The tool returned invalid data</source>
+        <translation>The tool returned invalid data</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="214"/>
+        <source>Copied</source>
+        <translation>Copied</translation>
+    </message>
+    <message>
+        <location filename="../Services/SpotlightToolService.qml" line="214"/>
+        <source>Could not copy the result</source>
+        <translation>Could not copy the result</translation>
     </message>
 </context>
 <context>

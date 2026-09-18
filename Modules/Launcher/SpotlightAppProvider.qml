@@ -9,13 +9,14 @@ Item {
     property string query: ""
     property var results: []
     property int limit: 50
+    property string order: UiPreferences.spotlightAppOrder
+    onOrderChanged: rebuild()
 
     function rebuild() {
         if (!active)
             return;
-        const ordered = LocalSearch.appResults(ApplicationService.getVisibleApplications(), query,
-                                               UiPreferences.spotlightAppOrder, SpotlightAppUsage.records,
-                                               Date.now());
+        const ordered = LocalSearch.appResults(ApplicationService.getVisibleApplications(), query, root.order,
+                                               SpotlightAppUsage.records, Date.now());
         root.results = root.limit > 0 ? ordered.slice(0, root.limit) : ordered;
     }
 

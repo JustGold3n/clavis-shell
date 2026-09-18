@@ -4,6 +4,7 @@ import qs.Services
 import Quickshell
 import qs.Common
 import "../Common/generated/SearchCatalog.js" as Catalog
+import "../Common/functions/SpotlightCommands.js" as Commands
 
 Singleton {
     id: root
@@ -14,6 +15,16 @@ Singleton {
     property var actionExecutor: null
     property bool keystoneAvailable: false
     readonly property bool keyboardLockAvailable: KeyboardLockService.available
+
+    readonly property var commands: Commands.entries
+    function commandTitle(entry) {
+        const currentLanguage = root.language;
+        return Commands.title(entry);
+    }
+    function commandMatches(query, palette) {
+        const currentLanguage = root.language;
+        return Commands.match(query, palette, root.commandTitle);
+    }
 
     signal availabilityChanged
     onKeyboardLockAvailableChanged: availabilityChanged()

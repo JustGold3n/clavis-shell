@@ -85,9 +85,8 @@ spawn "qs" "-c" "clavis" "ipc" "call" "keystone" "hub"
 `qs -c clavis ipc call spotlight files` open Files and focus its input. Repeated
 calls keep it open. Existing Apps/Wallpapers/Clipboard and web methods remain.
 
-Ctrl+1/2/3/4 selects Apps/Wallpapers/Clipboard/Files. Tab and Shift+Tab navigate
-the expanded four-mode rail. In Files, Enter opens the selected file or enters
-the folder; Ctrl+Enter requests selection in a file manager. Holding Ctrl shows
+Ctrl+1/2/3/4 selects Apps/Wallpapers/Clipboard/Files. Tab expands the four-mode rail; subsequent Tab/Shift+Tab cycle it, and Enter selects a mode. In Files, Enter opens the selected file or enters
+the folder; Ctrl+Enter requests selection in a file manager. Holding Ctrl immediately shows
 the selected result's containing path; the right-click menu also exposes Open
 and Show in file manager. Clipboard retains Shift+Enter.
 
@@ -115,9 +114,9 @@ when Search is visible they focus it. A new session starts with an empty input
 and no results panel. To open the application Grid/List directly, use
 `qs -c clavis ipc call spotlight openMode apps`.
 
-Ctrl+0 or the search icon returns to Search and preserves the current query.
-Ctrl+1/2/3/4 still opens Apps/Wallpapers/Clipboard/Files; Tab navigates the same
-four satellite buttons. Ctrl+K enters Web, and Esc from Web restores the previous
+Ctrl+0 or the search icon returns to Search and preserves ordinary search text. Tool parameters and command drafts are cleared.
+Ctrl+1/2/3/4 still opens Apps/Wallpapers/Clipboard/Files; Tab expands and cycles
+the same four satellite buttons. Ctrl+K enters Web, and Esc from Web restores the previous
 mode, including Search. The existing modal/rail/clear-input/close Esc priority and
 IME composition handling remain. No new global key is installed.
 
@@ -147,3 +146,80 @@ existing confirmation menu. Parameter templates, raw compositor commands,
 queries, duplicate navigation aliases and the reserved no-op `cancelRecord` are
 not exposed as executable Search results. No shell expression is evaluated.
 See [search catalog maintenance](architecture/spotlight-search.md).
+
+### Spotlight commands and temporary tools
+
+`spotlight commands` and `spotlight openMode commands` are idempotent public
+entries. Explicit IPC mode navigation clears temporary tools/overrides through
+the same session controller as local navigation; it does not change user keys.
+
+All 16 command-palette actions are also callable as
+`qs -c clavis ipc call spotlight command NAME`, using the slash name without `/`
+(e.g. `calc`, `fx`, `time`, `light`, `dark`, `find-settings`, `actions`, `map`).
+This returns `OK` or `INVALID_COMMAND`; scoped layout/order overrides are rejected.
+Tools open a fresh session; theme, Settings and map actions also work while
+Spotlight is closed. Existing dedicated IPC entry points remain compatible.
+Every palette action has a permanent row in Settings → Shortcuts, reusing existing
+rows where available. The new rows start unassigned and add no default bindings.
+
+Type `>` to enter the command palette immediately (`>calc` filters Calculator).
+Slash drafts stay in their base mode. Enter executes an exact command; slash input has no suggestion list. Unknown commands
+never fall through to content activation. `\/etc` and `\>hello` are literal
+searches. Tool parameters are not reparsed as top-level commands.
+
+| Command | Behavior |
+| --- | --- |
+| `/default`, `/apps`, `/wallpaper` (`/wallpapers`), `/clipboard`, `/files`, `/commands` | Base mode navigation |
+| `/search` (`/web`) | Web tool, not default Search |
+| `/calc`, `/fx` (`/currency`), `/time` (`/tz`) | Calculator, currency, time zone |
+| `/find-settings`, `/actions` | Settings-only / IPC action-only search |
+| `/light`, `/dark`, `/settings`, `/map` | Apply theme, open Settings, open standalone location map |
+| `/list`, `/grid`, `/smart`, `/most-used`, `/recent` (`/recently-used`), `/name` | Apps-only temporary presentation |
+| `/compact`, `/detail` (`/details`) | Clipboard-only temporary presentation |
+
+Tool commands accept trailing input, e.g. `/calc (120 + 80) * 0.85` or
+`/fx 100 USD to CNY`. The first Enter only enters the tool. A later Enter copies
+its valid result (Web submits); it does not close calculation tools.
+
+Empty-input Backspace removes the current tool, then the most recent presentation
+override. It requires a fresh press in the search input, no selection/preedit or
+modal dialog. Holding Backspace cannot unwind the stack. Theme changes
+and other completed actions are never undone. Closing clears temporary state.
+
+Tab and Shift+Tab always navigate the mode rail; they never complete input.
+Ctrl editing shortcuts and Files Ctrl+Enter retain their previous behavior.
+
+Currency opens with four independent slots: amount, currency, amount, currency,
+separated by ≈. Left/Right select adjacent slots without wrapping. Clicking a
+slot activates it; typing replaces the selected value. The last edited amount
+is the driver; currency changes preserve that side. `/fx 100 USD to CNY` seeds
+the slots, while `/fx` defaults to 1 USD → EUR.
+
+Only active currency slots show locally filtered candidates. Up/Down select and
+Enter confirms without copying. Tab/Shift+Tab retain mode-rail navigation.
+Ctrl+C copies the current slot (an explicit text selection takes priority).
+Ctrl+A highlights the whole four-slot expression; Ctrl+C then copies that expression.
+With candidates closed, Enter copies the derived amount without its currency.
+A fresh Backspace in an empty amount slot leaves Currency.
+
+Only the confirmed pair requests `key tool currency --expression="1 USD to EUR"`.
+Amount edits and direction changes reuse that rate locally, using decimal-string
+arithmetic. Reverse conversion rounds half-even to 24 decimal places. Pending or
+invalid dependent amounts cannot be copied. Existing generation checks reject
+old pair results, and current driver state determines which amount is derived.
+
+Time opens a searchable list of templates from local time to every available
+time zone. “Change source” chooses a different source zone. Select a template
+with Enter, then type a time (`0930`, `9`, `09:30`, or a date and time). Clearing
+the input and pressing Backspace again returns to template selection. Another
+fresh Backspace on the empty selector leaves the tool. DST ambiguity and invalid
+times still use the existing explicit result/error flow.
+
+### Sidebar weather and drawer
+
+`qs -c clavis ipc call sidebar open weather` and `sidebar open drawer` select the
+respective dashboard tab and open its sidebar, following the configured edge.
+Open/close remain explicit IPC operations. Spotlight Actions and permanent
+unassigned shortcut rows instead use `sidebar toggle weather` / `sidebar toggle drawer`.
+Toggling the already open target tab closes it; a closed sidebar or a different
+active tab opens the requested tab. No default key is installed.

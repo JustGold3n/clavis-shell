@@ -1061,6 +1061,114 @@
     }
   },
   {
+    "id": "clavis:spotlight:commands",
+    "category": "clavis",
+    "name": "Spotlight: Commands",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"spotlight\" \"commands\"",
+    "parameters": false,
+    "target": "spotlight",
+    "method": "commands",
+    "search": {
+      "policy": "alias"
+    }
+  },
+  {
+    "id": "clavis:spotlight:command:calc",
+    "category": "clavis",
+    "name": "Spotlight: Calculator",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"spotlight\" \"command\" \"calc\"",
+    "parameters": false,
+    "target": "spotlight",
+    "method": "command",
+    "search": {
+      "policy": "alias"
+    }
+  },
+  {
+    "id": "clavis:spotlight:command:fx",
+    "category": "clavis",
+    "name": "Spotlight: Currency",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"spotlight\" \"command\" \"fx\"",
+    "parameters": false,
+    "target": "spotlight",
+    "method": "command",
+    "search": {
+      "policy": "alias"
+    }
+  },
+  {
+    "id": "clavis:spotlight:command:time",
+    "category": "clavis",
+    "name": "Spotlight: Time zone",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"spotlight\" \"command\" \"time\"",
+    "parameters": false,
+    "target": "spotlight",
+    "method": "command",
+    "search": {
+      "policy": "alias"
+    }
+  },
+  {
+    "id": "clavis:spotlight:command:light",
+    "category": "clavis",
+    "name": "Spotlight: Light theme",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"spotlight\" \"command\" \"light\"",
+    "parameters": false,
+    "target": "spotlight",
+    "method": "command",
+    "search": {
+      "policy": "alias"
+    }
+  },
+  {
+    "id": "clavis:spotlight:command:dark",
+    "category": "clavis",
+    "name": "Spotlight: Dark theme",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"spotlight\" \"command\" \"dark\"",
+    "parameters": false,
+    "target": "spotlight",
+    "method": "command",
+    "search": {
+      "policy": "alias"
+    }
+  },
+  {
+    "id": "clavis:spotlight:command:find-settings",
+    "category": "clavis",
+    "name": "Spotlight: Search settings",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"spotlight\" \"command\" \"find-settings\"",
+    "parameters": false,
+    "target": "spotlight",
+    "method": "command",
+    "search": {
+      "policy": "alias"
+    }
+  },
+  {
+    "id": "clavis:spotlight:command:actions",
+    "category": "clavis",
+    "name": "Spotlight: Search IPC actions",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"spotlight\" \"command\" \"actions\"",
+    "parameters": false,
+    "target": "spotlight",
+    "method": "command",
+    "search": {
+      "policy": "alias"
+    }
+  },
+  {
+    "id": "clavis:spotlight:command:map",
+    "category": "clavis",
+    "name": "Spotlight: Location picker",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"spotlight\" \"command\" \"map\"",
+    "parameters": false,
+    "target": "spotlight",
+    "method": "command",
+    "search": {
+      "policy": "alias"
+    }
+  },
+  {
     "id": "clavis:spotlight:openMode",
     "category": "clavis",
     "name": "Spotlight: open mode",
@@ -1721,6 +1829,56 @@
         "quicksettings"
       ],
       "aliases": [
+        "sidebar"
+      ],
+      "availability": "always",
+      "confirmation": "none"
+    }
+  },
+  {
+    "id": "clavis:sidebar:toggle:weather",
+    "category": "clavis",
+    "name": "Weather sidebar: toggle",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"sidebar\" \"toggle\" \"weather\"",
+    "parameters": false,
+    "target": "sidebar",
+    "method": "toggle",
+    "search": {
+      "policy": "include",
+      "title": "Weather sidebar",
+      "description": "Toggle the weather sidebar",
+      "context": "SpotlightActions",
+      "icon": "partly_cloudy_day",
+      "args": [
+        "weather"
+      ],
+      "aliases": [
+        "weather",
+        "sidebar"
+      ],
+      "availability": "always",
+      "confirmation": "none"
+    }
+  },
+  {
+    "id": "clavis:sidebar:toggle:drawer",
+    "category": "clavis",
+    "name": "Sidebar drawer: toggle",
+    "expression": "spawn \"qs\" \"-c\" \"clavis\" \"ipc\" \"call\" \"sidebar\" \"toggle\" \"drawer\"",
+    "parameters": false,
+    "target": "sidebar",
+    "method": "toggle",
+    "search": {
+      "policy": "include",
+      "title": "Sidebar drawer",
+      "description": "Toggle the sidebar drawer",
+      "context": "SpotlightActions",
+      "icon": "widgets",
+      "args": [
+        "drawer"
+      ],
+      "aliases": [
+        "drawer",
         "sidebar"
       ],
       "availability": "always",
