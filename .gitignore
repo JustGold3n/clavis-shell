@@ -55,3 +55,4 @@ core/**/meta_types/
 
 # Nix build output
 result/
+.aider*
