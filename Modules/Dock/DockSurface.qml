@@ -26,9 +26,8 @@ PanelWindow {
     }
     readonly property real magnification: DockService.magnification ? DockService.magnificationScale : 1
     readonly property var baseLayout: DockLayout.layout(kinds, DockService.iconSize, availableLength,
-                                                        magnification, DockService.separatorSize, NaN,
-                                                        DockLayout.sectionBoundary(kinds,
-                                                                                   DockService.pinnedEntries.length))
+                                                        magnification, 16, NaN, DockLayout.sectionBoundary(
+                                                            kinds, DockService.pinnedEntries.length))
     readonly property real scrollOffset: horizontal ? icons.contentX - icons.originX : icons.contentY
                                                       - icons.originY
     readonly property real pointerInBase: pointerAxis - (axisLength - Math.min(baseLayout.baseLength,
@@ -39,13 +38,13 @@ PanelWindow {
                                                    ? DockService.rowIndex(externalSourceKey) : -1
     readonly property var preview: DockLayout.previewOrder(kinds, previewSource, dragInside || externalOver
                                                            ? insertion : -1, draggedEntry ? draggedEntry.kind :
-                                                                                            "app")
+                                                                                            externalKind)
     readonly property var layout: DockLayout.layout(preview.kinds, baseLayout.size, availableLength,
-                                                    magnification, DockService.separatorSize, dragInside
-                                                    || externalOver || (!dragKey && magnificationActive)
-                                                    ? pointerInBase : NaN, DockLayout.sectionBoundary(
-                                                        preview.kinds, DockService.pinnedEntries.length,
-                                                        preview.order))
+                                                    magnification, 16, dragInside || externalOver || (
+                                                        !dragKey && magnificationActive) ? pointerInBase : NaN,
+                                                    DockLayout.sectionBoundary(preview.kinds,
+                                                                               DockService.pinnedEntries.length,
+                                                                               preview.order))
     readonly property var slotsByIndex: {
         const result = [];
         for (let i = 0; i < preview.order.length; ++i) {
@@ -77,6 +76,7 @@ PanelWindow {
     property point dropPoint: Qt.point(0, 0)
     property int insertion: -1
     property bool externalOver: false
+    property string externalKind: "app"
     property string externalSourceKey: ""
     property point dragGrabOffset: Qt.point(0, 0)
     readonly property var draggedEntry: {
@@ -693,10 +693,11 @@ PanelWindow {
                     drag.accepted = drag.formats.indexOf(DockService.dragMimeType) >= 0 || drag.hasUrls;
                     if (!drag.accepted)
                         return;
-                    root.externalSourceKey = drag.source && typeof drag.source.desktopId === "string" ? "app:"
-                                                                                                        + drag.source.desktopId.replace(
-                                                                                                            /\.desktop$/,
-                                                                                                            "") : "";
+                    root.externalKind = drag.source && drag.source.spaceTemplate ? "spacer" : "app";
+                    root.externalSourceKey = root.externalKind === "app" && drag.source
+                            && typeof drag.source.desktopId === "string" ? "app:"
+                                                                           + drag.source.desktopId.replace(
+                                                                               /\.desktop$/, "") : "";
                     root.dropPoint = band.mapToItem(content, drag.x, drag.y);
                     root.pointerAxis = root.horizontal ? root.dropPoint.x : root.dropPoint.y;
                     root.insertion = root.insertionAt(root.dropPoint);

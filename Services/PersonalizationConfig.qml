@@ -445,6 +445,58 @@ Singleton {
     property string keystoneHoverAction: "peak"
     property string keystoneLeftClickAction: "media"
     property string keystoneMiddleClickAction: "lyrics"
+    property string keystoneMediaProgressStyle: "wave"
+    property string keystoneMediaCoverStyle: "rounded"
+    property string keystoneMediaColorStyle: "theme"
+    readonly property var keystoneMediaProgressOptions: [
+        {
+            value: "wave",
+            label: qsTr("Sine wave")
+        },
+        {
+            value: "material",
+            label: qsTr("Material wave")
+        }
+    ]
+    readonly property var keystoneMediaCoverOptions: [
+        {
+            value: "rounded",
+            label: qsTr("Rounded cover")
+        },
+        {
+            value: "caelestia",
+            label: qsTr("Caelestia")
+        },
+        {
+            value: "background",
+            label: qsTr("Cover background")
+        }
+    ]
+    readonly property var keystoneMediaColorOptions: [
+        {
+            value: "theme",
+            label: qsTr("Theme colors")
+        },
+        {
+            value: "cover",
+            label: qsTr("Cover colors")
+        }
+    ]
+
+    function setKeystoneMediaProgressStyle(value) {
+        setValue("keystoneMediaProgressStyle", normalizedOption(root.keystoneMediaProgressOptions, value,
+                                                                "wave"));
+    }
+
+    function setKeystoneMediaCoverStyle(value) {
+        setValue("keystoneMediaCoverStyle", normalizedOption(root.keystoneMediaCoverOptions, value,
+                                                             "rounded"));
+    }
+
+    function setKeystoneMediaColorStyle(value) {
+        setValue("keystoneMediaColorStyle", normalizedOption(root.keystoneMediaColorOptions, value, "theme"));
+    }
+
     property int keystoneHoverOpenDelay: 150
     property int keystoneHoverCloseDelay: 250
     readonly property var keystoneLongItemIds: ["workspaces", "media", "systemMonitor", "network", "bluetooth",
@@ -569,10 +621,6 @@ Singleton {
         {
             value: "dashboard",
             label: qsTr("Dashboard")
-        },
-        {
-            value: "library",
-            label: qsTr("Media library")
         },
         {
             value: "upload",
@@ -1772,6 +1820,11 @@ Singleton {
                 "longTrailing": root.keystoneLongTrailing.slice(),
                 "leftClickAction": root.keystoneLeftClickAction,
                 "middleClickAction": root.keystoneMiddleClickAction,
+                "media": {
+                    "progressStyle": root.keystoneMediaProgressStyle,
+                    "coverStyle": root.keystoneMediaCoverStyle,
+                    "colorStyle": root.keystoneMediaColorStyle
+                },
                 "keyhole": {
                     "card": root.keystoneKeyholeCard
                 },
@@ -1805,6 +1858,7 @@ Singleton {
         const theme = parsed.theme || {};
         const effects = parsed.effects || {};
         const keystone = parsed.keystone || {};
+        const media = keystone.media || {};
         const bar = parsed.bar || {};
         const sidebar = parsed.sidebar || {};
         const desktopCards = parsed.desktopCards || {};
@@ -1883,6 +1937,13 @@ Singleton {
         root.shellBlurEnabled = typeof effects.shellBlurEnabled === "boolean" ? effects.shellBlurEnabled :
                                                                                 false;
         root.shellBlurXray = typeof effects.shellBlurXray === "boolean" ? effects.shellBlurXray : true;
+        root.keystoneMediaProgressStyle = normalizedOption(root.keystoneMediaProgressOptions,
+                                                           media.progressStyle, "wave");
+        root.keystoneMediaCoverStyle = normalizedOption(root.keystoneMediaCoverOptions, media.coverStyle
+                                                        === "spectrum" ? "caelestia" : media.coverStyle,
+                                                        "rounded");
+        root.keystoneMediaColorStyle = normalizedOption(root.keystoneMediaColorOptions, media.colorStyle,
+                                                        "theme");
         root.keystoneStyle = normalizedOption(root.keystoneStyles, keystone.style, "bangs");
         root.keystonePosition = normalizedEdgePosition(keystone.position);
         root.keystoneCapsLockOsd = typeof keystone.capsLockOsd === "boolean" ? keystone.capsLockOsd : true;
@@ -1896,8 +1957,8 @@ Singleton {
         root.keystoneLongShowMonitorValues = typeof keystone.longShowMonitorValues === "boolean"
                 ? keystone.longShowMonitorValues : true;
         root.keystoneHideDate = typeof keystone.hideDate === "boolean" ? keystone.hideDate : false;
-        root.keystoneHoverAction = normalizedOption(root.keystoneHoverActionOptions, keystone.hoverAction,
-                                                    "peak");
+        root.keystoneHoverAction = normalizedOption(root.keystoneHoverActionOptions, keystone.hoverAction
+                                                    === "library" ? "media" : keystone.hoverAction, "peak");
         root.keystoneHoverOpenDelay = normalizedBoundedInt(keystone.hoverOpenDelay, 150, 0, 500);
         root.keystoneHoverCloseDelay = normalizedBoundedInt(keystone.hoverCloseDelay, 250, 0, 600);
         root.keystoneLongLeading = root.normalizedKeystoneLongItems(Array.isArray(keystone.longLeading)
@@ -1907,10 +1968,13 @@ Singleton {
                                                                      ? keystone.longTrailing :
                                                                        root.defaultKeystoneLongTrailing,
                                                                      root.keystoneLongLeading);
-        root.keystoneLeftClickAction = normalizedOption(root.keystoneActionOptions, keystone.leftClickAction,
+        root.keystoneLeftClickAction = normalizedOption(root.keystoneActionOptions, keystone.leftClickAction
+                                                        === "library" ? "media" : keystone.leftClickAction,
                                                         "media");
         root.keystoneMiddleClickAction = normalizedOption(root.keystoneActionOptions,
-                                                          keystone.middleClickAction, "lyrics");
+                                                          keystone.middleClickAction === "library" ? "media" :
+                                                                                                     keystone.middleClickAction,
+                                                          "lyrics");
         root.keystoneKeyholeCard = root.normalizedKeystoneKeyholeCard(keyhole.card !== undefined
                                                                       ? keyhole.card : keyhole.cards);
         root.horizontalClockFontSize = root.normalizedBoundedInt(horizontalClock.fontSize, 22, 16, 28);

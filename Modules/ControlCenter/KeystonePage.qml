@@ -190,6 +190,40 @@ Item {
             }
 
             KeystoneSection {
+                id: mediaSection
+                title: mediaSearchAnchor.title
+                iconName: "music_note"
+
+                SettingsSearchAnchor {
+                    id: mediaSearchAnchor
+                    target: mediaSection
+                    declaration:
+                        '{"id":"keystone.section.media-controls","route":"keystone","title":"Media controls","context":"KeystonePage","icon":"music_note","aliases":[]}'
+                }
+
+                SearchSelectSettingRow {
+                    title: qsTr("Progress bar")
+                    options: PersonalizationConfig.keystoneMediaProgressOptions
+                    value: PersonalizationConfig.keystoneMediaProgressStyle
+                    onAccepted: value => PersonalizationConfig.setKeystoneMediaProgressStyle(value)
+                }
+
+                SearchSelectSettingRow {
+                    title: qsTr("Cover style")
+                    options: PersonalizationConfig.keystoneMediaCoverOptions
+                    value: PersonalizationConfig.keystoneMediaCoverStyle
+                    onAccepted: value => PersonalizationConfig.setKeystoneMediaCoverStyle(value)
+                }
+
+                SearchSelectSettingRow {
+                    title: qsTr("Colors")
+                    options: PersonalizationConfig.keystoneMediaColorOptions
+                    value: PersonalizationConfig.keystoneMediaColorStyle
+                    onAccepted: value => PersonalizationConfig.setKeystoneMediaColorStyle(value)
+                }
+            }
+
+            KeystoneSection {
                 visible: PersonalizationConfig.keystoneStyle === "long"
                 title: qsTr("Status items")
                 iconName: "view_week"
@@ -525,7 +559,7 @@ Item {
         property string value: ""
         property string placeholder: ""
         property int fieldWidth: 240
-        property bool closeOnAccept: false
+        property bool closeOnAccept: true
 
         signal accepted(string value)
 

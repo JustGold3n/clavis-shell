@@ -544,7 +544,7 @@ Variants {
                     showLyrics = false;
                     showVolume = false;
                     showTools = false;
-                    hubTabIndex = 2;
+                    hubTabIndex = 1;
                     showHub = true;
                 }
 
@@ -564,9 +564,8 @@ Variants {
                         return;
                     const tabs = {
                         dashboard: 0,
-                        library: 1,
-                        upload: 2,
-                        weather: 3
+                        upload: 1,
+                        weather: 2
                     };
                     const isTab = Object.prototype.hasOwnProperty.call(tabs, action);
                     const alreadyOpen = action === "media" ? root.expanded : action === "lyrics"
@@ -685,7 +684,10 @@ Variants {
                 property int notifH: 20 + NotificationManager.popupList.reduce((height, notif) => {
                     return height + (NotificationManager.normalActions(notif).length > 0 ? 104 : 64);
                 }, 0) + Math.max(0, NotificationManager.popupList.length - 1) * 10
-                property color color: BlurService.backgroundColor(Appearance.colors.colLayer0)
+                property color color: BlurService.backgroundColor(mediaWidget.visible
+                                                                  && mediaWidget.coverColors
+                                                                  ? mediaWidget.surfaceColor :
+                                                                    Appearance.colors.colLayer0)
                 readonly property QtObject activeLayout: keystoneWindow.horizontalEdge ? horizontalLayout :
                                                                                          verticalLayout
                 readonly property real recordingVisualWidth: styleSurface.splitRecording
@@ -1073,6 +1075,8 @@ Variants {
                     hubActive: root.isHubMode
                     lyricsActive: root.isLyricsMode
                     expandedActive: root.expanded
+                    expandedWidth: mediaWidget.panelWidth
+                    expandedHeight: mediaWidget.panelHeight
                     volumeActive: root.isVolumeMode
                     notificationsActive: root.isNotifMode
                     collapsedHovered: root.isCollapsedHovered
@@ -1097,6 +1101,8 @@ Variants {
                     hubActive: root.isHubMode
                     lyricsActive: root.isLyricsMode
                     expandedActive: root.expanded
+                    expandedWidth: mediaWidget.panelWidth
+                    expandedHeight: mediaWidget.panelHeight
                     volumeActive: root.isVolumeMode
                     notificationsActive: root.isNotifMode
                     collapsedHovered: root.isCollapsedHovered
@@ -1324,6 +1330,26 @@ Variants {
                                                         && root.recordingPresentationActive) ? 0 : 1
                 }
 
+                Loader {
+                    anchors.fill: parent
+                    active: mediaWidget.visible && mediaWidget.backgroundCover
+                    opacity: mediaWidget.opacity
+                    sourceComponent: MediaBackdrop {
+                        artUrl: mediaWidget.artUrl
+                        sourceSize: Qt.size(Math.ceil(Math.min(mediaWidget.panelWidth,
+                                                               mediaWidget.panelHeight * 1.5) * 2), Math.ceil(
+                                                mediaWidget.panelHeight * 2))
+                        topLeftRadius: styleSurface.elongated && longFrame.item ? longFrame.item.childRadius :
+                                                                                  rootSurface.topLeftRadius
+                        topRightRadius: styleSurface.elongated && longFrame.item ? longFrame.item.childRadius :
+                                                                                   rootSurface.topRightRadius
+                        bottomLeftRadius: styleSurface.elongated && longFrame.item
+                                          ? longFrame.item.childRadius : rootSurface.bottomLeftRadius
+                        bottomRightRadius: styleSurface.elongated && longFrame.item
+                                           ? longFrame.item.childRadius : rootSurface.bottomRightRadius
+                    }
+                }
+
                 Connections {
                     target: KeyboardLockService
                     function onAvailabilityChanged() {
@@ -1522,6 +1548,8 @@ Variants {
                     }
 
                     MediaContent {
+                        id: mediaWidget
+
                         anchors.top: parent.top
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.topMargin: 20
@@ -1547,7 +1575,6 @@ Variants {
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: implicitWidth
                         height: implicitHeight
-                        player: root.currentPlayer
                         screen: keystoneWindow.screen
                         dragActive: cloudUploadDropArea.containsDrag || longCloudUploadDropArea.containsDrag
                         onCurrentIndexChanged: {

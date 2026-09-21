@@ -6,6 +6,7 @@ import qs.Services
 import qs.Widgets.common
 import "../../Common/functions/DockLayout.js" as DockLayout
 import "../../Common/functions/DockBubble.js" as DockBubble
+import "../../Common/functions/DockMedia.js" as DockMedia
 
 Item {
     id: root
@@ -27,6 +28,10 @@ Item {
     }
     readonly property bool hovered: popupHover.hovered
     readonly property bool thumbnails: DockService.showThumbnails && DockService.supportsThumbnails
+    readonly property var matchingPlayers: DockMedia.matchingPlayers(MediaManager.list, entry
+                                                                     ? entry.desktopId : "")
+    property var mediaPlayer: null
+    onMatchingPlayersChanged: mediaPlayer = DockMedia.selectPlayer(matchingPlayers, mediaPlayer)
     property string previewConsumer: ""
     readonly property var captureTargets: !visible || contextMenu || !thumbnails
                                           || WindowPreviewService.suspended ? [] : windows.map(window
@@ -34,6 +39,7 @@ Item {
                                                                                                       window.id))
     onCaptureTargetsChanged: WindowPreviewService.setTargets(previewConsumer, captureTargets)
     Component.onCompleted: {
+        mediaPlayer = DockMedia.selectPlayer(matchingPlayers, mediaPlayer);
         previewConsumer = WindowPreviewService.createConsumer();
         WindowPreviewService.setTargets(previewConsumer, captureTargets);
     }
@@ -135,6 +141,7 @@ Item {
                 windowData: modelData
                 applicationName: root.entryName
                 applicationIcon: String(root.entry && root.entry.icon || "")
+                mediaPlayer: root.mediaPlayer
                 width: root.rowLayout.cardWidth
                 showThumbnail: root.thumbnails
                 capture: {
@@ -164,7 +171,7 @@ Item {
             x: 8
             height: 32
             visible: root.windows.length === 0
-            text: root.entry && root.entry.kind === "separator" ? qsTr("Separator") : root.entryName
+            text: root.entryName
             textFormat: Text.PlainText
             font.family: Fonts.ui
             font.pixelSize: 12

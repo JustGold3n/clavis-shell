@@ -5,13 +5,11 @@ import qs.Common
 import qs.Components
 import qs.Modules.Keystone.CloudUploadContent
 import qs.Modules.Keystone.DashboardContent
-import qs.Modules.Keystone.Media
 import qs.Modules.Keystone.WeatherContent
 
 Item {
     id: root
 
-    property var player: null
     property var screen: null
     property int currentIndex: 0
     property bool dragActive: false
@@ -25,20 +23,17 @@ Item {
         cloudUploadContent.finishDrop(addedCount);
     }
 
-    implicitWidth: currentIndex === 0 ? dashboardContent.implicitWidth : currentIndex === 2 ? 960 : currentIndex
-                                                                                              === 3 ? 960 :
-                                                                                                      760
-    implicitHeight: 80 + 20 + (currentIndex === 0 ? 520 : currentIndex === 1 ? 480 : currentIndex === 2 ? 480 :
-                                                                                                          weatherContent.height)
+    implicitWidth: currentIndex === 0 ? dashboardContent.implicitWidth : 960
+    implicitHeight: 100 + (currentIndex === 0 ? 520 : currentIndex === 1 ? 480 : weatherContent.height)
 
     Shortcut {
         sequence: "Tab"
-        onActivated: root.currentIndex = (root.currentIndex + 1) % 4
+        onActivated: root.currentIndex = (root.currentIndex + 1) % 3
     }
 
     Shortcut {
         sequence: "Shift+Tab"
-        onActivated: root.currentIndex = (root.currentIndex + 3) % 4
+        onActivated: root.currentIndex = (root.currentIndex + 2) % 3
     }
 
     RowLayout {
@@ -58,21 +53,15 @@ Item {
         }
 
         TabBtn {
-            icon: "queue_music"
-            title: qsTr("Media")
-            index: 1
-        }
-
-        TabBtn {
             icon: "cloud_upload"
             title: qsTr("Upload")
-            index: 2
+            index: 1
         }
 
         TabBtn {
             icon: "sunny"
             title: qsTr("Weather")
-            index: 3
+            index: 2
         }
     }
 
@@ -175,20 +164,6 @@ Item {
             }
         }
 
-        Media {
-            player: root.player
-            anchors.top: parent.top
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: root.currentIndex === 1
-            opacity: visible ? 1 : 0
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 300
-                }
-            }
-        }
-
         CloudUploadContent {
             id: cloudUploadContent
 
@@ -197,7 +172,7 @@ Item {
             width: parent.width * 0.95
             height: 480
             dragActive: root.dragActive
-            visible: root.currentIndex === 2
+            visible: root.currentIndex === 1
             opacity: visible ? 1 : 0
 
             Behavior on opacity {
@@ -212,8 +187,8 @@ Item {
 
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            active: root.currentIndex === 3 && root.visible
-            visible: root.currentIndex === 3
+            active: root.currentIndex === 2 && root.visible
+            visible: root.currentIndex === 2
             opacity: visible ? 1 : 0
 
             Behavior on opacity {

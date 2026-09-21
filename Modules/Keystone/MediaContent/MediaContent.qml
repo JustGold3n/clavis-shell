@@ -23,9 +23,42 @@ Item {
 
     readonly property double currentPos: root.isActive ? MediaManager.currentPosition : 0
 
-    property double progress: (isActive && MediaManager.active.length > 0) ? (root.currentPos
-                                                                              / MediaManager.active.length) :
-                                                                             0
+    readonly property bool hasDuration: isActive && Number.isFinite(MediaManager.active.length)
+                                        && MediaManager.active.length > 0
+    readonly property bool canSeek: hasDuration && MediaManager.active.canSeek
+    readonly property double progress: hasDuration && Number.isFinite(root.currentPos) ? Math.max(0, Math.min(1,
+                                                                                                              root.currentPos
+                                                                                                              / MediaManager.active.length)) :
+                                                                                         0
+    readonly property bool caelestiaCover: PersonalizationConfig.keystoneMediaCoverStyle === "caelestia"
+    readonly property real panelWidth: caelestiaCover || backgroundCover ? 640 : 540
+    readonly property real panelHeight: caelestiaCover || backgroundCover ? 240 : 210
+    readonly property bool backgroundCover: PersonalizationConfig.keystoneMediaCoverStyle === "background"
+    readonly property bool coverColors: PersonalizationConfig.keystoneMediaColorStyle === "cover"
+                                        && root.artUrl !== ""
+    readonly property string paletteArtUrl: root.isActive && root.coverColors ? root.artUrl : ""
+    readonly property color themePrimary: Appearance.colors.colPrimary
+    readonly property color accentColor: coverColors ? MediaPalette.primary : Appearance.colors.colPrimary
+    readonly property color onAccentColor: coverColors ? MediaPalette.onPrimary :
+                                                         Appearance.colors.colOnPrimary
+    readonly property color trackColor: coverColors ? MediaPalette.track : Appearance.colors.colLayer2Hover
+    readonly property color surfaceColor: coverColors ? Qt.tint(Appearance.colors.colLayer0,
+                                                                Appearance.applyAlpha(accentColor, 0.12)) :
+                                                        Appearance.colors.colLayer0
+
+    function updatePalette() {
+        if (root.paletteArtUrl)
+            MediaPalette.extract(root.paletteArtUrl, root.themePrimary);
+    }
+
+    function seek(position) {
+        if (root.canSeek && Number.isFinite(position))
+            MediaManager.active.position = Math.max(0, Math.min(1, position)) * MediaManager.active.length;
+    }
+
+    onPaletteArtUrlChanged: updatePalette()
+    onThemePrimaryChanged: updatePalette()
+    Component.onCompleted: updatePalette()
 
     // 对播放器列表进行重排序，让当前播放器排在第一位
     property var sortedPlayerList: {
@@ -47,6 +80,34 @@ Item {
         return sorted;
     }
 
+    Component {
+        id: sineProgress
+        WaveProgressBar {
+            progress: root.progress
+            waveColor: root.accentColor
+            trackColor: root.trackColor
+            isPlaying: root.isPlaying
+            waveAmplitude: 6
+            waveFrequency: 0.05
+            progressGap: 10
+            seekMargin: 0
+            onSeekRequested: position => root.seek(position)
+        }
+    }
+
+    Component {
+        id: materialProgress
+        MaterialWaveProgressBar {
+            progress: root.progress
+            waveColor: root.accentColor
+            trackColor: root.trackColor
+            trackOpacity: 1
+            isPlaying: root.isPlaying
+            seekMargin: 0
+            onSeekRequested: position => root.seek(position)
+        }
+    }
+
     // ==========================================
     // 全局布局
     // ==========================================
@@ -58,85 +119,20 @@ Item {
         anchors.bottomMargin: 12
         spacing: 24
 
-        // 左侧：封面容器
         Item {
-            Layout.preferredWidth: 120
-            Layout.preferredHeight: 120
-            Layout.alignment: Qt.AlignTop
+            Layout.preferredWidth: root.caelestiaCover || root.backgroundCover ? 180 : 120
+            Layout.preferredHeight: root.caelestiaCover || root.backgroundCover ? 180 : 120
+            Layout.alignment: root.caelestiaCover || root.backgroundCover ? Qt.AlignVCenter : Qt.AlignTop
 
-            Item {
-                id: scaleWrapper
-                anchors.centerIn: parent
-                width: 120
-                height: 120
-                scale: root.isPlaying ? 1.0 : 0.8
-
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: 400
-                        easing.type: Easing.OutQuint
-                    }
-                }
-
-                DropShadow {
-                    anchors.fill: coverContainer
-                    source: coverContainer
-                    color: Qt.rgba(0, 0, 0, 0.85)
-                    radius: 24
-                    samples: 49
-                    verticalOffset: 8
-                    opacity: root.isPlaying ? 1.0 : 0.0
-
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: 400
-                            easing.type: Easing.OutQuint
-                        }
-                    }
-                }
-
-                Item {
-                    id: coverContainer
-                    anchors.fill: parent
-
-                    Rectangle {
-                        id: fallbackBg
-                        anchors.fill: parent
-                        radius: 16
-                        color: Appearance.colors.colLayer3
-                        visible: root.artUrl === ""
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "music_note"
-                            color: Appearance.colors.colOnLayer3
-                            font.family: Fonts.materialSymbolsOutlined
-                            font.pixelSize: 56
-                        }
-                    }
-
-                    Image {
-                        id: rawImg
-                        anchors.fill: parent
-                        source: root.artUrl
-                        fillMode: Image.PreserveAspectCrop
-                        asynchronous: true
-                        visible: false
-                    }
-
-                    Rectangle {
-                        id: maskRect
-                        anchors.fill: parent
-                        radius: 16
-                        visible: false
-                    }
-
-                    OpacityMask {
-                        anchors.fill: parent
-                        source: rawImg
-                        maskSource: maskRect
-                        visible: root.artUrl !== "" && rawImg.status === Image.Ready
-                    }
+            Loader {
+                anchors.fill: parent
+                active: !root.backgroundCover && root.visible
+                sourceComponent: MediaCover {
+                    artUrl: root.artUrl
+                    playing: root.isPlaying
+                    active: root.isActive
+                    caelestia: root.caelestiaCover
+                    accentColor: root.accentColor
                 }
             }
         }
@@ -176,7 +172,9 @@ Item {
 
                 // 为药丸预留空间
                 Item {
-                    Layout.preferredWidth: 80
+                    Layout.preferredWidth: root.caelestiaCover || root.backgroundCover ? Math.max(80,
+                                                                                                  pillRect.width
+                                                                                                  + 8) : 80
                     Layout.fillHeight: true
                 }
             }
@@ -185,26 +183,13 @@ Item {
                 Layout.fillHeight: true
             }
 
-            // 波浪进度条（填满右侧列宽度，与标题行对齐）
-            WaveProgressBar {
-                id: progressBar
+            Loader {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 36
-
-                progress: root.progress
-                waveColor: Appearance.colors.colPrimary
-                trackColor: Appearance.colors.colLayer2Hover
-                isPlaying: root.isPlaying
-                waveAmplitude: 6
-                waveFrequency: 0.05
-                progressGap: 10
-
-                onSeekRequested: position => {
-                    if (MediaManager.active && MediaManager.active.length > 0) {
-                        let targetPos = position * MediaManager.active.length;
-                        MediaManager.active.position = targetPos;
-                    }
-                }
+                active: root.visible
+                enabled: root.canSeek
+                sourceComponent: PersonalizationConfig.keystoneMediaProgressStyle === "material"
+                                 ? materialProgress : sineProgress
             }
 
             // 底部控制按钮区（填满右侧列宽度，与标题行对齐）
@@ -223,12 +208,12 @@ Item {
                                                                                                               MediaManager.active.loopState
                                                                                                               === MprisLoopState.Track
                                                                                                               ? 2 : 1)
-                activeColor: Appearance.colors.colPrimary
+                activeColor: root.accentColor
                 inactiveColor: Appearance.colors.colOnSurface
-                playingBg: Appearance.colors.colPrimary
-                playingFg: Appearance.colors.colOnPrimary
-                pausedBg: Appearance.colors.colSecondaryContainer
-                pausedFg: Appearance.colors.colOnSecondaryContainer
+                playingBg: root.accentColor
+                playingFg: root.onAccentColor
+                pausedBg: root.coverColors ? root.trackColor : Appearance.colors.colSecondaryContainer
+                pausedFg: root.coverColors ? root.accentColor : Appearance.colors.colOnSecondaryContainer
                 morphEnabled: true
 
                 onShuffleClicked: if (MediaManager.active && MediaManager.active.shuffleSupported)
@@ -265,7 +250,7 @@ Item {
 
         property bool menuExpanded: false
 
-        color: Appearance.colors.colTertiary
+        color: root.coverColors ? root.accentColor : Appearance.colors.colTertiary
         width: menuExpanded ? 110 : pillText.width + 24
         height: menuExpanded ? (30 * MediaManager.list.length + 12) : 26
         radius: menuExpanded ? 12 : 13
@@ -300,7 +285,7 @@ Item {
             id: pillText
             anchors.centerIn: parent
             text: MediaManager.getIdentity(MediaManager.active)
-            color: Appearance.colors.colOnTertiary
+            color: root.coverColors ? root.onAccentColor : Appearance.colors.colOnTertiary
             font.pixelSize: 11
             font.weight: Font.DemiBold
             opacity: pillRect.menuExpanded ? 0.0 : 1.0
@@ -361,7 +346,7 @@ Item {
                         Text {
                             Layout.fillWidth: true
                             text: MediaManager.getIdentity(modelData)
-                            color: Appearance.colors.colOnTertiary
+                            color: root.coverColors ? root.onAccentColor : Appearance.colors.colOnTertiary
                             font.pixelSize: 11
                             font.weight: Font.DemiBold
                             elide: Text.ElideRight

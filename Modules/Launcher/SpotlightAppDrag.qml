@@ -5,6 +5,7 @@ Item {
     id: root
 
     required property string desktopId
+    readonly property bool spaceTemplate: desktopId === ApplicationService.spaceApplication.id
     required property Item iconItem
     property bool dragged: false
     property bool preparing: false
@@ -39,7 +40,8 @@ Item {
     Drag.mimeData: ({
                         "application/x-clavis-dock": JSON.stringify({
                                                                         schemaVersion: 1,
-                                                                        kind: "app",
+                                                                        kind: root.spaceTemplate ? "spacer" :
+                                                                                                   "app",
                                                                         desktopId: root.desktopId
                                                                     })
                     })

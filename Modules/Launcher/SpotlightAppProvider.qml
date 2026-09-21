@@ -22,7 +22,7 @@ Item {
 
     function execute(index) {
         const result = root.results[index];
-        if (!result || !result.appObject)
+        if (!result || !result.appObject || result.appObject.dragOnly)
             return false;
         return SpotlightAppUsage.launch(result.id);
     }

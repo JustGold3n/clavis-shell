@@ -15,6 +15,7 @@ Button {
     property string applicationIcon: ""
     property bool showThumbnail: false
     property WindowCaptureProbe capture: null
+    property var mediaPlayer: null
     readonly property string title: String(windowData && (windowData.title || windowData.appName
                                                           || windowData.appId) || applicationName)
     readonly property bool hasFrame: !!capture && capture.active && capture.frameCount > 0
@@ -118,6 +119,55 @@ Button {
                     anchors.centerIn: parent
                     busy: root.busy
                 }
+                Rectangle {
+                    id: mediaControls
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 4
+                    width: mediaButtons.width + 8
+                    height: 36
+                    radius: 8
+                    visible: !!root.mediaPlayer
+                    color: Appearance.applyAlpha(Appearance.colors.colSurfaceContainer, 0.94)
+
+                    // Consume the bar's gaps and disabled buttons as well, so
+                    // no media click activates the window behind this overlay.
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.AllButtons
+                    }
+                    Row {
+                        id: mediaButtons
+                        anchors.centerIn: parent
+                        IconButton {
+                            controlSize: 32
+                            iconSize: 20
+                            iconName: "skip_previous"
+                            accessibleName: qsTr("Previous track")
+                            enabled: !!root.mediaPlayer && root.mediaPlayer.canControl
+                                     && root.mediaPlayer.canGoPrevious
+                            onClicked: root.mediaPlayer.previous()
+                        }
+                        IconButton {
+                            controlSize: 32
+                            iconSize: 22
+                            iconName: root.mediaPlayer?.isPlaying ? "pause" : "play_arrow"
+                            accessibleName: root.mediaPlayer?.isPlaying ? qsTr("Pause") : qsTr("Play")
+                            enabled: !!root.mediaPlayer && root.mediaPlayer.canControl
+                                     && root.mediaPlayer.canTogglePlaying
+                            onClicked: root.mediaPlayer.togglePlaying()
+                        }
+                        IconButton {
+                            controlSize: 32
+                            iconSize: 20
+                            iconName: "skip_next"
+                            accessibleName: qsTr("Next track")
+                            enabled: !!root.mediaPlayer && root.mediaPlayer.canControl
+                                     && root.mediaPlayer.canGoNext
+                            onClicked: root.mediaPlayer.next()
+                        }
+                    }
+                }
             }
         }
     }
@@ -125,6 +175,12 @@ Button {
     StyledToolTip {
         text: root.title
         textFormat: Text.PlainText
-        extraVisibleCondition: root.hovered && headerTitle.truncated && !closeButton.pointerHovered
+        extraVisibleCondition: root.hovered && headerTitle.truncated && !closeButton.pointerHovered &&
+                               !mediaHover.hovered
+    }
+
+    HoverHandler {
+        id: mediaHover
+        parent: mediaControls
     }
 }

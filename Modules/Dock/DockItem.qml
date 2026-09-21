@@ -102,7 +102,7 @@ Item {
             x: root.horizontal ? 0 : (root.edge === "left" ? -1 : 1) * (1 - root.presence) * 6
             y: root.horizontal ? (1 - root.presence) * 6 : 0
         }
-        opacity: root.available || root.windowCount > 0 || root.kind === "separator" ? 1 : 0.45
+        opacity: root.available || root.windowCount > 0 || root.kind === "spacer" ? 1 : 0.45
         Behavior on scale {
             NumberAnimation {
                 duration: 120
@@ -134,12 +134,16 @@ Item {
     }
 
     Rectangle {
-        visible: root.kind === "separator"
-        anchors.centerIn: parent
-        width: root.horizontal ? 2 : Math.min(32, root.width / 2)
-        height: root.horizontal ? Math.min(32, root.height / 2) : 2
-        radius: 1
-        color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.4)
+        visible: root.kind === "spacer" && (pointer.containsMouse || root.contextActive
+                                            || DockService.externalDragActive)
+        x: artwork.x
+        y: artwork.y
+        width: artwork.width
+        height: artwork.height
+        radius: width * 0.2
+        color: "transparent"
+        border.width: 1
+        border.color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.25)
     }
     Rectangle {
         visible: root.kind === "app" && root.windowCount > 0 && DockService.showIndicators
@@ -158,7 +162,7 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: Qt.PointingHandCursor
         Accessible.role: Accessible.Button
-        Accessible.name: root.kind === "separator" ? qsTr("Separator") : root.name
+        Accessible.name: root.kind === "spacer" ? qsTranslate("ApplicationService", "Space") : root.name
         Accessible.onPressAction: root.activated(root.entryKey)
         onEntered: root.hovered(root.entryKey)
         onExited: root.hoverLeft(root.entryKey)

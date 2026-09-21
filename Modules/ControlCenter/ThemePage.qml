@@ -311,6 +311,7 @@ StyledFlickable {
             }
 
             SearchSelectMenuField {
+                closeOnAccept: false
                 Layout.preferredWidth: selectRow.fieldWidth
                 Layout.preferredHeight: 40
                 Layout.alignment: Qt.AlignVCenter
@@ -574,6 +575,7 @@ StyledFlickable {
             iconName: "lock"
 
             SearchSelectMenuField {
+                closeOnAccept: true
                 Layout.preferredWidth: 240
                 Layout.preferredHeight: 40
                 options: PersonalizationConfig.lockScreenStyles

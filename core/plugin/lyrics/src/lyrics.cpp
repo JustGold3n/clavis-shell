@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace {
 
@@ -259,7 +260,13 @@ void Lyrics::setTrack(const QString &artist, const QString &title, const QString
     const QString nextArtist = artist.trimmed();
     const QString nextTitle = title.trimmed();
     const QString nextAlbum = album.trimmed();
-    const double nextDuration = std::isfinite(duration) && duration > 0.0 ? duration : 0.0;
+    // MPRIS can report sentinel lengths (including INT64_MAX microseconds).
+    // Treat values outside the provider's integer-second range as unknown,
+    // before either the request or the millisecond cache key converts them.
+    const double nextDuration =
+        std::isfinite(duration) && duration > 0.0 && std::round(duration) <= std::numeric_limits<int>::max()
+            ? duration
+            : 0.0;
     const QString nextPlayerId = playerId.trimmed();
 
     if (m_artist == nextArtist && m_title == nextTitle && m_album == nextAlbum &&

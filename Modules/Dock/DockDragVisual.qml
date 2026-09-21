@@ -113,10 +113,18 @@ Item {
     }
     MaterialSymbol {
         anchors.centerIn: parent
-        visible: !!root.entry && (!!root.entry.symbol || root.entry.kind === "separator")
-        text: root.entry ? root.entry.kind === "separator" ? "space_bar" : root.entry.symbol : ""
+        visible: !!root.entry && root.entry.kind === "app" && !!root.entry.symbol
+        text: root.entry ? root.entry.symbol : ""
         iconSize: root.width * 0.82
         color: Appearance.colors.colPrimary
+    }
+    Rectangle {
+        anchors.fill: parent
+        visible: !!root.entry && root.entry.kind === "spacer"
+        radius: width * 0.2
+        color: "transparent"
+        border.width: 1
+        border.color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.4)
     }
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter

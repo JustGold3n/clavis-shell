@@ -299,6 +299,7 @@ StyledFlickable {
                 iconName: "display_settings"
 
                 headerTrailing: SearchSelectMenuField {
+                    closeOnAccept: true
                     forbiddenDisabledCursor: true
                     Layout.preferredWidth: 168
                     Layout.preferredHeight: Metrics.controlHeightM
@@ -448,6 +449,7 @@ StyledFlickable {
                     }
 
                     SearchSelectMenuField {
+                        closeOnAccept: true
                         Layout.fillWidth: true
                         options: root.outputOptions
                         value: root.selectedDesktopOutput
@@ -1035,6 +1037,7 @@ StyledFlickable {
                 }
 
                 SearchSelectMenuField {
+                    closeOnAccept: true
                     Layout.fillWidth: true
                     options: root.outputOptions
                     value: root.selectedOverviewOutput

@@ -31,7 +31,6 @@ Singleton {
     readonly property bool showIndicators: root._options.showIndicators
     readonly property bool showRecent: root._options.showRecent
     readonly property bool contextPinning: root._options.contextPinning
-    readonly property int separatorSize: root._options.separatorSize
     property bool externalDragActive: false
     property bool ready: false
     property bool writable: false
@@ -99,7 +98,8 @@ Singleton {
     }
 
     function rebuild() {
-        const applications = ApplicationService.launcherApplications;
+        const applications = ApplicationService.launcherApplications.filter(application =>
+        !application.dragOnly);
         const windows = Niri.connected ? Niri.searchWindows("") : [];
         const focusOrder = Object.create(null);
         for (const window of windows)
@@ -121,12 +121,12 @@ Singleton {
         for (const pinned of root._pinned) {
             const key = DockModel.pinnedKey(pinned);
             used.add(key);
-            if (pinned.kind === "separator") {
+            if (pinned.kind === "spacer") {
                 rows.push({
                               key: key,
-                              kind: "separator",
+                              kind: "spacer",
                               desktopId: "",
-                              name: qsTr("Separator"),
+                              name: qsTranslate("ApplicationService", "Space"),
                               icon: "",
                               symbol: "",
                               pinned: true,
@@ -236,7 +236,7 @@ Singleton {
 
     function pin(identifier, index) {
         const application = ApplicationService.findById(identifier);
-        if (!application)
+        if (!application || application.dragOnly)
             return false;
         const id = DockModel.desktopId(application.id);
         const key = "app:" + id;
@@ -260,20 +260,12 @@ Singleton {
         return next !== null && root.commitPinned(next);
     }
 
-    function addSeparator(index) {
-        const next = root._pinned.slice();
-        const id = Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 10);
-        next.splice(DockModel.insertionIndex(index, next.length), 0, {
-                        kind: "separator",
-                        id: id
-                    });
-        return root.commitPinned(next);
-    }
-
     function dropEntries(mimeText, urls) {
         if (mimeText) {
             const payload = DockModel.dropPayload(String(mimeText));
-            if (!payload || (payload.kind === "app" && !ApplicationService.findById(payload.desktopId)))
+            const application = payload && payload.kind === "app" ? ApplicationService.findById(
+                                                                        payload.desktopId) : null;
+            if (!payload || (payload.kind === "app" && (!application || application.dragOnly)))
                 return [];
             return [payload];
         }
@@ -305,13 +297,12 @@ Singleton {
         const dropped = root.dropEntries(mimeText, urls);
         if (!root.ready || !dropped.length)
             return false;
-        const incoming = dropped.map(entry => entry.kind === "separator" ? {
-                                                                               kind: "separator",
-                                                                               id: Date.now().toString(36)
-                                                                                   + "_" + Math.random(
-                                                                                       ).toString(36).slice(2,
-                                                                                                            10)
-                                                                           } : entry);
+        const incoming = dropped.map(entry => entry.kind === "spacer" ? {
+                                                                            kind: "spacer",
+                                                                            id: Date.now().toString(36) + "_"
+                                                                                + Math.random().toString(
+                                                                                    36).slice(2, 10)
+                                                                        } : entry);
         const keys = new Set(incoming.map(entry => DockModel.pinnedKey(entry)));
         const gap = DockModel.insertionIndex(index, root._pinned.length);
         let position = 0;

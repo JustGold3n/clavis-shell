@@ -11,23 +11,30 @@ Item {
     property string edge: "top"
     readonly property var lyricsModel: Lyrics.lyrics
     readonly property string artUrl: player ? player.trackArtUrl || "" : ""
-    readonly property string spectrumToken: "keystone-lyrics"
+    readonly property string spectrumToken: "keystone-lyrics-" + String(root)
     readonly property int currentLineIndex: {
         const lines = Lyrics.lyrics;
         if (!root.player || !Lyrics.hasSynchronizedLyrics || !lines || lines.length === 0)
             return -1;
 
-        const position = root.player === MediaManager.active ? MediaManager.currentPosition : Math.max(0, Number(root.player.position) || 0);
+        const position = root.player === MediaManager.active ? MediaManager.currentPosition : Math.max(0, Number(
+                                                                                                           root.player.position)
+                                                                                                       || 0);
         return Lyrics.indexForTime(position);
     }
-    readonly property string currentLyric: currentLineIndex >= 0 && currentLineIndex < lyricsModel.length ? String(lyricsModel[currentLineIndex].text || "") : lyricsModel && lyricsModel.length > 0 ? String(lyricsModel[0].text || "") : ""
+    readonly property string currentLyric: currentLineIndex >= 0 && currentLineIndex < lyricsModel.length ? String(
+                                                                                                                lyricsModel[currentLineIndex].text
+                                                                                                                || "") : lyricsModel
+                                                                                                            && lyricsModel.length
+                                                                                                            > 0 ? String(
+                                                                                                                      lyricsModel[0].text
+                                                                                                                      || "") : ""
 
     implicitWidth: presenter.item ? presenter.item.implicitWidth : 0
     implicitHeight: presenter.item ? presenter.item.implicitHeight : 0
     Component.onCompleted: {
         if (active)
             AudioSpectrum.acquire(spectrumToken);
-
     }
     Component.onDestruction: AudioSpectrum.release(spectrumToken)
     onActiveChanged: {
@@ -55,7 +62,6 @@ Item {
             status: Lyrics.status
             errorText: Lyrics.error
         }
-
     }
 
     Component {
@@ -69,7 +75,5 @@ Item {
             status: Lyrics.status
             errorText: Lyrics.error
         }
-
     }
-
 }

@@ -57,6 +57,24 @@ CMake source distributions include that build recipe. No reference checkout
 is needed to build, test, install or run Clavis. This port does not imply Zen
 Browser endorsement.
 
+## Caelestia media cover
+
+Source: [Caelestia Shell](https://github.com/caelestia-dots/shell), local checkout
+commit `20e625d6bf1a9d0bb7625a4bb814797d187b075d`.
+
+`Modules/Keystone/MediaContent/CaelestiaCover.qml` adapts
+`modules/dashboard/media/CoverVisualiser.qml` and
+`components/widgets/CoverArt.qml`: the rotating nine-sided Cookie mask and
+spectrum bars that follow its outline. Clavis uses its own audio service and
+color tokens, pools peaks from the full spectrum into 36 bars with a linear
+response, and uses 4-pixel strokes with a 2–20 pixel amplitude range. It releases
+audio acquisition while hidden or paused. The cover
+scales with the media layout and uses Clavis's missing-art placeholder.
+
+The upstream GPL-3.0 license is preserved in
+[caelestia-shell-GPL-3.0.txt](caelestia-shell-GPL-3.0.txt). The shape is supplied
+by the external M3Shapes runtime; no upstream geometry implementation is copied.
+
 ## M3Shapes and Cookie Clock
 
 [M3Shapes](https://github.com/soramanew/m3shapes) is an external QML runtime

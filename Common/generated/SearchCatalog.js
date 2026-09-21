@@ -1290,23 +1290,6 @@ var catalog = {
       "title": "Window previews"
     },
     {
-      "aliases": [
-        "spacing",
-        "spacer"
-      ],
-      "anchor": true,
-      "context": "DockPage",
-      "icon": "space_bar",
-      "id": "general.dock.section.separators",
-      "path": [
-        "general",
-        "dock"
-      ],
-      "route": "general.dock",
-      "source": "DockPage.qml",
-      "title": "Separators"
-    },
-    {
       "aliases": [],
       "anchor": true,
       "context": "GammaControlPage",
@@ -1527,6 +1510,19 @@ var catalog = {
       "route": "keystone",
       "source": "KeystonePage.qml",
       "title": "Mouse actions"
+    },
+    {
+      "aliases": [],
+      "anchor": true,
+      "context": "KeystonePage",
+      "icon": "music_note",
+      "id": "keystone.section.media-controls",
+      "path": [
+        "keystone"
+      ],
+      "route": "keystone",
+      "source": "KeystonePage.qml",
+      "title": "Media controls"
     },
     {
       "aliases": [],
@@ -1942,7 +1938,6 @@ function title(id) {
     case "general.dock.section.appearance": return qsTranslate("DockPage", "Appearance");
     case "general.dock.section.behavior": return qsTranslate("DockPage", "Behavior");
     case "general.dock.section.previews": return qsTranslate("DockPage", "Window previews");
-    case "general.dock.section.separators": return qsTranslate("DockPage", "Separators");
     case "general.displays.gamma.section.color": return qsTranslate("GammaControlPage", "Color");
     case "general.displays.gamma.section.schedule": return qsTranslate("GammaControlPage", "Schedule");
     case "general.displays.gamma.section.current-status": return qsTranslate("GammaControlPage", "Current status");
@@ -1959,6 +1954,7 @@ function title(id) {
     case "keystone.horizontal-clock.section.horizontal-clock-style": return qsTranslate("HorizontalClockPage", "Horizontal clock style");
     case "keystone.section.keystone-style": return qsTranslate("KeystonePage", "Keystone style");
     case "keystone.section.mouse-actions": return qsTranslate("KeystonePage", "Mouse actions");
+    case "keystone.section.media-controls": return qsTranslate("KeystonePage", "Media controls");
     case "keystone.section.keyboard-indicators": return qsTranslate("KeystonePage", "Keyboard indicators");
     case "keystone.section.keyhole": return qsTranslate("KeystonePage", "Keyhole");
     case "keystone.section.horizontal-clock": return qsTranslate("KeystonePage", "Horizontal clock");

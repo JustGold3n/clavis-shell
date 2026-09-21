@@ -13,8 +13,7 @@ function defaults() {
         showRecent: true,
         showThumbnails: true,
         previewSize: 160,
-        contextPinning: true,
-        separatorSize: 16
+        contextPinning: true
     };
 }
 
@@ -36,7 +35,6 @@ function option(name, value) {
     if (typeof value !== "number" || !isFinite(value)) return undefined;
     if (name === "previewSize") return Math.round(Math.max(96, Math.min(240, value)));
     if (name === "iconSize") return Math.round(Math.max(32, Math.min(80, value)));
-    if (name === "separatorSize") return Math.round(Math.max(8, Math.min(40, value)));
     if (name === "magnificationScale") return Math.max(1, Math.min(2, value));
     return undefined;
 }
@@ -49,6 +47,12 @@ function decodeConfig(text) {
                 || Array.isArray(value.options)) return null;
         const options = defaults();
         for (const name of Object.keys(value.options)) {
+            // Legacy manual separators now occupy full icon slots. Discard
+            // their old width while preserving all other configuration checks.
+            if (name === "separatorSize") {
+                if (typeof value.options[name] !== "number" || !isFinite(value.options[name])) return null;
+                continue;
+            }
             const normalized = option(name, value.options[name]);
             if (normalized === undefined) return null;
             options[name] = normalized;
@@ -60,9 +64,9 @@ function decodeConfig(text) {
             let normalized;
             if (entry.kind === "app" && validDesktopId(entry.desktopId)) {
                 normalized = { kind: "app", desktopId: desktopId(entry.desktopId) };
-            } else if (entry.kind === "separator" && typeof entry.id === "string"
+            } else if ((entry.kind === "spacer" || entry.kind === "separator") && typeof entry.id === "string"
                     && /^[A-Za-z0-9_-]{1,80}$/.test(entry.id)) {
-                normalized = { kind: "separator", id: entry.id };
+                normalized = { kind: "spacer", id: entry.id };
             } else return null;
             const key = pinnedKey(normalized);
             if (keys.has(key)) return null;
@@ -76,7 +80,7 @@ function decodeConfig(text) {
 }
 
 function pinnedKey(entry) {
-    return entry.kind === "separator" ? "separator:" + entry.id : "app:" + desktopId(entry.desktopId);
+    return entry.kind === "spacer" ? "spacer:" + entry.id : "app:" + desktopId(entry.desktopId);
 }
 
 function applicationForWindow(window, applications) {
@@ -141,7 +145,7 @@ function dropPayload(text) {
     try {
         const value = JSON.parse(text);
         if (!value || value.schemaVersion !== 1) return null;
-        if (value.kind === "separator") return { kind: "separator" };
+        if (value.kind === "spacer") return { kind: "spacer" };
         return value.kind === "app" && validDesktopId(value.desktopId)
                 ? { kind: "app", desktopId: desktopId(value.desktopId) } : null;
     } catch (error) {

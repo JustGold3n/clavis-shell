@@ -31,6 +31,7 @@ Item {
         }
 
         SearchSelectMenuField {
+            closeOnAccept: false
             Layout.preferredWidth: root.fieldWidth
             Layout.preferredHeight: 40
             Layout.alignment: Qt.AlignVCenter

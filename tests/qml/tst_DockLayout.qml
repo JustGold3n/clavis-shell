@@ -44,8 +44,8 @@ TestCase {
         compare(DockLayout.sectionBoundary(kinds, 2), 2);
         compare(DockLayout.sectionBoundary(kinds, 0), -1);
         compare(DockLayout.sectionBoundary(kinds, 3), -1);
-        compare(DockLayout.sectionBoundary(["app", "separator", "app"], 2), -1);
-        compare(DockLayout.sectionBoundary(["separator", "app"], 1), -1);
+        compare(DockLayout.sectionBoundary(["app", "spacer", "app"], 2), 2);
+        compare(DockLayout.sectionBoundary(["spacer", "app"], 1), -1);
         const outside = DockLayout.previewOrder(kinds, 0, -1, "app");
         compare(DockLayout.sectionBoundary(outside.kinds, 2, outside.order), 1);
         compare(DockLayout.sectionBoundary(outside.kinds, 1, outside.order), -1);
@@ -56,19 +56,19 @@ TestCase {
     }
 
     function test_dragPreviewPreservesModelUntilDrop() {
-        const kinds = ["app", "separator", "app", "app"];
+        const kinds = ["app", "spacer", "app", "app"];
         const preview = DockLayout.previewOrder(kinds, 0, 3, "app");
         compare(preview.order.join(","), "1,2,-1,3");
-        compare(preview.kinds.join(","), "separator,app,app,app");
-        compare(kinds.join(","), "app,separator,app,app");
+        compare(preview.kinds.join(","), "spacer,app,app,app");
+        compare(kinds.join(","), "app,spacer,app,app");
         // Returning to either side of the source restores the same gap.
         compare(DockLayout.previewOrder(kinds, 0, 0, "app").order.join(","), "-1,1,2,3");
         compare(DockLayout.previewOrder(kinds, 0, 1, "app").order.join(","), "-1,1,2,3");
     }
 
     function test_dragOutClosesGapAndCancelRestoresIt() {
-        const kinds = ["app", "separator", "app"];
-        const outside = DockLayout.previewOrder(kinds, 1, -1, "separator");
+        const kinds = ["app", "spacer", "app"];
+        const outside = DockLayout.previewOrder(kinds, 1, -1, "spacer");
         compare(outside.kinds.join(","), "app,app");
         compare(outside.order.join(","), "0,2");
         const cancelled = DockLayout.previewOrder(kinds, -1, -1, "app");
@@ -110,7 +110,7 @@ TestCase {
                     },
                     {
                         tag: "mixed",
-                        kinds: ["app", "app", "separator", "app", "app", "app"],
+                        kinds: ["app", "app", "spacer", "app", "app", "app"],
                         preferred: 64,
                         available: 600,
                         maximum: 2
@@ -173,7 +173,7 @@ TestCase {
     }
 
     function test_pointerDoesNotMoveBaseCenters() {
-        const kinds = ["app", "app", "separator", "app", "app"];
+        const kinds = ["app", "app", "spacer", "app", "app"];
         const resting = DockLayout.layout(kinds, 48, 800, 1.75, 20, NaN);
         resting.slots.forEach(target => {
             const hovered = DockLayout.layout(kinds, 48, 800, 1.75, 20, target.center);
@@ -186,35 +186,25 @@ TestCase {
         });
     }
 
-    function test_hoverRespectsLimitsAndKeepsSeparatorSpacing() {
-        const kinds = ["app", "separator", "app", "app", "app"];
-        const resting = DockLayout.layout(kinds, 48, 800, 1.6, 24, NaN);
-        const hovered = DockLayout.layout(kinds, 48, 800, 1.6, 24, resting.slots[2].center);
-        verify(hovered.length > resting.length);
-        compare(hovered.slots[1].span, resting.slots[1].span);
-        hovered.slots.forEach((slot, index) => {
-            if (kinds[index] === "separator")
-                return;
-            verify(slot.size >= resting.size);
-            verify(slot.size <= resting.size * 1.6 + 0.0001);
-            verify(hovered.slots[2].size >= slot.size);
-        });
-        const disabled = DockLayout.layout(kinds, 48, 800, 1, 24, resting.slots[2].center);
-        compare(disabled.length, disabled.baseLength);
-        disabled.slots.forEach((slot, index) => {
-            if (kinds[index] !== "separator")
-                compare(slot.size, disabled.size);
-        });
+    function test_spacersUseApplicationSlotsAtEverySizeAndMagnification() {
+        const kinds = ["spacer", "app", "spacer", "app", "spacer"];
+        for (const available of [240, 600, 1200]) {
+            for (const pointer of [NaN, 40, 100, 250]) {
+                const mixed = DockLayout.layout(kinds, 80, available, 1.6, 16, pointer, 3);
+                const apps = DockLayout.layout(kinds.map(() => "app"), 80, available, 1.6, 16, pointer, 3);
+                compare(mixed, apps);
+                verifyOrdered(mixed);
+            }
+        }
     }
 
-    function test_emptyAndSeparatorOnlyLayoutsStayFinite() {
-        [[], ["separator"], ["separator", "separator"]].forEach(kinds => {
+    function test_emptyAndSpacerOnlyLayoutsStayFinite() {
+        [[], ["spacer"], ["spacer", "spacer"]].forEach(kinds => {
             const result = DockLayout.layout(kinds, 48, 600, 2, 16, 100);
             compare(result.slots.length, kinds.length);
             verify(isFinite(result.size));
             verify(isFinite(result.length));
             verify(!result.overflow);
-            compare(result.length, result.baseLength);
             verifyOrdered(result);
         });
     }

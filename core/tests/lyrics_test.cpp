@@ -16,6 +16,8 @@
 #include <QUrlQuery>
 
 #include <functional>
+#include <limits>
+#include <cmath>
 #include <cstring>
 #include <utility>
 
@@ -158,6 +160,8 @@ class LyricsTest : public QObject {
     void mapsTimelineAndOffset();
     void localLyricsUseReadableFilename();
     void cacheUsesProviderIdentityAndDuration();
+    void trackDurationIsSafe_data();
+    void trackDurationIsSafe();
     void netEaseRequestUsesCompatibleContract();
     void missingMetadataDoesNotRejectCandidates();
     void fallsBackToNetEaseWithScoring();
@@ -336,6 +340,64 @@ void LyricsTest::cacheUsesProviderIdentityAndDuration()
     differentDuration.setTrack(QStringLiteral("artist"), QStringLiteral("title"), QStringLiteral("album"),
                                121.0);
     waitForRequests(differentDurationManager, 1);
+}
+
+void LyricsTest::trackDurationIsSafe_data()
+{
+    QTest::addColumn<double>("duration");
+    QTest::addColumn<double>("expected");
+    const double limit = std::numeric_limits<int>::max();
+    QTest::newRow("ordinary") << 120.6 << 120.6;
+    QTest::newRow("largest-rounded-second") << limit + 0.49 << limit + 0.49;
+    QTest::newRow("rounding-overflow") << limit + 0.5 << 0.0;
+    QTest::newRow("mpris-sentinel") << double(std::numeric_limits<qint64>::max()) / 1000000.0 << 0.0;
+    QTest::newRow("millisecond-overflow") << std::numeric_limits<double>::max() << 0.0;
+    QTest::newRow("infinity") << std::numeric_limits<double>::infinity() << 0.0;
+    QTest::newRow("nan") << std::numeric_limits<double>::quiet_NaN() << 0.0;
+    QTest::newRow("negative") << -1.0 << 0.0;
+    QTest::newRow("unknown") << 0.0 << 0.0;
+}
+
+void LyricsTest::trackDurationIsSafe()
+{
+    QFETCH(double, duration);
+    QFETCH(double, expected);
+    QTemporaryDir temporary;
+    QVERIFY(temporary.isValid());
+    ScopedEnvironment cacheHome("XDG_CACHE_HOME");
+    ScopedEnvironment dataHome("XDG_DATA_HOME");
+    ScopedEnvironment localDirectory("CLAVIS_LYRICS_DIR");
+    configureTemporaryPaths(temporary.path(), cacheHome, dataHome, localDirectory);
+
+    FixtureNetworkAccessManager manager;
+    manager.responder = [](const QUrl &, int) {
+        return lrclibResponse(QStringLiteral("42"), QStringLiteral("[00:01]line"));
+    };
+    Lyrics lyrics;
+    lyrics.setNetworkAccessManager(&manager);
+    lyrics.setTrack(QStringLiteral("artist"), QStringLiteral("title"), {}, duration);
+    QCOMPARE(lyrics.trackDuration(), expected);
+    QTRY_VERIFY_WITH_TIMEOUT(lyrics.hasLyrics(), 1500);
+    QCOMPARE(manager.requests, 1);
+    const QUrlQuery query(manager.requestAt(0).url());
+    QCOMPARE(query.hasQueryItem(QStringLiteral("duration")), expected > 0.0);
+    if (expected > 0.0)
+        QCOMPARE(query.queryItemValue(QStringLiteral("duration")), QString::number(qRound(expected)));
+
+    // Unknown/invalid lengths use the same cache identity, while supported
+    // fractional durations retain their existing millisecond identity.
+    FixtureNetworkAccessManager cachedManager;
+    Lyrics cached;
+    cached.setNetworkAccessManager(&cachedManager);
+    cached.setTrack(QStringLiteral("artist"), QStringLiteral("title"), {}, expected);
+    QTRY_VERIFY_WITH_TIMEOUT(cached.hasLyrics(), 1500);
+    QCOMPARE(cachedManager.requests, 0);
+
+    lyrics.setTrack(QStringLiteral("artist"), QStringLiteral("title"), {}, 240.0);
+    QTRY_COMPARE_WITH_TIMEOUT(manager.requests, 2, 1500);
+    QCOMPARE(lyrics.trackDuration(), 240.0);
+    QCOMPARE(QUrlQuery(manager.requestAt(1).url()).queryItemValue(QStringLiteral("duration")),
+             QStringLiteral("240"));
 }
 
 void LyricsTest::netEaseRequestUsesCompatibleContract()

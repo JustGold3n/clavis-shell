@@ -108,6 +108,8 @@ Item {
                 deferredRequested("web", "", request.query);
             return true;
         case "apps":
+            if (ApplicationService.findById(request.sourceId)?.dragOnly)
+                return false;
             if (SpotlightAppUsage.launch(request.sourceId)) {
                 closeRequested();
                 return true;

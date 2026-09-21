@@ -26,9 +26,18 @@ Singleton {
                                                     symbol: root.settingsIconName ? "" : "settings",
                                                     icon: root.settingsIconName
                                                 })
+    readonly property var spaceApplication: ({
+                                                 id: "org.clavis.Space",
+                                                 name: qsTr("Space"),
+                                                 genericName: qsTr("Drag to Dock to add a blank space"),
+                                                 keywords: ["space", "spacer", "blank", "dock"],
+                                                 symbol: "check_box_outline_blank",
+                                                 icon: "",
+                                                 dragOnly: true
+                                             })
     // Internal shell entries belong in the launcher, not in default-app or
     // autostart pickers that require an installed desktop application.
-    readonly property var launcherApplications: applications.concat([settingsApplication])
+    readonly property var launcherApplications: applications.concat([settingsApplication, spaceApplication])
 
     function launchCommand(command, workingDirectory) {
         const argv = Array.from(command || []);
@@ -47,7 +56,7 @@ Singleton {
     }
 
     function launchApplication(application) {
-        if (!application)
+        if (!application || application.dragOnly)
             return false;
         if (application.id === root.settingsApplication.id)
             return ControlCenterService.openOrFocus();
@@ -96,6 +105,8 @@ Singleton {
 
     function findById(identifier) {
         const value = String(identifier || "");
+        if (value === root.spaceApplication.id)
+            return root.spaceApplication;
         if (value === root.settingsApplication.id)
             return root.settingsApplication;
         const withoutSuffix = value.endsWith(".desktop") ? value.substring(0, value.length

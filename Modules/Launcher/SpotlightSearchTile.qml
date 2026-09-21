@@ -48,9 +48,12 @@ Item {
             ThemeIcon {
                 id: artwork
                 anchors.fill: parent
-                iconSource: root.result.iconKind === "app" ? ApplicationService.iconSource(
-                                                                 root.result.appIcon) : root.result.iconKind
-                                                             === "wallpaper" ? root.result.previewUrl : ""
+                iconSource: root.result.iconKind === "app" && !root.result.symbol ? ApplicationService.iconSource(
+                                                                                        root.result.appIcon) :
+                                                                                    root.result.iconKind
+                                                                                    === "wallpaper"
+                                                                                    ? root.result.previewUrl :
+                                                                                      ""
                 sourceSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
                 asynchronous: true
                 retainWhileLoading: false
@@ -126,9 +129,10 @@ Item {
         }
         StyledToolTip {
             extraVisibleCondition: false
-            alternativeVisibleCondition: mouse.containsMouse && title.truncated &&
+            alternativeVisibleCondition: mouse.containsMouse && (title.truncated || !!root.result.appObject
+                                                                 ?.dragOnly) &&
                                          !DockService.externalDragActive
-            text: root.result.title
+            text: root.result.appObject?.dragOnly ? root.result.subtitle : root.result.title
             textFormat: Text.PlainText
         }
     }

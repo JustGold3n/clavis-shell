@@ -95,7 +95,9 @@ GridView {
                 text: tile.modelData.symbol || ""
                 iconSize: root.style.appGridIconSize
                 color: root.searchActive && tile.selected ? root.style.selectedContentColor :
-                                                            Appearance.colors.colPrimary
+                                                            tile.modelData.appObject?.dragOnly
+                                                            ? Appearance.colors.colOnSurfaceVariant :
+                                                              Appearance.colors.colPrimary
                 scale: appIcon.scale
             }
 
@@ -130,6 +132,7 @@ GridView {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             acceptedButtons: Qt.LeftButton
+            Accessible.description: tile.modelData.subtitle || ""
             Accessible.name: tile.modelData.title
             Accessible.role: Accessible.ListItem
             Accessible.selected: tile.selected
@@ -154,8 +157,9 @@ GridView {
             iconItem: tile.modelData.symbol ? appSymbol : appIcon
         }
 
-        ToolTip.visible: tileMouse.containsMouse && appName.truncated && !DockService.externalDragActive
+        ToolTip.visible: tileMouse.containsMouse && (appName.truncated || !!tile.modelData.appObject
+                                                     ?.dragOnly) && !DockService.externalDragActive
         ToolTip.delay: 600
-        ToolTip.text: tile.modelData.title
+        ToolTip.text: tile.modelData.appObject?.dragOnly ? tile.modelData.subtitle : tile.modelData.title
     }
 }

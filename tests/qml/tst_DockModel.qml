@@ -45,7 +45,7 @@ TestCase {
                                                                      desktopId: "org.example.Editor.desktop"
                                                                  },
                                                                  {
-                                                                     kind: "separator",
+                                                                     kind: "spacer",
                                                                      id: "first"
                                                                  }
                                                              ], {
@@ -59,7 +59,8 @@ TestCase {
         compare(decoded.pinned[1].id, "first");
         compare(decoded.options.iconSize, 80);
         compare(decoded.options.magnificationScale, 1);
-        compare(decoded.options.separatorSize, 8);
+        compare(decoded.options.separatorSize, undefined);
+        compare(decoded.pinned[1].kind, "spacer");
         compare(decoded.options.position, "right");
         compare(decoded.options.showRecent, true);
         compare(decoded.options.showThumbnails, true);
@@ -80,6 +81,42 @@ TestCase {
         compare(DockModel.option("previewSize", 0), 96);
     }
 
+    function test_legacySeparatorsKeepTheirPositionAndIdentity() {
+        const config = DockModel.decodeConfig(encodedConfig([
+                                                                {
+                                                                    kind: "app",
+                                                                    desktopId: "a"
+                                                                },
+                                                                {
+                                                                    kind: "separator",
+                                                                    id: "old_gap"
+                                                                },
+                                                                {
+                                                                    kind: "spacer",
+                                                                    id: "new_gap"
+                                                                },
+                                                                {
+                                                                    kind: "app",
+                                                                    desktopId: "b"
+                                                                }
+                                                            ], {
+                                                                separatorSize: 24
+                                                            }));
+        compare(config.pinned.map(DockModel.pinnedKey).join(","),
+                "app:a,spacer:old_gap,spacer:new_gap,app:b");
+        compare(DockModel.decodeConfig(JSON.stringify(config)), config);
+        compare(DockModel.decodeConfig(encodedConfig([
+                                                         {
+                                                             kind: "separator",
+                                                             id: "duplicate"
+                                                         },
+                                                         {
+                                                             kind: "spacer",
+                                                             id: "duplicate"
+                                                         }
+                                                     ])), null);
+    }
+
     function test_invalidConfigMustNotReplaceSavedData() {
         const invalid = ["", "invalid", "null", "[]", '{"schemaVersion":2,"pinned":[],"options":{}}',
                          encodedConfig([
@@ -94,7 +131,7 @@ TestCase {
                                                              }
                                                          ]), encodedConfig([
                                                                                {
-                                                                                   kind: "separator",
+                                                                                   kind: "spacer",
                                                                                    id: "bad/id"
                                                                                }
                                                                            ]), encodedConfig([
@@ -111,11 +148,11 @@ TestCase {
                                                                                              ]), encodedConfig(
                              [
                                  {
-                                     kind: "separator",
+                                     kind: "spacer",
                                      id: "same"
                                  },
                                  {
-                                     kind: "separator",
+                                     kind: "spacer",
                                      id: "same"
                                  }
                              ]), encodedConfig([], {
@@ -264,8 +301,8 @@ TestCase {
         compare(DockModel.dropPayload(
                     '{"schemaVersion":1,"kind":"app","desktopId":"org.example.Editor.desktop"}').desktopId,
                 "org.example.Editor");
-        compare(DockModel.dropPayload('{"schemaVersion":1,"kind":"separator"}').kind, "separator");
-        for (const text of ["org.example.Editor", "{}", '{"schemaVersion":2,"kind":"separator"}',
+        compare(DockModel.dropPayload('{"schemaVersion":1,"kind":"spacer"}').kind, "spacer");
+        for (const text of ["org.example.Editor", "{}", '{"schemaVersion":2,"kind":"spacer"}',
                             '{"schemaVersion":1,"kind":"app","desktopId":"/tmp/app.desktop"}'])
             compare(DockModel.dropPayload(text), null);
         const roots = ["/home/example/.local/share", "/usr/share"];
@@ -340,7 +377,7 @@ TestCase {
                       desktopId: "a"
                   },
                   {
-                      kind: "separator",
+                      kind: "spacer",
                       id: "gap"
                   },
                   {
@@ -349,14 +386,14 @@ TestCase {
                   }
               ];
         const ids = entries => entries.map(entry => DockModel.pinnedKey(entry)).join(",");
-        compare(ids(DockModel.movePinned(pinned, "app:a", 0)), "app:a,separator:gap,app:b");
-        compare(ids(DockModel.movePinned(pinned, "app:a", 1)), "app:a,separator:gap,app:b");
-        compare(ids(DockModel.movePinned(pinned, "app:a", 2)), "separator:gap,app:a,app:b");
-        compare(ids(DockModel.movePinned(pinned, "app:a", 3)), "separator:gap,app:b,app:a");
-        compare(ids(DockModel.movePinned(pinned, "app:b", 0)), "app:b,app:a,separator:gap");
-        compare(ids(DockModel.movePinned(pinned, "app:b", 99)), "app:a,separator:gap,app:b");
+        compare(ids(DockModel.movePinned(pinned, "app:a", 0)), "app:a,spacer:gap,app:b");
+        compare(ids(DockModel.movePinned(pinned, "app:a", 1)), "app:a,spacer:gap,app:b");
+        compare(ids(DockModel.movePinned(pinned, "app:a", 2)), "spacer:gap,app:a,app:b");
+        compare(ids(DockModel.movePinned(pinned, "app:a", 3)), "spacer:gap,app:b,app:a");
+        compare(ids(DockModel.movePinned(pinned, "app:b", 0)), "app:b,app:a,spacer:gap");
+        compare(ids(DockModel.movePinned(pinned, "app:b", 99)), "app:a,spacer:gap,app:b");
         compare(DockModel.movePinned(pinned, "missing", 0), null);
-        compare(ids(pinned), "app:a,separator:gap,app:b");
+        compare(ids(pinned), "app:a,spacer:gap,app:b");
     }
 
     function test_launchWaitsForNewMatchingWindowOrTimeout() {
