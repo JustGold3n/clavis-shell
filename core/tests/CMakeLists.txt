@@ -1,6 +1,20 @@
 find_package(Qt6 REQUIRED COMPONENTS Test)
 find_program(BASH_EXECUTABLE bash REQUIRED)
 
+qt_add_executable(icon_theme_controller_tests
+    icon_theme_controller_test.cpp
+)
+target_include_directories(icon_theme_controller_tests PRIVATE
+    ${CLAVIS_SOURCE_ROOT}/core/plugin/runtime/src
+)
+target_link_libraries(icon_theme_controller_tests PRIVATE
+    ClavisRuntime Qt6::Gui Qt6::Qml Qt6::Test
+)
+add_test(NAME icon_theme_controller_tests COMMAND icon_theme_controller_tests)
+set_tests_properties(icon_theme_controller_tests PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORMTHEME="
+)
+
 # These are black-box checks for the shell-owned configuration writers.  They
 # exercise their generated output and validation behavior; source layout is
 # intentionally not part of the CTest suite.

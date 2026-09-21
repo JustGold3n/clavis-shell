@@ -7,6 +7,7 @@ Item {
 
     default property alias contentData: contentViewport.data
     property bool animateResize: true
+    property bool backgroundVisible: true
 
     // Animate the size consumed by the bar layout so the surface, shadow and
     // neighbouring pills follow the same geometry throughout a resize.
@@ -17,6 +18,7 @@ Item {
     data: [
         TopBarPillBackground {
             anchors.fill: parent
+            visible: root.backgroundVisible
         },
         Rectangle {
             id: contentMask

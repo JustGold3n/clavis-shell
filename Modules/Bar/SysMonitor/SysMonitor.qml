@@ -10,6 +10,7 @@ TopBarPill {
     id: root
 
     property bool vertical: false
+    property bool showValues: true
     property string ownerId: "bar-sysmonitor"
     readonly property bool isHovered: mouseArea.containsMouse
     readonly property var memory: SystemMonitorService.memory || ({})
@@ -29,8 +30,7 @@ TopBarPill {
     readonly property string diskDisplayText: Format.number(root.disk.usagePercent, 0)
     readonly property string temperatureDisplayText: Format.number(root.displayTemperature, 0)
     readonly property string cpuDisplayText: Format.number(root.cpu.usagePercent, 0)
-    // Match the ordinary circular controls in QuickSettings. Vertical bars
-    // use the same circle geometry while intentionally hiding percentages.
+    // Match the ordinary circular controls in QuickSettings.
     readonly property real horizontalIndicatorSize: Sizes.barControlCircleSize
     readonly property real verticalIndicatorSize: Sizes.barControlCircleSize
     readonly property real indicatorSize: root.vertical ? root.verticalIndicatorSize :
@@ -91,7 +91,8 @@ TopBarPill {
             indicatorSize: root.indicatorSize
             iconSize: root.indicatorIconSize
             value: root.memoryUsage
-            showText: !root.vertical
+            showText: root.showValues
+            vertical: root.vertical
             displayText: root.memoryDisplayText
             icon: "memory_alt"
             fillColor: Appearance.colors.colPrimary
@@ -104,7 +105,8 @@ TopBarPill {
             indicatorSize: root.indicatorSize
             iconSize: root.indicatorIconSize
             value: root.diskUsage
-            showText: !root.vertical
+            showText: root.showValues
+            vertical: root.vertical
             displayText: root.diskDisplayText
             icon: "hard_drive"
             fillColor: Appearance.colors.colSecondary
@@ -117,7 +119,8 @@ TopBarPill {
             indicatorSize: root.indicatorSize
             iconSize: root.indicatorIconSize
             value: root.temperatureUsage
-            showText: !root.vertical
+            showText: root.showValues
+            vertical: root.vertical
             displayText: root.temperatureDisplayText
             icon: "thermostat"
             fillColor: Appearance.colors.colTertiary
@@ -130,7 +133,8 @@ TopBarPill {
             indicatorSize: root.indicatorSize
             iconSize: root.indicatorIconSize
             value: root.cpuUsage
-            showText: !root.vertical
+            showText: root.showValues
+            vertical: root.vertical
             displayText: root.cpuDisplayText
             icon: "developer_board"
             fillColor: Appearance.colors.colTertiary

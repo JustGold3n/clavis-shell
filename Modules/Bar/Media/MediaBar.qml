@@ -9,11 +9,13 @@ TopBarPill {
     id: root
 
     property bool vertical: false
+    property bool showSpectrum: true
+    property string edge: PersonalizationConfig.barPosition
     property real maximumTitleWidth: 180
     readonly property var player: MediaManager.active
     readonly property string title: player ? player.trackTitle || player.identity || qsTr("No media") : qsTr(
                                                  "No media")
-    readonly property bool spectrumActive: visible && player !== null && player.isPlaying
+    readonly property bool spectrumActive: showSpectrum && visible && player !== null && player.isPlaying
     readonly property string spectrumToken: "bar-media-" + String(root)
 
     implicitWidth: vertical ? Sizes.barVisualThickness : layout.implicitWidth + 2
@@ -40,9 +42,13 @@ TopBarPill {
         columnSpacing: 4
 
         Row {
+            visible: root.showSpectrum
             Layout.alignment: Qt.AlignCenter
             Layout.preferredWidth: 28
             Layout.preferredHeight: 28
+            // Rotate the spectrum as a unit: frequencies run down the side bar
+            // and amplitude extends across it, retaining the same smoothing.
+            rotation: root.vertical ? 90 : 0
             spacing: 2
 
             Repeater {
@@ -109,7 +115,7 @@ TopBarPill {
                 anchors.centerIn: parent
                 width: titleSlot.titleExtent
                 height: 28
-                rotation: root.vertical ? (PersonalizationConfig.barPosition === "left" ? -90 : 90) : 0
+                rotation: root.vertical ? (root.edge === "left" ? -90 : 90) : 0
                 clip: true
                 readonly property bool overflowing: titleText.implicitWidth > width
 

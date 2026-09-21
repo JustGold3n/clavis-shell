@@ -6,17 +6,19 @@ Item {
     id: root
 
     property var screen: null
-    readonly property var keyholeGlassItems: keyholeCardCarousel.blurBackgroundItems
+    readonly property var keyholeGlassItems: [keyholeCard.glassBackgroundItem]
     readonly property real clockColumnWidth: 160
     readonly property real profileColumnWidth: 392
     readonly property real layoutMargin: 32
     readonly property real layoutSpacing: 24
     readonly property real keyholeWidth: 340
     readonly property real keyholeLeftMargin: 30
-    readonly property real keyholeCenterOffset: layoutMargin + clockColumnWidth + layoutSpacing + profileColumnWidth + layoutSpacing + keyholeLeftMargin - implicitWidth / 2
+    readonly property real keyholeCenterOffset: layoutMargin + clockColumnWidth + layoutSpacing
+                                                + profileColumnWidth + layoutSpacing + keyholeLeftMargin
+                                                - implicitWidth / 2
 
-    signal closeRequested()
-    signal avatarEditRequested()
+    signal closeRequested
+    signal avatarEditRequested
 
     implicitWidth: 1040
     implicitHeight: 520
@@ -50,26 +52,21 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
             }
-
         }
 
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            KeyholeCardCarousel {
-                id: keyholeCardCarousel
+            KeyholeCard {
+                id: keyholeCard
 
                 width: root.keyholeWidth
                 anchors.left: parent.left
                 anchors.leftMargin: root.keyholeLeftMargin
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                screen: root.screen
             }
-
         }
-
     }
-
 }

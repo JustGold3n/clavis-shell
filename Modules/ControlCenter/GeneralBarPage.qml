@@ -60,16 +60,28 @@ StyledFlickable {
                     '{"id":"general.bar.section.components","route":"general.bar","title":"Components","context":"GeneralBarPage","icon":"dock_to_bottom","aliases":[]}'
             }
             iconName: "view_agenda"
+
+            SettingsRow {
+                Layout.fillWidth: true
+                title: qsTr("Show system monitor values")
+                trailing: StyledSwitch {
+                    checked: PersonalizationConfig.barShowMonitorValues
+                    Accessible.name: qsTr("Show system monitor values")
+                    onToggled: PersonalizationConfig.setBarShowMonitorValues(checked)
+                }
+            }
             supportingText: qsTr("Drag components to reorder them or move them to the other side.")
 
             SettingsRow {
+                id: leadingFieldRow
                 Layout.fillWidth: true
                 title: root.horizontalBar ? qsTr("Left") : qsTr("Top")
 
                 trailing: SortableMultiSelectField {
                     id: leadingField
 
-                    Layout.preferredWidth: 380
+                    Layout.minimumWidth: 0
+                    Layout.preferredWidth: Math.max(0, leadingFieldRow.width - 96 - 3 * Metrics.spacingS)
                     values: PersonalizationConfig.barLeadingComponents
                     options: PersonalizationConfig.barComponentOptions
                     zone: "leading"
@@ -84,13 +96,15 @@ StyledFlickable {
             }
 
             SettingsRow {
+                id: trailingFieldRow
                 Layout.fillWidth: true
                 title: root.horizontalBar ? qsTr("Right") : qsTr("Bottom")
 
                 trailing: SortableMultiSelectField {
                     id: trailingField
 
-                    Layout.preferredWidth: 380
+                    Layout.minimumWidth: 0
+                    Layout.preferredWidth: Math.max(0, trailingFieldRow.width - 96 - 3 * Metrics.spacingS)
                     values: PersonalizationConfig.barTrailingComponents
                     options: PersonalizationConfig.barComponentOptions
                     zone: "trailing"

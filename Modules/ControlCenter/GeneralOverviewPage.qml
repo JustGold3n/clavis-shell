@@ -23,15 +23,18 @@ StyledFlickable {
 
         SettingsSection {
             id: searchSection0
+
             Layout.fillWidth: true
             title: searchAnchor0.title
+            iconName: "dashboard"
+
             SettingsSearchAnchor {
                 id: searchAnchor0
+
                 target: searchSection0
                 declaration:
                     '{"id":"general.section.interface","route":"general","title":"Interface","context":"GeneralOverviewPage","icon":"settings","aliases":[],"source":"GeneralOverviewPage.qml"}'
             }
-            iconName: "dashboard"
 
             SettingsActionRow {
                 Layout.fillWidth: true
@@ -39,6 +42,14 @@ StyledFlickable {
                 text: SpotlightCatalog.title("general.bar")
                 trailingIconName: "chevron_right"
                 onClicked: root.sectionRequested("bar")
+            }
+
+            SettingsActionRow {
+                Layout.fillWidth: true
+                iconName: "dock_to_bottom"
+                text: SpotlightCatalog.title("general.dock")
+                trailingIconName: "chevron_right"
+                onClicked: root.sectionRequested("dock")
             }
 
             SettingsActionRow {
@@ -68,15 +79,18 @@ StyledFlickable {
 
         SettingsSection {
             id: searchSection1
+
             Layout.fillWidth: true
             title: searchAnchor1.title
+            iconName: "settings_suggest"
+
             SettingsSearchAnchor {
                 id: searchAnchor1
+
                 target: searchSection1
                 declaration:
                     '{"id":"general.section.system","route":"general","title":"System","context":"GeneralOverviewPage","icon":"settings","aliases":[],"source":"GeneralOverviewPage.qml"}'
             }
-            iconName: "settings_suggest"
 
             SettingsActionRow {
                 Layout.fillWidth: true
@@ -138,15 +152,18 @@ StyledFlickable {
 
         SettingsSection {
             id: searchSection2
+
             Layout.fillWidth: true
             title: searchAnchor2.title
+            iconName: "apps"
+
             SettingsSearchAnchor {
                 id: searchAnchor2
+
                 target: searchSection2
                 declaration:
                     '{"id":"general.section.applications","route":"general","title":"Applications","context":"GeneralOverviewPage","icon":"settings","aliases":[],"source":"GeneralOverviewPage.qml"}'
             }
-            iconName: "apps"
 
             SettingsActionRow {
                 Layout.fillWidth: true

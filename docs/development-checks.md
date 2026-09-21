@@ -43,13 +43,16 @@ normalize。仅明确格式迁移时使用全树写入 `--all`；`--check-all` �
 ```bash
 sudo pacman -S --needed base-devel cmake ninja qt6-base qt6-declarative \
   qt6-shadertools qt6-tools qt6-wayland qtkeychain-qt6 libpipewire \
-  clang shellcheck python git libxkbcommon systemd-libs
+  clang shellcheck python git libxkbcommon systemd-libs wayland wayland-protocols
 # libcava 的 AUR 包提供所需共享库与 pkg-config 接口，另行构建安装。
 # Matugen 集成测试需要：
 sudo pacman -S --needed matugen jq
 # Niri 配置与显示预览集成测试需要 niri validate（不会启动 compositor）：
 sudo pacman -S --needed niri
 ```
+
+窗口预览模块需要 `wayland-protocols >= 1.41`；协议代码由构建时的 `wayland-scanner`
+生成。标准 niri 会话未提供单窗口捕获协议时，Dock 自动使用标题模式。
 
 M3Shapes 是另行安装的 QML 运行时依赖，Arch 包名为 `qt6-m3shapes-git`
 （AUR）。`lint-qml.sh` 使用 Qt 的系统 import 根解析它，不要求 `build/qml/M3Shapes`。

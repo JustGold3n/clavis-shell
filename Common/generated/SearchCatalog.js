@@ -471,6 +471,21 @@ var catalog = {
       "title": "Bar"
     },
     {
+      "aliases": [
+        "taskbar",
+        "launcher"
+      ],
+      "context": "GeneralPage",
+      "icon": "dock_to_bottom",
+      "id": "general.dock",
+      "path": [
+        "general",
+        "dock"
+      ],
+      "source": "DockPage.qml",
+      "title": "Dock"
+    },
+    {
       "aliases": [],
       "context": "GeneralPage",
       "icon": "side_navigation",
@@ -739,6 +754,23 @@ var catalog = {
       "route": "general.bar",
       "source": "GeneralBarPage.qml",
       "title": "Bar"
+    },
+    {
+      "aliases": [
+        "taskbar",
+        "launcher"
+      ],
+      "anchor": false,
+      "context": "GeneralPage",
+      "icon": "dock_to_bottom",
+      "id": "general.dock",
+      "path": [
+        "general",
+        "dock"
+      ],
+      "route": "general.dock",
+      "source": "DockPage.qml",
+      "title": "Dock"
     },
     {
       "aliases": [],
@@ -1200,6 +1232,79 @@ var catalog = {
       "route": "general.displays.configuration",
       "source": "DisplayConfigurationPage.qml",
       "title": "Output settings"
+    },
+    {
+      "aliases": [
+        "size",
+        "position",
+        "magnification"
+      ],
+      "anchor": true,
+      "context": "DockPage",
+      "icon": "dock_to_bottom",
+      "id": "general.dock.section.appearance",
+      "path": [
+        "general",
+        "dock"
+      ],
+      "route": "general.dock",
+      "source": "DockPage.qml",
+      "title": "Appearance"
+    },
+    {
+      "aliases": [
+        "auto hide",
+        "bounce",
+        "recent",
+        "indicators",
+        "pin"
+      ],
+      "anchor": true,
+      "context": "DockPage",
+      "icon": "touch_app",
+      "id": "general.dock.section.behavior",
+      "path": [
+        "general",
+        "dock"
+      ],
+      "route": "general.dock",
+      "source": "DockPage.qml",
+      "title": "Behavior"
+    },
+    {
+      "aliases": [
+        "thumbnails",
+        "hover"
+      ],
+      "anchor": true,
+      "availability": "dock-previews",
+      "context": "DockPage",
+      "icon": "preview",
+      "id": "general.dock.section.previews",
+      "path": [
+        "general",
+        "dock"
+      ],
+      "route": "general.dock",
+      "source": "DockPage.qml",
+      "title": "Window previews"
+    },
+    {
+      "aliases": [
+        "spacing",
+        "spacer"
+      ],
+      "anchor": true,
+      "context": "DockPage",
+      "icon": "space_bar",
+      "id": "general.dock.section.separators",
+      "path": [
+        "general",
+        "dock"
+      ],
+      "route": "general.dock",
+      "source": "DockPage.qml",
+      "title": "Separators"
     },
     {
       "aliases": [],
@@ -1800,6 +1905,7 @@ function title(id) {
     case "advanced": return qsTranslate("ControlCenterWindow", "Advanced");
     case "general.displays": return qsTranslate("GeneralPage", "Displays");
     case "general.bar": return qsTranslate("GeneralPage", "Bar");
+    case "general.dock": return qsTranslate("GeneralPage", "Dock");
     case "general.sidebar": return qsTranslate("GeneralPage", "Sidebars");
     case "general.spotlight": return qsTranslate("GeneralPage", "Spotlight");
     case "general.effects": return qsTranslate("GeneralPage", "Transparency and blur");
@@ -1833,6 +1939,10 @@ function title(id) {
     case "general.default-apps.section.multimedia": return qsTranslate("DefaultAppsPage", "Multimedia");
     case "general.displays.configuration.section.layout": return qsTranslate("DisplayConfigurationPage", "Layout");
     case "general.displays.configuration.section.output-settings": return qsTranslate("DisplayConfigurationPage", "Output settings");
+    case "general.dock.section.appearance": return qsTranslate("DockPage", "Appearance");
+    case "general.dock.section.behavior": return qsTranslate("DockPage", "Behavior");
+    case "general.dock.section.previews": return qsTranslate("DockPage", "Window previews");
+    case "general.dock.section.separators": return qsTranslate("DockPage", "Separators");
     case "general.displays.gamma.section.color": return qsTranslate("GammaControlPage", "Color");
     case "general.displays.gamma.section.schedule": return qsTranslate("GammaControlPage", "Schedule");
     case "general.displays.gamma.section.current-status": return qsTranslate("GammaControlPage", "Current status");

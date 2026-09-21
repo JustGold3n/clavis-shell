@@ -152,6 +152,28 @@ Item {
                     onAccepted: value => PersonalizationConfig.setKeystoneAction("hover", value)
                 }
 
+                GeneralSliderSetting {
+                    title: qsTr("Hover open delay")
+                    value: PersonalizationConfig.keystoneHoverOpenDelay
+                    from: 0
+                    to: 500
+                    stepSize: 25
+                    suffix: qsTr(" ms")
+                    enabled: PersonalizationConfig.keystoneHoverAction !== "none"
+                    onMoved: value => PersonalizationConfig.setKeystoneHoverOpenDelay(value)
+                }
+
+                GeneralSliderSetting {
+                    title: qsTr("Hover close delay")
+                    value: PersonalizationConfig.keystoneHoverCloseDelay
+                    from: 0
+                    to: 600
+                    stepSize: 25
+                    suffix: qsTr(" ms")
+                    enabled: PersonalizationConfig.keystoneHoverAction !== "none"
+                    onMoved: value => PersonalizationConfig.setKeystoneHoverCloseDelay(value)
+                }
+
                 SearchSelectSettingRow {
                     title: qsTr("Left click")
                     options: PersonalizationConfig.keystoneActionOptions
@@ -164,6 +186,91 @@ Item {
                     options: PersonalizationConfig.keystoneActionOptions
                     value: PersonalizationConfig.keystoneMiddleClickAction
                     onAccepted: value => PersonalizationConfig.setKeystoneAction("middle", value)
+                }
+            }
+
+            KeystoneSection {
+                visible: PersonalizationConfig.keystoneStyle === "long"
+                title: qsTr("Status items")
+                iconName: "view_week"
+
+                SettingsRow {
+                    Layout.fillWidth: true
+                    title: qsTr("Show device names")
+                    trailing: StyledSwitch {
+                        checked: PersonalizationConfig.keystoneLongShowNames
+                        Accessible.name: qsTr("Show device names")
+                        onToggled: PersonalizationConfig.setKeystoneLongShowNames(checked)
+                    }
+                }
+
+                SettingsRow {
+                    Layout.fillWidth: true
+                    title: qsTr("Show system monitor values")
+                    trailing: StyledSwitch {
+                        checked: PersonalizationConfig.keystoneLongShowMonitorValues
+                        Accessible.name: qsTr("Show system monitor values")
+                        onToggled: PersonalizationConfig.setKeystoneLongShowMonitorValues(checked)
+                    }
+                }
+
+                SettingsRow {
+                    Layout.fillWidth: true
+                    title: qsTr("Show spectrum")
+                    trailing: StyledSwitch {
+                        checked: PersonalizationConfig.keystoneLongShowSpectrum
+                        Accessible.name: qsTr("Show spectrum")
+                        onToggled: PersonalizationConfig.setKeystoneLongShowSpectrum(checked)
+                    }
+                }
+
+                SettingsRow {
+                    Layout.fillWidth: true
+                    title: qsTr("Show numeric values")
+                    trailing: StyledSwitch {
+                        checked: PersonalizationConfig.keystoneLongShowValues
+                        Accessible.name: qsTr("Show numeric values")
+                        onToggled: PersonalizationConfig.setKeystoneLongShowValues(checked)
+                    }
+                }
+
+                SettingsRow {
+                    id: longLeadingFieldRow
+                    Layout.fillWidth: true
+                    title: PersonalizationConfig.keystonePosition === "top"
+                           || PersonalizationConfig.keystonePosition === "bottom" ? qsTr("Left") : qsTr("Top")
+                    trailing: SortableMultiSelectField {
+                        id: longLeadingField
+                        Layout.minimumWidth: 0
+                        Layout.preferredWidth: Math.max(0, longLeadingFieldRow.width - 96 - 3
+                                                        * Metrics.spacingS)
+                        values: PersonalizationConfig.keystoneLongLeading
+                        options: PersonalizationConfig.keystoneLongItemOptions
+                        zone: "leading"
+                        dragCoordinator: longDragCoordinator
+                        onToggled: itemId => PersonalizationConfig.toggleKeystoneLongItem(itemId, zone)
+                        onRemoved: itemId => PersonalizationConfig.removeKeystoneLongItem(itemId)
+                    }
+                }
+
+                SettingsRow {
+                    id: longTrailingFieldRow
+                    Layout.fillWidth: true
+                    title: PersonalizationConfig.keystonePosition === "top"
+                           || PersonalizationConfig.keystonePosition === "bottom" ? qsTr("Right") : qsTr(
+                                                                                        "Bottom")
+                    trailing: SortableMultiSelectField {
+                        id: longTrailingField
+                        Layout.minimumWidth: 0
+                        Layout.preferredWidth: Math.max(0, longTrailingFieldRow.width - 96 - 3
+                                                        * Metrics.spacingS)
+                        values: PersonalizationConfig.keystoneLongTrailing
+                        options: PersonalizationConfig.keystoneLongItemOptions
+                        zone: "trailing"
+                        dragCoordinator: longDragCoordinator
+                        onToggled: itemId => PersonalizationConfig.toggleKeystoneLongItem(itemId, zone)
+                        onRemoved: itemId => PersonalizationConfig.removeKeystoneLongItem(itemId)
+                    }
                 }
             }
 
@@ -209,24 +316,14 @@ Item {
                     declaration:
                         '{"id":"keystone.section.keyhole","route":"keystone","title":"Keyhole","context":"KeystonePage","icon":"settings","aliases":[]}'
                 }
-                iconName: "view_carousel"
+                iconName: "dashboard"
 
-                SortableMultiSelectField {
-                    id: keyholeCardsField
-
-                    Layout.fillWidth: true
-                    Layout.leftMargin: Metrics.spacingS
-                    Layout.rightMargin: Metrics.spacingS
-                    values: PersonalizationConfig.keystoneKeyholeCards
+                SearchSelectSettingRow {
+                    title: qsTr("Card")
+                    closeOnAccept: true
                     options: PersonalizationConfig.keystoneKeyholeCardOptions
-                    zone: "keyhole"
-                    dragCoordinator: keyholeDragCoordinator
-                    onToggled: cardId => {
-                        return PersonalizationConfig.toggleKeystoneKeyholeCard(cardId);
-                    }
-                    onRemoved: cardId => {
-                        return PersonalizationConfig.removeKeystoneKeyholeCard(cardId);
-                    }
+                    value: PersonalizationConfig.keystoneKeyholeCard
+                    onAccepted: value => PersonalizationConfig.setKeystoneKeyholeCard(value)
                 }
             }
 
@@ -337,15 +434,13 @@ Item {
     }
 
     BarLayoutDragCoordinator {
-        id: keyholeDragCoordinator
-
+        id: longDragCoordinator
         anchors.fill: parent
-        z: 1000
-        fields: [keyholeCardsField]
-        onDropped: (cardId, targetZone, targetIndex) => {
-            if (targetZone === "keyhole")
-                PersonalizationConfig.moveKeystoneKeyholeCard(cardId, targetIndex);
-        }
+        z: 1001
+        fields: [longLeadingField, longTrailingField]
+        onDropped: (itemId, targetZone, targetIndex) => PersonalizationConfig.moveKeystoneLongItem(itemId,
+                                                                                                   targetZone,
+                                                                                                   targetIndex)
     }
 
     FilePickerWindow {
@@ -430,6 +525,7 @@ Item {
         property string value: ""
         property string placeholder: ""
         property int fieldWidth: 240
+        property bool closeOnAccept: false
 
         signal accepted(string value)
 
@@ -472,6 +568,7 @@ Item {
                 Layout.preferredHeight: 40
                 Layout.alignment: Qt.AlignVCenter
                 options: selectRow.options
+                closeOnAccept: selectRow.closeOnAccept
                 value: selectRow.value
                 placeholder: selectRow.placeholder
                 textRole: "label"

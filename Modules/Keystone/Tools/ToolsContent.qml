@@ -10,6 +10,7 @@ Item {
     property bool vertical: false
     property string edge: "top"
     property string popupEdge: edge
+    property bool retainForRecording: false
     readonly property int buttonSize: 48
     readonly property int buttonSpacing: 40
     readonly property int buttonsExtent: 480
@@ -44,13 +45,19 @@ Item {
     property int selectedIndex: 0
 
     signal requestHideKeystone
+    signal recordingRequested
 
     function triggerSelected() {
         const tool = toolsModel[selectedIndex];
         if (!tool)
             return;
 
-        toolsRoot.requestHideKeystone();
+        const recordingTool = tool.action === "record-video" || tool.action === "record-gif" || tool.action
+              === "audio-mic" || tool.action === "audio-system";
+        if (recordingTool && retainForRecording)
+            toolsRoot.recordingRequested();
+        else
+            toolsRoot.requestHideKeystone();
         switch (tool.action) {
         case "color-picker":
             toolsBackend.pickColor();

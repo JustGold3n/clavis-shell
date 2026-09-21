@@ -15,7 +15,7 @@ Item {
     property bool directory: false
     property string fallbackSymbol: directory ? "folder" : "draft"
     property real iconSize: 40
-    readonly property string themeName: PersonalizationConfig.iconTheme
+    readonly property int themeRevision: ThemeService.iconThemeRevision
     readonly property var candidates: {
         if (directory)
             return ["folder"];
@@ -43,17 +43,17 @@ Item {
             const resolved = Quickshell.iconPath(name, true);
             if (resolved !== "" && attemptedSources.indexOf(resolved) < 0) {
                 attemptedSources = attemptedSources.concat([resolved]);
-                artwork.source = resolved;
+                artwork.iconSource = resolved;
                 return;
             }
         }
-        artwork.source = "";
+        artwork.iconSource = "";
     }
     function reset() {
         generation += 1;
         candidateIndex = 0;
         attemptedSources = [];
-        artwork.source = "";
+        artwork.iconSource = "";
         if (active)
             nextSource();
     }
@@ -69,7 +69,7 @@ Item {
         if (initialized)
             reset();
     }
-    onThemeNameChanged: {
+    onThemeRevisionChanged: {
         if (initialized)
             reset();
     }
@@ -78,11 +78,10 @@ Item {
         reset();
     }
 
-    Image {
+    ThemeIcon {
         id: artwork
         anchors.fill: parent
         asynchronous: true
-        cache: true
         retainWhileLoading: false
         fillMode: Image.PreserveAspectFit
         sourceSize: Qt.size(Math.ceil(width * Screen.devicePixelRatio), Math.ceil(height
@@ -94,7 +93,7 @@ Item {
             const failedGeneration = root.generation;
             const failedSource = source.toString();
             Qt.callLater(() => {
-                if (root.generation === failedGeneration && artwork.source.toString() === failedSource)
+                if (root.generation === failedGeneration && artwork.iconSource.toString() === failedSource)
                     root.nextSource();
             });
         }

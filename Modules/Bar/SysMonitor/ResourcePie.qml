@@ -14,6 +14,7 @@ Item {
     property real indicatorSize: 28
     property real iconSize: 15
     property bool showText: false
+    property bool vertical: false
     property string displayText: ""
     property real labelSpacing: Appearance.spacing.xSmall
     property bool animationEnabled: true
@@ -31,16 +32,21 @@ Item {
     readonly property real radius: root.indicatorSize / 2
     readonly property real displayTextWidth: displayTextMetrics.width
 
-    implicitWidth: root.indicatorSize + (root.showText ? root.labelSpacing + root.displayTextWidth : 0)
-    implicitHeight: root.showText ? Math.max(root.indicatorSize, displayTextMetrics.height) : root.indicatorSize
+    implicitWidth: root.vertical ? Math.max(root.indicatorSize, root.showText ? root.displayTextWidth : 0) :
+                                   root.indicatorSize + (root.showText ? root.labelSpacing
+                                                                         + root.displayTextWidth : 0)
+    implicitHeight: root.vertical ? root.indicatorSize + (root.showText ? root.labelSpacing
+                                                                          + displayTextMetrics.height : 0) :
+                                    Math.max(root.indicatorSize, root.showText ? displayTextMetrics.height :
+                                                                                 0)
 
     Item {
         id: circleCanvas
 
         width: root.indicatorSize
         height: root.indicatorSize
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
+        x: root.vertical ? (parent.width - width) / 2 : 0
+        y: root.vertical ? 0 : (parent.height - height) / 2
 
         Rectangle {
             anchors.fill: parent
@@ -78,9 +84,7 @@ Item {
                     x: sectorPath.startX
                     y: sectorPath.startY
                 }
-
             }
-
         }
 
         MaterialSymbol {
@@ -90,7 +94,6 @@ Item {
             color: root.iconColor
             fill: 1
         }
-
     }
 
     TextMetrics {
@@ -111,11 +114,13 @@ Item {
         font.weight: Typography.labelLarge.weight
 
         anchors {
-            left: circleCanvas.right
-            leftMargin: root.labelSpacing
-            verticalCenter: parent.verticalCenter
+            left: root.vertical ? undefined : circleCanvas.right
+            leftMargin: root.vertical ? 0 : root.labelSpacing
+            verticalCenter: root.vertical ? undefined : parent.verticalCenter
+            top: root.vertical ? circleCanvas.bottom : undefined
+            topMargin: root.vertical ? root.labelSpacing : 0
+            horizontalCenter: root.vertical ? parent.horizontalCenter : undefined
         }
-
     }
 
     Behavior on degree {
@@ -126,7 +131,5 @@ Item {
             easing.type: Appearance.animation.standardSmall.type
             easing.bezierCurve: Appearance.animation.standardSmall.bezierCurve
         }
-
     }
-
 }

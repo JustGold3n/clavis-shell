@@ -1,4 +1,5 @@
 import QtQuick
+import qs.Services
 import QtQuick.Layouts
 import qs.Modules.Bar.Workspaces
 import qs.Modules.Bar.ActiveWindow
@@ -89,6 +90,7 @@ Loader {
         id: systemMonitorComponent
 
         SysMonitor {
+            showValues: PersonalizationConfig.barShowMonitorValues
             ownerId: "bar-sysmonitor:" + root.screen.name
             vertical: root.vertical
         }

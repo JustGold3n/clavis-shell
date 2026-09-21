@@ -13,9 +13,9 @@ Item {
     onOrderChanged: rebuild()
 
     function rebuild() {
-        if (!active)
+        if (!active || DockService.externalDragActive)
             return;
-        const ordered = LocalSearch.appResults(ApplicationService.getVisibleApplications(), query, root.order,
+        const ordered = LocalSearch.appResults(ApplicationService.launcherApplications, query, root.order,
                                                SpotlightAppUsage.records, Date.now());
         root.results = root.limit > 0 ? ordered.slice(0, root.limit) : ordered;
     }
@@ -35,6 +35,14 @@ Item {
     Component.onCompleted: rebuild()
 
     Connections {
+        target: DockService
+        function onExternalDragActiveChanged() {
+            if (!DockService.externalDragActive)
+                root.rebuild();
+        }
+    }
+
+    Connections {
         target: UiPreferences
         function onSpotlightAppOrderChanged() {
             root.rebuild();
@@ -51,7 +59,7 @@ Item {
     Connections {
         target: ApplicationService
 
-        function onApplicationsChanged() {
+        function onLauncherApplicationsChanged() {
             root.rebuild();
         }
     }

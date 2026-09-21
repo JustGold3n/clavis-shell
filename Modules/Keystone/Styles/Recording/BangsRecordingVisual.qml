@@ -5,6 +5,8 @@ import qs.Components
 import qs.Widgets.common
 import "RecordingFormat.js" as RecordingFormat
 
+// The Pill presentation's contents, arranged inside one continuous surface.
+// The parent owns all geometry; the action never becomes a satellite.
 Item {
     id: root
 
@@ -20,15 +22,11 @@ Item {
     property string edge: "top"
     property double heldElapsedMs: 0
     property real entryProgress: active ? 1 : 0
-    readonly property real normalizedRecordingInfoProgress: Math.max(0, Math.min(1, recordingInfoProgress))
-    readonly property real normalizedRecordingActionProgress: Math.max(0, Math.min(1,
-                                                                                   recordingActionProgress))
-    readonly property real normalizedProcessingContentProgress: Math.max(0, Math.min(1,
-                                                                                     processingContentProgress))
-    readonly property real sessionContentProgress: Math.min(1, normalizedRecordingInfoProgress
-                                                            + normalizedProcessingContentProgress)
-    readonly property color typeColor: recordingType === "gif" ? Appearance.colors.colTertiary :
-                                                                 Appearance.colors.colError
+    readonly property real infoProgress: Math.max(0, Math.min(1, recordingInfoProgress))
+    readonly property real actionProgress: Math.max(0, Math.min(1, recordingActionProgress))
+    readonly property real processingProgress: Math.max(0, Math.min(1, processingContentProgress))
+    readonly property color typeContainerColor: Appearance.colors.colTertiaryContainer
+    readonly property color typeContentColor: Appearance.colors.colOnTertiaryContainer
 
     signal stopRequested
 
@@ -44,358 +42,136 @@ Item {
             heldElapsedMs = 0;
     }
 
-    SessionTypeIndicator {
-        anchors.left: parent.left
-        anchors.leftMargin: 12
-        anchors.verticalCenter: parent.verticalCenter
-        opacity: root.sessionContentProgress
-        scale: 0.96 + 0.04 * root.sessionContentProgress
-        visible: !root.vertical
-    }
-
-    Item {
-        id: recordingContent
-
-        anchors.fill: parent
-        opacity: root.normalizedRecordingInfoProgress
-        visible: !root.vertical
-        scale: 0.96 + 0.04 * root.normalizedRecordingInfoProgress
-
-        ToolButton {
-            id: closeButton
-
-            anchors.right: parent.right
-            anchors.rightMargin: 8
-            anchors.verticalCenter: parent.verticalCenter
-            width: 48
-            height: 48
-            opacity: root.normalizedRecordingActionProgress
-            enabled: root.recording && root.normalizedRecordingActionProgress > 0.55
-            hoverEnabled: true
-            scale: down ? 0.9 : (hovered ? 1.04 : 1)
-            Accessible.name: qsTr("Stop recording")
-            Accessible.role: Accessible.Button
-            onClicked: root.stopRequested()
-
-            StyledToolTip {
-                extraVisibleCondition: closeButton.hovered && closeButton.enabled
-                text: qsTr("Stop recording")
-            }
-
-            Behavior on scale {
-                NumberAnimation {
-                    duration: Appearance.animation.expressiveFastSpatial.duration
-                    easing.type: Appearance.animation.expressiveFastSpatial.type
-                    easing.bezierCurve: Appearance.animation.expressiveFastSpatial.bezierCurve
-                }
-            }
-
-            background: Item {
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: 36
-                    height: 36
-                    radius: width / 2
-                    color: closeButton.down ? Appearance.colors.colErrorContainerActive : (
-                                                  closeButton.hovered
-                                                  ? Appearance.colors.colErrorContainerHover :
-                                                    Appearance.colors.colErrorContainer)
-
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: Appearance.animation.expressiveEffects.duration
-                            easing.type: Appearance.animation.expressiveEffects.type
-                            easing.bezierCurve: Appearance.animation.expressiveEffects.bezierCurve
-                        }
-                    }
-                }
-            }
-
-            contentItem: MaterialSymbol {
-                text: "close"
-                iconSize: 20
-                fill: 1
-                color: Appearance.colors.colOnErrorContainer
-            }
-        }
-
-        Item {
-            anchors.left: parent.left
-            anchors.leftMargin: 78
-            anchors.right: closeButton.left
-            anchors.rightMargin: 4
-            anchors.verticalCenter: parent.verticalCenter
-            height: 32
-
-            Text {
-                anchors.fill: parent
-                text: RecordingFormat.elapsed(root.heldElapsedMs)
-                color: Appearance.colors.colOnLayer0
-                horizontalAlignment: Text.AlignRight
-                verticalAlignment: Text.AlignVCenter
-                renderType: Text.NativeRendering
-
-                font {
-                    family: Fonts.numeric
-                    pixelSize: 18
-                    weight: Font.DemiBold
-                }
-            }
-
-            Item {
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                width: 7
-                height: 7
-                opacity: root.recording ? 1 : 0
-                visible: opacity > 0.01
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: width / 2
-                    color: Appearance.colors.colError
-
-                    SequentialAnimation on opacity {
-                        running: root.recording
-                        loops: Animation.Infinite
-
-                        NumberAnimation {
-                            to: 0.35
-                            duration: 720
-                            easing.type: Easing.InOutSine
-                        }
-
-                        NumberAnimation {
-                            to: 1
-                            duration: 720
-                            easing.type: Easing.InOutSine
-                        }
-                    }
-                }
-
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: Appearance.animation.expressiveFastEffects.duration
-                        easing.type: Appearance.animation.expressiveFastEffects.type
-                        easing.bezierCurve: Appearance.animation.expressiveFastEffects.bezierCurve
-                    }
-                }
-            }
-        }
-
-        transform: Translate {
-            y: (1 - root.normalizedRecordingInfoProgress) * -4
-        }
-    }
-
-    Item {
-        id: processingContent
-
-        anchors.fill: parent
-        opacity: root.normalizedProcessingContentProgress
-        visible: !root.vertical
-        scale: 0.96 + 0.04 * root.normalizedProcessingContentProgress
-
-        Item {
-            id: processingIndicator
-
-            anchors.right: parent.right
-            anchors.rightMargin: 8
-            anchors.verticalCenter: parent.verticalCenter
-            width: 48
-            height: 48
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: 36
-                height: 36
-                radius: width / 2
-                color: Appearance.colors.colErrorContainer
-                opacity: 0.38
-            }
-
-            MaterialSymbol {
-                anchors.centerIn: parent
-                text: "hourglass_top"
-                iconSize: 20
-                fill: 1
-                color: Appearance.colors.colOnErrorContainer
-
-                SequentialAnimation on opacity {
-                    running: root.finalizing && root.normalizedProcessingContentProgress > 0.01
-                    loops: Animation.Infinite
-
-                    NumberAnimation {
-                        to: 0.25
-                        duration: 560
-                        easing.type: Easing.InOutSine
-                    }
-
-                    NumberAnimation {
-                        to: 0.6
-                        duration: 560
-                        easing.type: Easing.InOutSine
-                    }
-                }
-            }
-        }
-
-        Item {
-            anchors.left: parent.left
-            anchors.leftMargin: 78
-            anchors.right: processingIndicator.left
-            anchors.rightMargin: 4
-            anchors.verticalCenter: parent.verticalCenter
-            height: 32
-
-            Text {
-                anchors.fill: parent
-                text: qsTr("Processing")
-                color: Appearance.colors.colOnLayer0
-                horizontalAlignment: Text.AlignRight
-                verticalAlignment: Text.AlignVCenter
-                renderType: Text.NativeRendering
-
-                font {
-                    family: Fonts.ui
-                    pixelSize: 14
-                    weight: Font.DemiBold
-                }
-            }
-        }
-
-        transform: Translate {
-            y: (1 - root.normalizedProcessingContentProgress) * 4
-        }
-    }
-
-    Column {
-        id: verticalRecordingContent
-
+    Grid {
         anchors.centerIn: parent
-        spacing: 8
-        visible: root.vertical
-        opacity: root.normalizedRecordingInfoProgress
-
-        SessionTypeIndicator {
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
+        columns: root.vertical ? 1 : 3
+        spacing: root.vertical ? 8 : 10
+        opacity: root.infoProgress
+        visible: opacity > 0.01
 
         Item {
             width: 42
-            height: 70
+            height: 42
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: 30
+                height: 30
+                radius: 15
+                color: root.typeContainerColor
+
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    text: root.recordingType === "gif" ? "gif_box" : "videocam"
+                    iconSize: 18
+                    fill: 1
+                    color: root.typeContentColor
+                }
+            }
+        }
+
+        Item {
+            width: root.vertical ? 42 : 86
+            height: root.vertical ? 72 : 42
 
             Text {
                 anchors.centerIn: parent
                 text: RecordingFormat.elapsed(root.heldElapsedMs)
                 color: Appearance.colors.colOnLayer0
-                rotation: root.edge === "left" ? -90 : 90
-                renderType: Text.NativeRendering
-
-                font {
-                    family: Fonts.numeric
-                    pixelSize: 18
-                    weight: Font.DemiBold
-                }
+                font.family: Fonts.numeric
+                font.pixelSize: 18
+                font.weight: Font.DemiBold
+                horizontalAlignment: Text.AlignHCenter
+                rotation: !root.vertical ? 0 : root.edge === "left" ? -90 : 90
             }
         }
 
         ToolButton {
-            id: verticalCloseButton
+            id: stopButton
 
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: 48
-            height: 48
-            enabled: root.recording && root.normalizedRecordingActionProgress > 0.55
+            width: 42
+            height: 42
+            padding: 0
+            opacity: root.actionProgress
+            enabled: root.recording && root.actionProgress > 0.55
             hoverEnabled: true
             Accessible.name: qsTr("Stop recording")
             Accessible.role: Accessible.Button
             onClicked: root.stopRequested()
+            background: Item {}
+            contentItem: Item {
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 16
+                    height: 16
+                    radius: 8
+                    color: Appearance.colors.colError
 
+                    SequentialAnimation on opacity {
+                        running: root.recording && root.actionProgress > 0.01
+                        loops: Animation.Infinite
+                        NumberAnimation {
+                            from: 0.35
+                            to: 1
+                            duration: 800
+                            easing.type: Easing.InOutSine
+                        }
+                        NumberAnimation {
+                            from: 1
+                            to: 0.35
+                            duration: 800
+                            easing.type: Easing.InOutSine
+                        }
+                    }
+                }
+            }
             StyledToolTip {
-                extraVisibleCondition: verticalCloseButton.hovered && verticalCloseButton.enabled
+                extraVisibleCondition: stopButton.hovered && stopButton.enabled
                 text: qsTr("Stop recording")
             }
-
-            background: Rectangle {
-                width: 36
-                height: 36
-                radius: width / 2
-                anchors.centerIn: parent
-                color: verticalCloseButton.down ? Appearance.colors.colErrorContainerActive : (
-                                                      verticalCloseButton.hovered
-                                                      ? Appearance.colors.colErrorContainerHover :
-                                                        Appearance.colors.colErrorContainer)
-            }
-
-            contentItem: MaterialSymbol {
-                text: "close"
-                iconSize: 20
-                fill: 1
-                color: Appearance.colors.colOnErrorContainer
-            }
         }
     }
 
-    Column {
-        id: verticalProcessingContent
-
+    Grid {
         anchors.centerIn: parent
-        spacing: 10
-        visible: root.vertical
-        opacity: root.normalizedProcessingContentProgress
+        columns: root.vertical ? 1 : 2
+        spacing: root.vertical ? 8 : 10
+        opacity: root.processingProgress
+        visible: opacity > 0.01
 
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: 36
-            height: 36
-            radius: width / 2
-            color: Appearance.colors.colErrorContainer
-            opacity: 0.38
+        Item {
+            width: root.vertical ? 42 : 30
+            height: 30
 
-            MaterialSymbol {
+            Rectangle {
                 anchors.centerIn: parent
-                text: "hourglass_top"
-                iconSize: 20
-                fill: 1
-                color: Appearance.colors.colOnErrorContainer
+                width: 30
+                height: 30
+                radius: 15
+                color: root.typeContainerColor
+
+                ProcessingSpiralIndicator {
+                    anchors.centerIn: parent
+                    running: root.finalizing && root.processingProgress > 0.01
+                    dotColor: root.typeContentColor
+                }
             }
         }
 
-        VerticalRecordingStatusLabel {
-            anchors.horizontalCenter: parent.horizontalCenter
-            label: qsTr("Processing")
-            edge: root.edge
-        }
-    }
+        Item {
+            width: root.vertical ? 42 : processingLabel.implicitWidth
+            height: root.vertical ? processingLabel.implicitWidth : 30
 
-    component SessionTypeIndicator: Row {
-        spacing: 7
-
-        MaterialSymbol {
-            anchors.verticalCenter: parent.verticalCenter
-            text: root.recordingType === "gif" ? "gif_box" : "videocam"
-            iconSize: 18
-            fill: 1
-            color: root.typeColor
-        }
-
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: root.recordingType === "gif" ? "GIF" : "REC"
-            color: Appearance.colors.colOnSurfaceVariant
-            renderType: Text.NativeRendering
-
-            font {
-                family: Fonts.numeric
-                pixelSize: 11
-                weight: Font.DemiBold
-                letterSpacing: 0.8
+            Text {
+                id: processingLabel
+                anchors.centerIn: parent
+                text: qsTr("Processing")
+                color: Appearance.colors.colOnLayer0
+                font.family: Fonts.ui
+                font.pixelSize: 15
+                font.weight: Font.DemiBold
+                rotation: !root.vertical ? 0 : root.edge === "left" ? -90 : 90
             }
         }
-    }
-
-    transform: Translate {
-        y: (1 - root.entryProgress) * -6
     }
 }

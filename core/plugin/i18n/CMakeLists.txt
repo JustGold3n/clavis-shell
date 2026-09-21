@@ -29,6 +29,7 @@ list(APPEND CLAVIS_TRANSLATION_SOURCES
     "${CLAVIS_SOURCE_ROOT}/core/plugin/keyboard/src/shortcut_recorder.cpp"
     "${CLAVIS_SOURCE_ROOT}/AppShell.qml"
     "${CLAVIS_SOURCE_ROOT}/shell.qml"
+    "${CLAVIS_SOURCE_ROOT}/tools/window-preview/Preview.qml"
 )
 
 # Qt 6.7+ otherwise scans every target, including tests and dependency headers.

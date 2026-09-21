@@ -92,6 +92,18 @@
       "aliases": []
     },
     {
+      "id": "general.dock",
+      "title": "Dock",
+      "context": "GeneralPage",
+      "icon": "dock_to_bottom",
+      "source": "DockPage.qml",
+      "path": [
+        "general",
+        "dock"
+      ],
+      "aliases": ["taskbar", "launcher"]
+    },
+    {
       "id": "general.sidebar",
       "title": "Sidebars",
       "context": "GeneralPage",

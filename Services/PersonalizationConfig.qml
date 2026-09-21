@@ -191,7 +191,12 @@ Singleton {
                                             }), ({
                                                      "value": "pill",
                                                      "label": qsTr("Pill")
-                                                 })]
+                                                 }),
+        {
+            value: "long",
+            label: qsTr("Long")
+        }
+    ]
     readonly property var edgePositions: [({
                                                "value": "top",
                                                "label": qsTr("Top"),
@@ -337,22 +342,20 @@ Singleton {
     property int cursorHideAfterInactiveMs: 0
     property string iconTheme: ""
     property string keystoneStyle: "bangs"
-    readonly property var keystoneKeyholeCardIds: ["weather", "quickSettings", "pomodoro"]
-    readonly property var defaultKeystoneKeyholeCards: root.keystoneKeyholeCardIds.slice()
-    readonly property var keystoneKeyholeCardOptions: [({
-                                                            "value": "weather",
-                                                            "label": qsTr("Weather"),
-                                                            "icon": "partly_cloudy_day"
-                                                        }), ({
-                                                                 "value": "quickSettings",
-                                                                 "label": qsTr("Quick Settings"),
-                                                                 "icon": "tune"
-                                                             }), ({
-                                                                      "value": "pomodoro",
-                                                                      "label": qsTr("Pomodoro"),
-                                                                      "icon": "timer"
-                                                                  })]
-    property var keystoneKeyholeCards: root.defaultKeystoneKeyholeCards.slice()
+    readonly property var keystoneKeyholeCardIds: ["weather", "pomodoro"]
+    readonly property var keystoneKeyholeCardOptions: [
+        {
+            "value": "weather",
+            "label": qsTr("Weather"),
+            "icon": "partly_cloudy_day"
+        },
+        {
+            "value": "pomodoro",
+            "label": qsTr("Pomodoro"),
+            "icon": "timer"
+        }
+    ]
+    property string keystoneKeyholeCard: "weather"
     property string barPosition: "top"
     readonly property var barComponentIds: ["workspaces", "information", "activeWindow", "media", "tray",
         "systemMonitor", "quickSettings"]
@@ -434,9 +437,122 @@ Singleton {
     property bool keystoneCapsLockOsd: true
     property bool keystoneNumLockOsd: true
     property bool keystoneHideDate: false
+    property bool keystoneLongShowSpectrum: true
+    property bool keystoneLongShowNames: true
+    property bool keystoneLongShowMonitorValues: true
+    property bool barShowMonitorValues: true
+    property bool keystoneLongShowValues: true
     property string keystoneHoverAction: "peak"
     property string keystoneLeftClickAction: "media"
     property string keystoneMiddleClickAction: "lyrics"
+    property int keystoneHoverOpenDelay: 150
+    property int keystoneHoverCloseDelay: 250
+    readonly property var keystoneLongItemIds: ["workspaces", "media", "systemMonitor", "network", "bluetooth",
+        "brightness", "volume", "microphone", "battery", "weather"]
+    readonly property var defaultKeystoneLongLeading: ["workspaces", "media", "systemMonitor"]
+    readonly property var defaultKeystoneLongTrailing: ["network", "bluetooth", "brightness", "volume",
+        "microphone", "battery"]
+    property var keystoneLongLeading: defaultKeystoneLongLeading.slice()
+    property var keystoneLongTrailing: defaultKeystoneLongTrailing.slice()
+    readonly property var keystoneLongItemOptions: [
+        {
+            value: "workspaces",
+            label: qsTr("Workspaces"),
+            icon: "view_week"
+        },
+        {
+            value: "media",
+            label: qsTr("Media"),
+            icon: "music_note"
+        },
+        {
+            value: "systemMonitor",
+            label: qsTr("System monitor"),
+            icon: "monitor_heart"
+        },
+        {
+            value: "weather",
+            label: qsTr("Weather"),
+            icon: "partly_cloudy_day"
+        },
+        {
+            value: "network",
+            label: qsTr("Network"),
+            icon: "wifi"
+        },
+        {
+            value: "bluetooth",
+            label: qsTr("Bluetooth"),
+            icon: "bluetooth"
+        },
+        {
+            value: "brightness",
+            label: qsTr("Brightness"),
+            icon: "brightness_medium"
+        },
+        {
+            value: "volume",
+            label: qsTr("Volume"),
+            icon: "volume_up"
+        },
+        {
+            value: "microphone",
+            label: qsTr("Microphone"),
+            icon: "mic"
+        },
+        {
+            value: "battery",
+            label: qsTr("Battery"),
+            icon: "battery_full"
+        }
+    ]
+
+    function setKeystoneHoverOpenDelay(value) {
+        setValue("keystoneHoverOpenDelay", normalizedBoundedInt(value, 150, 0, 500));
+    }
+
+    function setKeystoneHoverCloseDelay(value) {
+        setValue("keystoneHoverCloseDelay", normalizedBoundedInt(value, 250, 0, 600));
+    }
+
+    function normalizedKeystoneLongItems(raw, excluded) {
+        const result = [];
+        for (const value of Array.isArray(raw) ? raw : []) {
+            if (root.keystoneLongItemIds.indexOf(value) >= 0 && excluded.indexOf(value) < 0 && result.indexOf(value)
+                    < 0)
+                result.push(value);
+        }
+        return result;
+    }
+
+    function moveKeystoneLongItem(id, zone, index) {
+        if (root.keystoneLongItemIds.indexOf(id) < 0 || (zone !== "leading" && zone !== "trailing"))
+            return;
+        const leading = root.keystoneLongLeading.filter(value => value !== id);
+        const trailing = root.keystoneLongTrailing.filter(value => value !== id);
+        const target = zone === "leading" ? leading : trailing;
+        const position = Number(index);
+        target.splice(isFinite(position) ? Math.max(0, Math.min(target.length, Math.round(position))) :
+                                           target.length, 0, id);
+        root.keystoneLongLeading = leading;
+        root.keystoneLongTrailing = trailing;
+        root.save();
+    }
+
+    function removeKeystoneLongItem(id) {
+        root.keystoneLongLeading = root.keystoneLongLeading.filter(value => value !== id);
+        root.keystoneLongTrailing = root.keystoneLongTrailing.filter(value => value !== id);
+        root.save();
+    }
+
+    function toggleKeystoneLongItem(id, zone) {
+        const target = zone === "leading" ? root.keystoneLongLeading : root.keystoneLongTrailing;
+        if (target.indexOf(id) >= 0)
+            root.removeKeystoneLongItem(id);
+        else
+            root.moveKeystoneLongItem(id, zone, target.length);
+    }
+
     readonly property var keystoneActionOptions: [
         {
             value: "none",
@@ -1432,56 +1548,18 @@ Singleton {
         setValue("keystonePosition", normalizedEdgePosition(value));
     }
 
-    function normalizedKeystoneKeyholeCards(raw) {
-        const source = Array.isArray(raw) ? raw : root.defaultKeystoneKeyholeCards;
-        const result = [];
-        for (let index = 0; index < source.length; index += 1) {
-            const cardId = String(source[index] || "");
-            if (root.keystoneKeyholeCardIds.indexOf(cardId) === -1 || result.indexOf(cardId) !== -1)
-                continue;
-
-            result.push(cardId);
+    function normalizedKeystoneKeyholeCard(raw) {
+        // Migrate the old ordered selection, skipping the removed quick-settings card.
+        const candidates = Array.isArray(raw) ? raw : [raw];
+        for (const candidate of candidates) {
+            if (root.keystoneKeyholeCardIds.indexOf(candidate) !== -1)
+                return candidate;
         }
-        return result;
+        return "weather";
     }
 
-    function moveKeystoneKeyholeCard(cardId, targetIndex) {
-        const id = String(cardId || "");
-        if (root.keystoneKeyholeCardIds.indexOf(id) === -1)
-            return false;
-
-        const cards = root.normalizedKeystoneKeyholeCards(root.keystoneKeyholeCards).filter(value => {
-            return value !== id;
-        });
-        const numericIndex = Number(targetIndex);
-        const insertionIndex = isFinite(numericIndex) ? Math.max(0, Math.min(cards.length, Math.round(
-                                                                                 numericIndex))) :
-                                                        cards.length;
-        cards.splice(insertionIndex, 0, id);
-        root.keystoneKeyholeCards = cards;
-        root.save();
-        return true;
-    }
-
-    function removeKeystoneKeyholeCard(cardId) {
-        const id = String(cardId || "");
-        const cards = root.keystoneKeyholeCards.filter(value => {
-            return value !== id;
-        });
-        if (cards.length === root.keystoneKeyholeCards.length)
-            return false;
-
-        root.keystoneKeyholeCards = root.normalizedKeystoneKeyholeCards(cards);
-        root.save();
-        return true;
-    }
-
-    function toggleKeystoneKeyholeCard(cardId) {
-        const id = String(cardId || "");
-        if (root.keystoneKeyholeCards.indexOf(id) !== -1)
-            return root.removeKeystoneKeyholeCard(id);
-
-        return root.moveKeystoneKeyholeCard(id, root.keystoneKeyholeCards.length);
+    function setKeystoneKeyholeCard(value) {
+        setValue("keystoneKeyholeCard", root.normalizedKeystoneKeyholeCard(value));
     }
 
     function setKeystoneCapsLockOsd(value) {
@@ -1490,6 +1568,26 @@ Singleton {
 
     function setKeystoneNumLockOsd(value) {
         setValue("keystoneNumLockOsd", !!value);
+    }
+
+    function setKeystoneLongShowSpectrum(value) {
+        setValue("keystoneLongShowSpectrum", !!value);
+    }
+
+    function setKeystoneLongShowNames(value) {
+        setValue("keystoneLongShowNames", !!value);
+    }
+
+    function setKeystoneLongShowMonitorValues(value) {
+        setValue("keystoneLongShowMonitorValues", !!value);
+    }
+
+    function setBarShowMonitorValues(value) {
+        setValue("barShowMonitorValues", !!value);
+    }
+
+    function setKeystoneLongShowValues(value) {
+        setValue("keystoneLongShowValues", !!value);
     }
 
     function setKeystoneHideDate(value) {
@@ -1663,11 +1761,19 @@ Singleton {
                 "capsLockOsd": root.keystoneCapsLockOsd,
                 "numLockOsd": root.keystoneNumLockOsd,
                 "hideDate": root.keystoneHideDate,
+                "longShowSpectrum": root.keystoneLongShowSpectrum,
+                "longShowNames": root.keystoneLongShowNames,
+                "longShowMonitorValues": root.keystoneLongShowMonitorValues,
+                "longShowValues": root.keystoneLongShowValues,
                 "hoverAction": root.keystoneHoverAction,
+                "hoverOpenDelay": root.keystoneHoverOpenDelay,
+                "hoverCloseDelay": root.keystoneHoverCloseDelay,
+                "longLeading": root.keystoneLongLeading.slice(),
+                "longTrailing": root.keystoneLongTrailing.slice(),
                 "leftClickAction": root.keystoneLeftClickAction,
                 "middleClickAction": root.keystoneMiddleClickAction,
                 "keyhole": {
-                    "cards": root.keystoneKeyholeCards.slice()
+                    "card": root.keystoneKeyholeCard
                 },
                 "horizontalClock": {
                     "fontSize": root.horizontalClockFontSize,
@@ -1677,6 +1783,7 @@ Singleton {
             },
             "bar": {
                 "position": root.barPosition,
+                "showMonitorValues": root.barShowMonitorValues,
                 "barLeadingComponents": root.barLeadingComponents.slice(),
                 "barTrailingComponents": root.barTrailingComponents.slice(),
                 "quickSettingsComponents": root.quickSettingsComponents.slice()
@@ -1780,17 +1887,36 @@ Singleton {
         root.keystonePosition = normalizedEdgePosition(keystone.position);
         root.keystoneCapsLockOsd = typeof keystone.capsLockOsd === "boolean" ? keystone.capsLockOsd : true;
         root.keystoneNumLockOsd = typeof keystone.numLockOsd === "boolean" ? keystone.numLockOsd : true;
+        root.keystoneLongShowSpectrum = typeof keystone.longShowSpectrum === "boolean"
+                ? keystone.longShowSpectrum : true;
+        root.keystoneLongShowValues = typeof keystone.longShowValues === "boolean" ? keystone.longShowValues :
+                                                                                     true;
+        root.keystoneLongShowNames = typeof keystone.longShowNames === "boolean" ? keystone.longShowNames :
+                                                                                   true;
+        root.keystoneLongShowMonitorValues = typeof keystone.longShowMonitorValues === "boolean"
+                ? keystone.longShowMonitorValues : true;
         root.keystoneHideDate = typeof keystone.hideDate === "boolean" ? keystone.hideDate : false;
         root.keystoneHoverAction = normalizedOption(root.keystoneHoverActionOptions, keystone.hoverAction,
                                                     "peak");
+        root.keystoneHoverOpenDelay = normalizedBoundedInt(keystone.hoverOpenDelay, 150, 0, 500);
+        root.keystoneHoverCloseDelay = normalizedBoundedInt(keystone.hoverCloseDelay, 250, 0, 600);
+        root.keystoneLongLeading = root.normalizedKeystoneLongItems(Array.isArray(keystone.longLeading)
+                                                                    ? keystone.longLeading :
+                                                                      root.defaultKeystoneLongLeading, []);
+        root.keystoneLongTrailing = root.normalizedKeystoneLongItems(Array.isArray(keystone.longTrailing)
+                                                                     ? keystone.longTrailing :
+                                                                       root.defaultKeystoneLongTrailing,
+                                                                     root.keystoneLongLeading);
         root.keystoneLeftClickAction = normalizedOption(root.keystoneActionOptions, keystone.leftClickAction,
                                                         "media");
         root.keystoneMiddleClickAction = normalizedOption(root.keystoneActionOptions,
                                                           keystone.middleClickAction, "lyrics");
-        root.keystoneKeyholeCards = root.normalizedKeystoneKeyholeCards(keyhole.cards);
+        root.keystoneKeyholeCard = root.normalizedKeystoneKeyholeCard(keyhole.card !== undefined
+                                                                      ? keyhole.card : keyhole.cards);
         root.horizontalClockFontSize = root.normalizedBoundedInt(horizontalClock.fontSize, 22, 16, 28);
         root.horizontalClockAxes = root.normalizedHorizontalClockAxes(horizontalClock.axes);
         root.horizontalClockDigits = root.normalizedHorizontalClockDigits(horizontalClock.digits);
+        root.barShowMonitorValues = typeof bar.showMonitorValues === "boolean" ? bar.showMonitorValues : true;
         root.barPosition = normalizedEdgePosition(bar.position);
         const hasBarLayout = Array.isArray(bar.barLeadingComponents) || Array.isArray(
                   bar.barTrailingComponents);
