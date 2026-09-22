@@ -780,7 +780,8 @@ PanelWindow {
                         height: root.horizontal ? icons.height : retiring ? retirementSpan : slot.span
                         iconSize: retiring ? retirementSize : slot.size
                         restingIconSize: root.baseLayout.size
-                        contextActive: root.contextMenu && root.popupKey === key
+                        contextActive: root.popupKey === key && (root.contextMenu || kind === "folder"
+                                                                 && filePopup.list)
                         folderExpanded: kind === "folder" && root.popupKey === key && !root.contextMenu &&
                                         !filePopup.list && !filePopup.closing
 

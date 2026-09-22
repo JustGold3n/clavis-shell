@@ -152,10 +152,15 @@ Item {
             border.color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.2)
             MaterialSymbol {
                 anchors.centerIn: parent
+                anchors.alignWhenCentered: false
                 text: root.edge === "bottom" ? "expand_more" : root.edge === "left" ? "chevron_left" :
                                                                                       "chevron_right"
 
-                iconSize: parent.width * 0.5
+                // Magnify one glyph continuously instead of changing hinted
+                // pixel sizes and optical font variants during pointer motion.
+                iconSize: 32
+                scale: parent.width / (iconSize * 2)
+                renderType: Text.QtRendering
                 color: Appearance.colors.colOnSurface
             }
         }

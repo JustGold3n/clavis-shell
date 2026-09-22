@@ -455,19 +455,21 @@ Item {
                 model: root.choices
                 delegate: Column {
                     required property var modelData
+                    required property int index
                     width: menuColumn.width
                     Rectangle {
-                        visible: !!modelData.heading
-                        width: parent.width - 16
-                        x: 8
+                        visible: !!modelData.heading && parent.index > 0 || modelData.action === "open"
+                                 && root.entry && root.entry.kind === "folder"
+                        width: parent.width - 44
+                        x: 32
                         height: 1
                         color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.16)
                     }
                     Text {
                         visible: !!parent.modelData.heading
                         text: parent.modelData.heading || ""
-                        width: parent.width - 16
-                        x: 8
+                        width: parent.width - 44
+                        x: 32
                         topPadding: 8
                         bottomPadding: 6
                         wrapMode: Text.Wrap
@@ -476,6 +478,7 @@ Item {
                         color: Appearance.colors.colOnSurfaceVariant
                     }
                     StyledMenuItem {
+                        id: choiceItem
                         readonly property var choice: parent.modelData
                         visible: !choice.heading
                         width: parent.width
@@ -483,6 +486,35 @@ Item {
                         text: choice.label || ""
                         checkable: !!choice.option
                         checked: !!root.entry && !!choice.option && root.entry[choice.option] === choice.value
+                        leftPadding: 32
+                        indicator: MaterialSymbol {
+                            x: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "check"
+                            iconSize: 18
+                            opacity: choiceItem.checked ? 1 : 0
+                            color: choiceItem.foreground
+                        }
+                        contentItem: Text {
+                            text: choiceItem.text
+                            textFormat: Text.PlainText
+                            font.family: Fonts.ui
+                            font.pixelSize: Typography.labelLarge.pixelSize
+                            font.weight: Typography.labelLarge.weight
+                            color: choiceItem.foreground
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                        }
+                        background: Rectangle {
+                            radius: 6
+                            color: Appearance.applyAlpha(choiceItem.foreground, choiceItem.down
+                                                         ? Appearance.interaction.pressedStateLayerOpacity :
+                                                           choiceItem.highlighted || choiceItem.activeFocus
+                                                           ? Appearance.interaction.focusStateLayerOpacity :
+                                                             choiceItem.hovered
+                                                             ? Appearance.interaction.hoverStateLayerOpacity :
+                                                               0)
+                        }
                         destructive: !!choice.destructive
                         enabled: choice.action !== "confirm" && choice.action !== "empty"
                                  || DesktopFiles.trashAvailable && DesktopFiles.trashCount > 0 &&
