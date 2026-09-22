@@ -63,13 +63,29 @@ PanelWindow {
                                   || dragKey !== "" || popupKey !== "" || dragGhost.active || handoffKey
                                   !== ""
 
-    readonly property bool interacting: bandHover.hovered || edgeHover.hovered || popup.hovered
+    readonly property bool interacting: root.pointerOverDock || edgeHover.hovered || popup.hovered
                                         || filePopup.hovered && filePopup.visible || dropArea.containsDrag
                                         || dragKey !== "" || DockService.externalDragActive
                                         || dragGhost.active || handoffKey !== ""
     property bool revealed: false
     property real pointerAxis: 0
     property bool magnificationActive: false
+    // Track the pointer above the popup/delegate hierarchy. Disabling a closing
+    // fan must not look like leaving the Dock when the pointer hasn't moved.
+    readonly property bool pointerOverDock: shown && surfaceHover.hovered && surfaceHover.point.position.x
+                                            >= band.x && surfaceHover.point.position.x < band.x + band.width
+                                            && surfaceHover.point.position.y >= band.y
+                                            && surfaceHover.point.position.y < band.y + band.height
+    onPointerOverDockChanged: {
+        if (pointerOverDock) {
+            pointerAxis = horizontal ? surfaceHover.point.scenePosition.x :
+                                       surfaceHover.point.scenePosition.y;
+            magnificationExit.stop();
+            magnificationActive = true;
+        } else {
+            magnificationExit.restart();
+        }
+    }
     property string hoverKey: ""
     property string pendingPopupKey: ""
     property string popupKey: ""
@@ -262,10 +278,11 @@ PanelWindow {
     function dismissPopup() {
         if (DockService.fileDragActive)
             return;
-        if (filePopup.visible && filePopup.fan && filePopup.progress > 0) {
-            filePopup.closeFan();
+        if (filePopup.visible && filePopup.closePopup())
             return;
-        }
+        finishDismissPopup();
+    }
+    function finishDismissPopup() {
         popupKey = "";
         contextMenu = false;
         pendingPopupKey = "";
@@ -500,7 +517,7 @@ PanelWindow {
         id: magnificationExit
         interval: 80
         onTriggered: {
-            if (!bandHover.hovered)
+            if (!root.pointerOverDock)
                 root.magnificationActive = false;
         }
     }
@@ -526,8 +543,8 @@ PanelWindow {
         id: hoverTimer
         interval: 450
         onTriggered: {
-            if (root.pendingPopupKey && root.pendingPopupKey === root.hoverKey && bandHover.hovered && !root.dragKey &&
-                    !dragGhost.active)
+            if (root.pendingPopupKey && root.pendingPopupKey === root.hoverKey && root.pointerOverDock &&
+                    !root.dragKey && !dragGhost.active)
                 root.showPopup(root.pendingPopupKey, false);
         }
     }
@@ -556,6 +573,14 @@ PanelWindow {
             root.cancelDrag();
             root.dismissPopup();
             event.accepted = true;
+        }
+
+        HoverHandler {
+            id: surfaceHover
+            onPointChanged: {
+                if (root.pointerOverDock)
+                    root.pointerAxis = root.horizontal ? point.scenePosition.x : point.scenePosition.y;
+            }
         }
 
         // Click-opened file stacks stay open while browsing. Consume the
@@ -649,22 +674,6 @@ PanelWindow {
             Behavior on opacity {
                 NumberAnimation {
                     duration: 180
-                }
-            }
-
-            HoverHandler {
-                id: bandHover
-                onHoveredChanged: {
-                    if (hovered) {
-                        magnificationExit.stop();
-                        root.magnificationActive = true;
-                    } else {
-                        magnificationExit.restart();
-                    }
-                }
-                onPointChanged: {
-                    if (hovered)
-                        root.pointerAxis = root.horizontal ? point.scenePosition.x : point.scenePosition.y;
                 }
             }
 
@@ -869,7 +878,7 @@ PanelWindow {
                             if (kind === "folder") {
                                 if (root.popupKey === key && !root.contextMenu) {
                                     if (filePopup.closing)
-                                        filePopup.reopenFan();
+                                        filePopup.reopenPopup();
                                     else
                                         root.dismissPopup();
                                 } else
@@ -1061,7 +1070,7 @@ PanelWindow {
             sourceCenter: Qt.point(root.popupSourceCenter.x - x, root.popupSourceCenter.y - y)
             iconSize: root.popupIconSize
             maximumFanOutset: labelsLeft ? root.width - root.popupAxis - 16 : root.popupAxis - 16
-            readonly property real iconInset: fan ? fanIconInset : 68
+            readonly property real iconInset: fan ? fanIconInset : contextMenu ? 68 : width / 2
             maximumWidth: root.horizontal ? root.width - 32 : (root.edge === "left" ? root.width
                                                                                       - root.popupCross :
                                                                                       root.popupCross) - 24
@@ -1073,7 +1082,7 @@ PanelWindow {
             y: root.horizontal ? root.popupCross - height - 6 : Math.max(16, Math.min(root.height - height - 16,
                                                                                       root.popupAxis - height
                                                                                       / 2))
-            onDismissed: root.dismissPopup()
+            onDismissed: root.finishDismissPopup()
         }
 
         DockDragVisual {

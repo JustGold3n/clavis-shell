@@ -9,6 +9,12 @@ import qs.Widgets.common
 StyledMenu {
     id: root
     required property url folderUrl
+    property string edge: "bottom"
+    property real anchorOffset: width / 2
+    readonly property real tailSize: ownerMenu ? 0 : 10
+    leftPadding: 8 + (edge === "left" ? tailSize : 0)
+    rightPadding: 8 + (edge === "right" ? tailSize : 0)
+    bottomPadding: 8 + (edge === "bottom" ? tailSize : 0)
     property string sort: "name"
     property DockFolderModel sharedModel: null
     readonly property DockFolderModel contents: sharedModel || directory.item
@@ -19,19 +25,18 @@ StyledMenu {
     signal surfacesChanged
     signal fileActivated(var info)
     width: 360
-    height: Math.min(maximumHeight, 16 + ((root.contents ? Math.max(1, root.contents.count) : 1) + 1) * 34
-                     + 12)
+    height: Math.min(maximumHeight, 16 + ((root.contents ? Math.max(1, root.contents.count) : 1) + 1) * 34 + 12
+                     + (edge === "bottom" ? tailSize : 0))
 
     cascade: true
-    background: Rectangle {
+    background: DockBubbleSurface {
+        edge: root.edge
+        tailSize: root.tailSize
+        anchorOffset: root.anchorOffset
         readonly property bool menuHovered: menuHover.hovered
         HoverHandler {
             id: menuHover
         }
-        radius: 12
-        color: BlurService.backgroundColor(Appearance.colors.colSurfaceContainer)
-        border.width: 1
-        border.color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.18)
     }
     function surfaces() {
         let items = visible ? [background] : [];
@@ -46,6 +51,9 @@ StyledMenu {
             surfacesChanged();
     }
     property bool loadedOnce: false
+    property bool closing: false
+    onAboutToShow: closing = false
+    onAboutToHide: closing = true
     onVisibleChanged: {
         if (visible)
             loadedOnce = true;
@@ -64,11 +72,11 @@ StyledMenu {
     }
     property var generatedItems: []
     function requestRebuild() {
-        if (visible && !DockService.fileDragActive)
+        if (visible && !closing && !DockService.fileDragActive)
             Qt.callLater(root.rebuild);
     }
     function rebuild() {
-        if (!visible || !root.contents || root.contents.loading)
+        if (!visible || closing || !root.contents || root.contents.loading)
             return;
         const old = generatedItems;
         generatedItems = [];
