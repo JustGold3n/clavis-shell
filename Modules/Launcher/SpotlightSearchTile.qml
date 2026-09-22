@@ -66,6 +66,11 @@ Item {
                 visible: !artwork.visible
                 text: root.result.symbol || "apps"
                 iconSize: root.horizontal ? 32 : 24
+                transform: Scale {
+                    origin.x: (root.horizontal ? 32 : 24) / 2
+                    xScale: root.result.appObject?.id === ApplicationService.smallSpaceApplication.id ? 0.5 :
+                                                                                                        1
+                }
                 color: root.selected ? root.style.selectedContentColor : Appearance.colors.colOnSurfaceVariant
             }
         }

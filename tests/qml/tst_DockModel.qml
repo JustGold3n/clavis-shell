@@ -332,6 +332,32 @@ TestCase {
                 "org.clavis.Settings,extra,fourth");
     }
 
+    function test_smallSpacerDropAndConfigRoundTrip() {
+        const payload = DockModel.dropPayload('{"schemaVersion":1,"kind":"small-spacer"}');
+        compare(payload.kind, "small-spacer");
+        const decoded = DockModel.decodeConfig(encodedConfig([
+                                                                 {
+                                                                     kind: "app",
+                                                                     desktopId: "example"
+                                                                 },
+                                                                 {
+                                                                     kind: payload.kind,
+                                                                     id: "small"
+                                                                 },
+                                                                 {
+                                                                     kind: "spacer",
+                                                                     id: "regular"
+                                                                 }
+                                                             ], {}));
+        verify(decoded !== null);
+        compare(decoded.pinned[1].kind, "small-spacer");
+        compare(DockModel.pinnedKey(decoded.pinned[1]), "spacer:small");
+        compare(DockModel.decodeConfig(JSON.stringify(decoded)), decoded);
+        const moved = DockModel.movePinned(decoded.pinned, "spacer:small", 0);
+        compare(moved[0].kind, "small-spacer");
+        compare(moved[2].kind, "spacer");
+    }
+
     function test_dropProtocolAndInstalledPathBoundaries() {
         compare(DockModel.dropPayload(
                     '{"schemaVersion":1,"kind":"app","desktopId":"org.example.Editor.desktop"}').desktopId,

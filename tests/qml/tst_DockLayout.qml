@@ -73,7 +73,7 @@ TestCase {
         const short = DockLayout.folderFan("bottom", 5, 1000, 1600, true, 84);
         const long = DockLayout.folderFan("bottom", 11, 1000, 1600, true, 84);
         compare(short.count, 5);
-        compare(long.count, 11);
+        compare(long.count, 8);
         const first = fanCenter(long.slots[0], long, true);
         const last = fanCenter(long.slots[long.count - 1], long, true);
         const shortFirst = fanCenter(short.slots[0], short, true);
@@ -89,6 +89,30 @@ TestCase {
             fuzzyCompare(Math.atan2(b.x - a.x, a.y - b.y) * 180 / Math.PI, (before.rotation + after.rotation)
                          / 2, 0.00001);
         }
+    }
+
+    function test_fanLimitsExpandedExtent() {
+        for (const size of [64, 84, 160]) {
+            const layout = DockLayout.folderFan("bottom", 200, 1600, 1400, true, size);
+            verify(layout.count <= 8);
+            verify(layout.height <= 1400 * 0.75);
+            verify(layout.count > 0);
+        }
+    }
+
+    function test_smallSpacerUsesHalfAnIconSlot() {
+        const kinds = ["app", "spacer", "small-spacer", "app"];
+        const resting = DockLayout.layout(kinds, 48, 800, 2, 16, NaN);
+        compare(resting.slots[1].span - resting.slots[2].span, 24);
+        const small = DockLayout.layout(kinds, 48, 800, 2, 16, resting.slots[2].center);
+        const regular = DockLayout.layout(kinds, 48, 800, 2, 16, resting.slots[1].center);
+        compare(small.slots[2].size, regular.slots[1].size);
+        compare(small.slots[2].span - 8, (regular.slots[1].span - 8) / 2);
+        compare(small.slots[2].center, resting.slots[2].center);
+        verifyOrdered(small);
+        const preview = DockLayout.previewOrder(kinds, 2, 0, "small-spacer");
+        compare(preview.kinds[0], "small-spacer");
+        compare(preview.kinds.length, kinds.length);
     }
 
     function test_fanKeepsItsFootAtTheFolderNearOutputEdge() {

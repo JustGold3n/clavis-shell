@@ -35,9 +35,20 @@ Singleton {
                                                  icon: "",
                                                  dragOnly: true
                                              })
+    readonly property var smallSpaceApplication: ({
+                                                      id: "org.clavis.SmallSpace",
+                                                      name: qsTr("Small Space"),
+                                                      genericName: qsTr("Drag to Dock to add a blank space"),
+                                                      keywords: ["space", "spacer", "blank", "dock", "small",
+                                                          "narrow"],
+                                                      symbol: "check_box_outline_blank",
+                                                      icon: "",
+                                                      dragOnly: true
+                                                  })
     // Internal shell entries belong in the launcher, not in default-app or
     // autostart pickers that require an installed desktop application.
-    readonly property var launcherApplications: applications.concat([settingsApplication, spaceApplication])
+    readonly property var launcherApplications: applications.concat([settingsApplication, spaceApplication,
+                                                                     smallSpaceApplication])
 
     function launchCommand(command, workingDirectory) {
         const argv = Array.from(command || []);
@@ -105,6 +116,8 @@ Singleton {
 
     function findById(identifier) {
         const value = String(identifier || "");
+        if (value === root.smallSpaceApplication.id)
+            return root.smallSpaceApplication;
         if (value === root.spaceApplication.id)
             return root.spaceApplication;
         if (value === root.settingsApplication.id)

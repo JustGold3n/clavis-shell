@@ -781,7 +781,7 @@ PanelWindow {
                                                                                                     windowCount
                                                                                                     === 0 ||
                                                                                                     !DockService.showThumbnails) :
-                                                                                                kind !== "spacer"
+                                                                                                !spacer
                                                                                                 && root.hoverKey
                                                                                                 === key
                                                                                                 && root.popupKey

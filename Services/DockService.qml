@@ -177,12 +177,14 @@ Singleton {
         for (const pinned of root._pinned.filter(entry => !DockModel.isFile(entry))) {
             const key = DockModel.pinnedKey(pinned);
             used.add(key);
-            if (pinned.kind === "spacer") {
+            if (DockModel.isSpacer(pinned)) {
                 rows.push({
                               key: key,
-                              kind: "spacer",
+                              kind: pinned.kind,
                               desktopId: "",
-                              name: qsTranslate("ApplicationService", "Space"),
+                              name: pinned.kind === "small-spacer" ? qsTranslate("ApplicationService",
+                                                                                 "Small Space") : qsTranslate(
+                                                                         "ApplicationService", "Space"),
                               icon: "",
                               symbol: "",
                               pinned: true,
@@ -380,12 +382,13 @@ Singleton {
         const dropped = root.dropEntries(mimeText, urls);
         if (!root.ready || !dropped.length)
             return false;
-        const incoming = dropped.map(entry => entry.kind === "spacer" ? {
-                                                                            kind: "spacer",
-                                                                            id: Date.now().toString(36) + "_"
-                                                                                + Math.random().toString(
-                                                                                    36).slice(2, 10)
-                                                                        } : entry);
+        const incoming = dropped.map(entry => DockModel.isSpacer(entry) ? {
+                                                                              kind: entry.kind,
+                                                                              id: Date.now().toString(36)
+                                                                                  + "_" + Math.random(
+                                                                                      ).toString(36).slice(2,
+                                                                                                           10)
+                                                                          } : entry);
         const keys = new Set(incoming.map(entry => DockModel.pinnedKey(entry)));
         const gap = DockModel.insertionIndex(index, root._pinned.length);
         let position = 0;

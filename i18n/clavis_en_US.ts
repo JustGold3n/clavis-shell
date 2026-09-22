@@ -13866,6 +13866,12 @@ Windows: </translation>
         <source>Drag to Dock to add a blank space</source>
         <translation>Drag to Dock to add a blank space</translation>
     </message>
+    <message>
+        <location filename="../Services/ApplicationService.qml" line="40"/>
+        <location filename="../Services/DockService.qml" line="185"/>
+        <source>Small Space</source>
+        <translation>Small Space</translation>
+    </message>
 </context>
 <context>
     <name>DockFilePopup</name>

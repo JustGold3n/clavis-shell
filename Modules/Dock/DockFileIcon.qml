@@ -10,6 +10,7 @@ Item {
     FileThemeIcon {
         anchors.fill: parent
         active: root.visible
+        rasterSize: 192
         themeIcon: root.info.icon || ""
         mimeType: root.info.mimeType || ""
         directory: !!root.info.isDirectory

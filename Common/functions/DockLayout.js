@@ -19,7 +19,8 @@ function layout(kinds, preferredSize, available, magnification, sectionSpacing, 
     const gap = 8;
     const padding = 12;
     const count = kinds.length;
-    const apps = count;
+    const weights = kinds.map(kind => kind === "small-spacer" ? 0.5 : 1);
+    const apps = weights.reduce((sum, weight) => sum + weight, 0);
     const maximum = Math.max(1, Math.min(2, magnification));
     const boundaries = (Array.isArray(sectionBoundary) ? sectionBoundary : [sectionBoundary])
         .filter((v, i, list) => v > 0 && v < count && list.indexOf(v) === i);
@@ -40,11 +41,11 @@ function layout(kinds, preferredSize, available, magnification, sectionSpacing, 
             baseCursor += sectionGap;
             cursor += sectionGap;
         }
-        const baseSpan = size + gap;
+        const baseSpan = size * weights[index] + gap;
         const center = baseCursor + baseSpan / 2;
         const distance = (pointer - center) / (size + gap);
         const scale = !isFinite(pointer) ? 1 : 1 + (maximum - 1) * Math.exp(-distance * distance / 2);
-        const span = size * scale + gap;
+        const span = size * weights[index] * scale + gap;
         slots.push({ center: center, start: cursor, span: span, size: size * scale });
         baseCursor += baseSpan;
         cursor += span;
@@ -142,7 +143,7 @@ function bottomFolderFan(count, availableWidth, availableHeight, requestedIconSi
     const step = iconSize + Math.max(12, iconSize * 0.16);
     const preferredWidth = iconSize + 18 + Math.max(260, Math.min(440, iconSize * 4.5));
     const geometry = {iconSize: iconSize, step: step, tileHeight: iconSize + 8, slots: []};
-    let shown = Math.max(0, Math.min(count, Math.floor((availableHeight - iconSize - 8 - padding * 2) / step)));
+    let shown = Math.max(0, Math.min(count, 8, Math.floor((availableHeight - iconSize - 8 - padding * 2) / step)));
     let bounds;
     do {
         geometry.count = shown;
@@ -194,10 +195,10 @@ function folderFan(edge, count, maximumWidth, maximumHeight, labelsLeft, request
     const iconSize = Math.max(64, Math.round(requestedIconSize || 64));
     let geometry;
     if (edge === "bottom") {
-        geometry = bottomFolderFan(count, availableWidth, availableHeight, iconSize, maximumOutset);
+        geometry = bottomFolderFan(count, availableWidth, Math.min(availableHeight, Math.max(iconSize + 24, availableHeight * 0.75)), iconSize, maximumOutset);
     } else {
         const step = iconSize + 56;
-        const shown = Math.max(0, Math.min(count, 10, Math.floor((availableWidth - 48) / step)));
+        const shown = Math.max(0, Math.min(count, 8, Math.floor((availableWidth - 48) / step)));
         geometry = {
             width: Math.min(availableWidth, Math.max(220, shown * step + 48)),
             height: Math.min(availableHeight, iconSize * 2 + 132),

@@ -24,6 +24,7 @@ Item {
     required property string edge
     required property real iconSize
     required property real restingIconSize
+    readonly property bool spacer: kind === "spacer" || kind === "small-spacer"
     property bool dragged: false
     property bool contextActive: false
     property bool folderExpanded: false
@@ -117,7 +118,7 @@ Item {
         layer.effect: MultiEffect {
             brightness: -artwork.pressShade
         }
-        opacity: root.available || root.windowCount > 0 || root.kind === "spacer" ? 1 : 0.45
+        opacity: root.available || root.windowCount > 0 || root.spacer ? 1 : 0.45
 
         ThemeIcon {
             anchors.fill: parent
@@ -176,18 +177,6 @@ Item {
     }
 
     Rectangle {
-        visible: root.kind === "spacer" && (pointer.containsMouse || root.contextActive
-                                            || DockService.externalDragActive)
-        x: artwork.x
-        y: artwork.y
-        width: artwork.width
-        height: artwork.height
-        radius: width * 0.2
-        color: "transparent"
-        border.width: 1
-        border.color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.25)
-    }
-    Rectangle {
         visible: root.kind === "app" && root.windowCount > 0 && DockService.showIndicators
         // Scale with the resting icons, so hover magnification does not pulse the dot.
         width: Math.round(Math.max(5, Math.min(8, root.restingIconSize / 8)))
@@ -202,9 +191,9 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: root.spacer ? Qt.ArrowCursor : Qt.PointingHandCursor
         Accessible.role: Accessible.Button
-        Accessible.name: root.kind === "spacer" ? qsTranslate("ApplicationService", "Space") : root.name
+        Accessible.name: root.name
         Accessible.onPressAction: root.activated(root.entryKey)
         onEntered: root.hovered(root.entryKey)
         onExited: root.hoverLeft(root.entryKey)

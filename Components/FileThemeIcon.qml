@@ -15,6 +15,8 @@ Item {
     property bool directory: false
     property string fallbackSymbol: directory ? "folder" : "draft"
     property real iconSize: 40
+    // Animated consumers can keep the decoded image stable while scaling it.
+    property real rasterSize: 0
     readonly property int themeRevision: ThemeService.iconThemeRevision
     readonly property var candidates: {
         if (directory)
@@ -84,8 +86,9 @@ Item {
         asynchronous: true
         retainWhileLoading: false
         fillMode: Image.PreserveAspectFit
-        sourceSize: Qt.size(Math.ceil(width * Screen.devicePixelRatio), Math.ceil(height
-                                                                                  * Screen.devicePixelRatio))
+        sourceSize: Qt.size(Math.ceil((root.rasterSize || width) * Screen.devicePixelRatio), Math.ceil((root.rasterSize
+                                                                                                        || height)
+                                                                                                       * Screen.devicePixelRatio))
         visible: status === Image.Ready
         onStatusChanged: {
             if (status !== Image.Error)

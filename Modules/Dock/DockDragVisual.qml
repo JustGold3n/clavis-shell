@@ -125,8 +125,10 @@ Item {
         color: Appearance.colors.colPrimary
     }
     Rectangle {
-        anchors.fill: parent
-        visible: !!root.entry && root.entry.kind === "spacer"
+        anchors.centerIn: parent
+        width: parent.width * (root.entry && root.entry.kind === "small-spacer" ? 0.5 : 1)
+        height: parent.height
+        visible: !!root.entry && (root.entry.kind === "spacer" || root.entry.kind === "small-spacer")
         radius: width * 0.2
         color: "transparent"
         border.width: 1
