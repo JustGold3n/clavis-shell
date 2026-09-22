@@ -246,12 +246,10 @@ Item {
         visible: !root.fan && !root.list && (root.contextMenu || root.progress > 0)
         // Compositor blur has no opacity. Collapse paint, content and its blur
         // outline together, rather than fading away over a still-blurred card.
-        transform: Scale {
-            origin.x: root.edge === "left" ? 0 : root.edge === "right" ? card.width : card.width / 2
-            origin.y: root.edge === "bottom" ? card.height : card.height / 2
-            xScale: root.contextMenu ? 1 : root.progress
-            yScale: xScale
-        }
+        // TransformWatcher observes Item.scaleChanged, not a separate Scale
+        // object's xScale/yScale. Keep blur-region updates on the same frames.
+        scale: root.contextMenu ? 1 : root.progress
+        transformOrigin: root.edge === "left" ? Item.Left : root.edge === "right" ? Item.Right : Item.Bottom
         DockBubbleSurface {
             id: bubble
             anchors.fill: parent
