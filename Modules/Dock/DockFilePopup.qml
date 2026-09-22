@@ -244,11 +244,12 @@ Item {
         id: card
         anchors.fill: parent
         visible: !root.fan && !root.list && (root.contextMenu || root.progress > 0)
-        opacity: root.contextMenu ? 1 : root.progress
+        // Compositor blur has no opacity. Collapse paint, content and its blur
+        // outline together, rather than fading away over a still-blurred card.
         transform: Scale {
             origin.x: root.edge === "left" ? 0 : root.edge === "right" ? card.width : card.width / 2
             origin.y: root.edge === "bottom" ? card.height : card.height / 2
-            xScale: root.contextMenu ? 1 : 0.85 + root.progress * 0.15
+            xScale: root.contextMenu ? 1 : root.progress
             yScale: xScale
         }
         DockBubbleSurface {

@@ -78,7 +78,11 @@ Singleton {
         const value = String(url || "");
         if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value))
             return false;
-        return root.launchCommand(["xdg-open", value]);
+        // GIO honors the default desktop entry's Terminal=true and opens a
+        // terminal through the system launcher (e.g. for Yazi). xdg-open's
+        // generic backend executes these file handlers without a terminal.
+        return root.launchCommand(/^(file|trash):/i.test(value) ? ["gio", "open", value] : ["xdg-open",
+                                                                                            value]);
     }
 
     function isVisibleApplication(application) {

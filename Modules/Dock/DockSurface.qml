@@ -95,7 +95,7 @@ PanelWindow {
     property point popupSourceCenter: Qt.point(width / 2, height)
     property real popupIconSize: baseLayout.size
     readonly property var folderButtonItems: {
-        if (!filePopupActive || contextMenu)
+        if (!filePopupActive || contextMenu || filePopup.list)
             return [];
         for (let i = 0; i < iconItems.count; ++i) {
             const item = iconItems.itemAt(i);
@@ -782,7 +782,7 @@ PanelWindow {
                         restingIconSize: root.baseLayout.size
                         contextActive: root.contextMenu && root.popupKey === key
                         folderExpanded: kind === "folder" && root.popupKey === key && !root.contextMenu &&
-                                        !filePopup.closing
+                                        !filePopup.list && !filePopup.closing
 
                         showTooltip: !root.contextMenu && !WindowPreviewService.suspended && (kind === "app"
                                                                                               ? root.popupKey
@@ -1070,7 +1070,7 @@ PanelWindow {
             sourceCenter: Qt.point(root.popupSourceCenter.x - x, root.popupSourceCenter.y - y)
             iconSize: root.popupIconSize
             maximumFanOutset: labelsLeft ? root.width - root.popupAxis - 16 : root.popupAxis - 16
-            readonly property real iconInset: fan ? fanIconInset : contextMenu ? 68 : width / 2
+            readonly property real iconInset: fan ? fanIconInset : contextMenu || list ? 68 : width / 2
             maximumWidth: root.horizontal ? root.width - 32 : (root.edge === "left" ? root.width
                                                                                       - root.popupCross :
                                                                                       root.popupCross) - 24
