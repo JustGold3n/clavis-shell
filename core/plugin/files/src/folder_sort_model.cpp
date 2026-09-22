@@ -30,8 +30,19 @@ void FolderSortModel::setSourceModel(QAbstractItemModel *model)
     QSortFilterProxyModel::setSourceModel(model);
     if (model) {
         const auto reset = [this] {
-            m_metadata.clear();
-            invalidate();
+            if (m_refreshQueued)
+                return;
+            m_refreshQueued = true;
+            // FolderListModel can replace its list through a removal/insertion
+            // batch. Rebuilding a proxy mapping inside that batch duplicates rows.
+            QMetaObject::invokeMethod(
+                this,
+                [this] {
+                    m_refreshQueued = false;
+                    m_metadata.clear();
+                    invalidate();
+                },
+                Qt::QueuedConnection);
         };
         connect(model, &QAbstractItemModel::modelReset, this, reset);
         connect(model, &QAbstractItemModel::dataChanged, this, reset);

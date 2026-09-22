@@ -9,6 +9,9 @@ Item {
     required property var targetWindow
     required property Item backgroundItem
     property var additionalBackgroundItems: []
+    // Already rasterized shapes, such as rotated Dock labels, can supply a
+    // native Region directly without creating one Item per compositor row.
+    property var additionalRegions: []
     property var subtractedBackgroundItems: []
     property var postSubtractionBackgroundItems: []
     // Clip restored glass to the currently visible surface, not its final layout.
@@ -130,6 +133,8 @@ Item {
         // Region children are evaluated in order. Keep the operation chain
         // explicit: (base + additional) - subtraction + post-subtraction.
         const combinedRegions = regions.slice();
+        for (const region of root.additionalRegions)
+            combinedRegions.push(region);
         for (let index = 0; index < subtractionRegions.length; ++index)
             combinedRegions.push(subtractionRegions[index]);
         for (let index = 0; index < postSubtractionRegions.length; ++index)
@@ -169,6 +174,7 @@ Item {
 
     onBackgroundItemChanged: rebuildRegions()
     onAdditionalBackgroundItemsChanged: rebuildRegions()
+    onAdditionalRegionsChanged: rebuildRegions()
     onSubtractedBackgroundItemsChanged: rebuildRegions()
     onPostSubtractionBackgroundItemsChanged: rebuildRegions()
     onPostSubtractionClipItemChanged: publish()
@@ -240,6 +246,7 @@ Item {
 
     Region {
         id: combinedRegion
+        onChanged: root.publish()
     }
 
     Region {

@@ -3,6 +3,7 @@
 #include "folder_sort_model.h"
 #include <QFile>
 #include <QFileInfo>
+#include <QQmlComponent>
 #include <QSignalSpy>
 #include <QStandardItemModel>
 #include <QTemporaryDir>
@@ -82,6 +83,43 @@ class DesktopFilesTest : public QObject {
         QVERIFY(QFileInfo::exists(target.fileName()));
         QVERIFY(!files.canOpenWith("org.clavis.Settings"));
         QVERIFY(!files.openWith("org.clavis.Settings", {QUrl::fromLocalFile(target.fileName())}));
+    }
+    void liveDirectoryRefreshKeepsOneRowPerFile()
+    {
+        QTemporaryDir dir;
+        QFile first(dir.filePath("first.txt"));
+        QVERIFY(first.open(QIODevice::WriteOnly));
+        first.close();
+        QQmlEngine engine;
+        QQmlComponent component(&engine);
+        component.setData("import Qt.labs.folderlistmodel\nFolderListModel { "
+                          "showDotAndDotDot: false; sortField: FolderListModel.Unsorted }",
+                          QUrl());
+        QScopedPointer<QObject> object(component.create());
+        QVERIFY2(object, qPrintable(component.errorString()));
+        auto *source = qobject_cast<QAbstractItemModel *>(object.data());
+        QVERIFY(source);
+        object->setProperty("folder", QUrl::fromLocalFile(dir.path()));
+        FolderSortModel model;
+        model.setSourceModel(source);
+        // Views read rows from change notifications while FolderListModel refreshes.
+        connect(&model, &FolderSortModel::countChanged, &model, [&model] {
+            for (int row = 0; row < model.rowCount(); ++row)
+                model.get(row);
+        });
+        QTRY_COMPARE(source->rowCount(), 1);
+        QTRY_COMPARE(model.rowCount(), 1);
+        QFile second(dir.filePath("second.txt"));
+        QVERIFY(second.open(QIODevice::WriteOnly));
+        second.close();
+        QTRY_COMPARE(source->rowCount(), 2);
+        QTRY_COMPARE(model.rowCount(), 2);
+        QCOMPARE(model.get(0).value("name").toString(), "first.txt");
+        QCOMPARE(model.get(1).value("name").toString(), "second.txt");
+        QVERIFY(first.remove());
+        QTRY_COMPARE(source->rowCount(), 1);
+        QTRY_COMPARE(model.rowCount(), 1);
+        QCOMPARE(model.get(0).value("name").toString(), "second.txt");
     }
 };
 QTEST_GUILESS_MAIN(DesktopFilesTest)

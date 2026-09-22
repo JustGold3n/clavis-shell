@@ -29,4 +29,5 @@ class FolderSortModel : public QSortFilterProxyModel {
     QCollator m_collator;
     QString m_order = "name";
     int m_urlRole = -1;
+    bool m_refreshQueued = false;
 };

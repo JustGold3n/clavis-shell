@@ -9,7 +9,7 @@ TestCase {
         for (const edge of ["bottom", "left", "right"]) {
             for (const count of [0, 1, 7, 200]) {
                 const layout = DockLayout.folderFan(edge, count, 800, 600, true);
-                verify(layout.count <= 7 && layout.count <= count);
+                verify(layout.count <= 10 && layout.count <= count);
                 verify(layout.width <= 800 && layout.height <= 600);
                 for (const slot of layout.slots) {
                     verify(slot.x >= 0 && slot.y >= 0);

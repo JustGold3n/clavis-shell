@@ -76,6 +76,7 @@ PanelWindow {
     property bool contextMenu: false
     property real popupAxis: axisLength / 2
     property real popupCross: 0
+    property point popupSourceCenter: Qt.point(width / 2, height)
     property string dragKey: ""
     property bool dragCancelled: false
     property point dragPoint: Qt.point(0, 0)
@@ -162,7 +163,7 @@ PanelWindow {
     }
 
     function updateInteraction() {
-        if (interacting) {
+        if (interacting || filePopupActive) {
             revealed = true;
             hideTimer.stop();
             closeTimer.stop();
@@ -176,7 +177,7 @@ PanelWindow {
     }
     function hoverEntry(key) {
         if (WindowPreviewService.suspended || dragKey || dragGhost.active || handoffKey
-                || DockService.externalDragActive || contextMenu)
+                || DockService.externalDragActive || contextMenu || filePopupActive)
             return;
         hoverKey = key;
         closeTimer.stop();
@@ -221,6 +222,10 @@ PanelWindow {
         const trayStart = glass.mapToItem(content, 0, 0);
         const trayEnd = glass.mapToItem(content, glass.width, glass.height);
         popupCross = horizontal ? trayStart.y : edge === "left" ? trayEnd.x : trayStart.x;
+        popupSourceCenter = horizontal ? Qt.point(popupAxis, (trayStart.y + trayEnd.y) / 2) : Qt.point((
+                                                                                                           trayStart.x
+                                                                                                           + trayEnd.x)
+                                                                                                       / 2, popupAxis);
         for (let i = 0; i < iconItems.count; ++i) {
             const item = iconItems.itemAt(i);
             if (!item || item.entryKey !== key)
@@ -228,6 +233,7 @@ PanelWindow {
             const artwork = item.artworkItem;
             const start = artwork.mapToItem(content, 0, 0);
             const end = artwork.mapToItem(content, artwork.width, artwork.height);
+            popupSourceCenter = Qt.point((start.x + end.x) / 2, (start.y + end.y) / 2);
             popupAxis = horizontal ? (start.x + end.x) / 2 : (start.y + end.y) / 2;
             popupCross = horizontal ? Math.min(popupCross, start.y) : edge === "left" ? Math.max(popupCross,
                                                                                                  end.x) : Math.min(
@@ -243,6 +249,10 @@ PanelWindow {
     function dismissPopup() {
         if (DockService.fileDragActive)
             return;
+        if (filePopup.visible && filePopup.fan && filePopup.progress > 0) {
+            filePopup.closeFan();
+            return;
+        }
         popupKey = "";
         contextMenu = false;
         pendingPopupKey = "";
@@ -465,6 +475,7 @@ PanelWindow {
                                                                              WlrKeyboardFocus.None
 
     onInteractingChanged: updateInteraction()
+    onFilePopupActiveChanged: updateInteraction()
     onShownChanged: {
         if (!shown)
             dismissPopup();
@@ -532,6 +543,21 @@ PanelWindow {
             root.cancelDrag();
             root.dismissPopup();
             event.accepted = true;
+        }
+
+        // Click-opened file stacks stay open while browsing. Consume the
+        // outside press like a menu, but release the screen for native drags.
+        MouseArea {
+            id: fileDismissArea
+            anchors.fill: parent
+            visible: root.filePopupActive && !DockService.fileDragActive
+            acceptedButtons: Qt.AllButtons
+            onPressed: event => {
+                const inPopup = filePopup.mapFromItem(fileDismissArea, event.x, event.y);
+                const inBand = band.mapFromItem(fileDismissArea, event.x, event.y);
+                if (!filePopup.contains(inPopup) && !band.contains(inBand))
+                    root.dismissPopup();
+            }
         }
 
         Item {
@@ -814,7 +840,8 @@ PanelWindow {
                         }
                         onPressStarted: {
                             root.dragCancelled = false;
-                            root.dismissPopup();
+                            if (kind !== "folder" || root.popupKey !== key || root.contextMenu)
+                                root.dismissPopup();
                         }
                         onHovered: key => root.hoverEntry(key)
                         onHoverLeft: key => root.leaveEntry(key)
@@ -823,9 +850,15 @@ PanelWindow {
                         dropHint: kind === "trash" ? qsTr("Move to Trash") : qsTr("Open with %1").arg(name)
                         onActivated: key => {
                             root.dragCancelled = false;
-                            if (kind === "folder")
-                                root.showPopup(key, false, true);
-                            else {
+                            if (kind === "folder") {
+                                if (root.popupKey === key && !root.contextMenu) {
+                                    if (filePopup.closing)
+                                        filePopup.reopenFan();
+                                    else
+                                        root.dismissPopup();
+                                } else
+                                    root.showPopup(key, false, true);
+                            } else {
                                 DockService.activate(key);
                                 root.dismissPopup();
                             }
@@ -1009,13 +1042,14 @@ PanelWindow {
             edge: root.edge
             labelsLeft: root.edge === "right" || root.horizontal && root.popupAxis > root.width / 2
             anchorOffset: root.popupAxis - (root.horizontal ? x : y)
+            sourceCenter: Qt.point(root.popupSourceCenter.x - x, root.popupSourceCenter.y - y)
             maximumWidth: root.horizontal ? root.width - 32 : (root.edge === "left" ? root.width
                                                                                       - root.popupCross :
                                                                                       root.popupCross) - 24
             maximumHeight: root.horizontal ? root.popupCross - 24 : root.height - 32
             x: root.horizontal ? Math.max(16, Math.min(root.width - width - 16, root.popupAxis - (labelsLeft
-                                                                                                  ? width - 48 :
-                                                                                                    48))) : root.edge
+                                                                                                  ? width - 68 :
+                                                                                                    68))) : root.edge
                                  === "left" ? root.popupCross + 6 : root.popupCross - width - 6
             y: root.horizontal ? root.popupCross - height - 6 : Math.max(16, Math.min(root.height - height - 16,
                                                                                       root.popupAxis - height
@@ -1030,6 +1064,9 @@ PanelWindow {
     }
 
     mask: Region {
+        Region {
+            item: root.filePopupActive && !DockService.fileDragActive ? content : null
+        }
         Region {
             item: root.shown ? band : null
         }
@@ -1048,6 +1085,7 @@ PanelWindow {
         backgroundItem: glass
         additionalBackgroundItems: (popup.visible ? popup.blurBackgroundItems : []).concat(
                                        filePopup.blurBackgroundItems)
+        additionalRegions: filePopup.blurRegions
         blurEnabled: root.shown
         radius: 20
     }

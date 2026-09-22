@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import qs.Common
+import qs.Components
 import qs.Services
 import qs.Widgets.common
 
@@ -11,11 +12,14 @@ Item {
     property bool fan: false
     property bool verticalLabel: false
     property bool labelsLeft: true
-    property real tileIconSize: compact ? 22 : 64
+    property real labelReveal: 1
+    property string actionIcon: ""
+    property real tileIconSize: compact ? 22 : fan ? 48 : 64
     signal activated(var info)
-    readonly property bool hovered: pointer.containsMouse
+    readonly property bool hovered: pointer.hovered
     readonly property alias iconItem: artwork
     readonly property alias glassItem: background
+    readonly property alias actionGlassItem: actionBackground
     activeFocusOnTab: true
     Accessible.role: Accessible.Button
     Accessible.name: fileInfo.name || ""
@@ -26,13 +30,16 @@ Item {
     Rectangle {
         id: background
         y: root.verticalLabel ? parent.height - height : (parent.height - height) / 2
-        width: root.fan && !root.verticalLabel ? parent.width - root.tileIconSize - 18 : parent.width
-        height: root.fan ? 36 : parent.height
-        x: root.fan && !root.verticalLabel && !root.labelsLeft ? root.tileIconSize + 18 : 0
-        radius: root.fan ? height / 2 : 8
+        width: root.fan && !root.verticalLabel ? Math.min(parent.width - root.tileIconSize - 18, Math.ceil(
+                                                              label.implicitWidth) + 20) : parent.width
+        height: root.fan ? 28 : parent.height
+        x: root.fan && !root.verticalLabel ? root.labelsLeft ? artwork.x - width - 12 : artwork.x
+                                                               + artwork.width + 12 : 0
+        opacity: root.labelReveal
+        radius: 7
         color: root.fan ? BlurService.backgroundColor(Appearance.colors.colSurfaceContainer) :
-                          pointer.containsMouse ? Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.12) :
-                                                  "transparent"
+                          pointer.hovered ? Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.12) :
+                                            "transparent"
         border.width: root.fan ? 1 : 0
         border.color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.16)
     }
@@ -41,6 +48,7 @@ Item {
         width: root.tileIconSize
         height: width
         info: root.fileInfo
+        visible: root.actionIcon === ""
         x: root.verticalLabel ? (parent.width - width) / 2 : root.compact ? 8 : root.fan ? (root.labelsLeft
                                                                                             ? parent.width
                                                                                               - width - 6 :
@@ -49,15 +57,30 @@ Item {
                                                                                            / 2
         y: root.verticalLabel ? 0 : root.compact || root.fan ? (parent.height - height) / 2 : 6
     }
+    Rectangle {
+        id: actionBackground
+        visible: root.actionIcon !== ""
+        x: artwork.x + 7
+        y: artwork.y + 7
+        width: root.tileIconSize - 14
+        height: width
+        radius: width / 2
+        color: BlurService.backgroundColor(Appearance.colors.colSurfaceContainer)
+        MaterialSymbol {
+            anchors.centerIn: parent
+            text: root.actionIcon
+            iconSize: 22
+            color: Appearance.colors.colOnSurface
+        }
+    }
     Text {
-        x: root.compact ? 38 : root.fan && !root.verticalLabel && !root.labelsLeft ? root.tileIconSize + 28 :
-                                                                                     10
+        id: label
+        x: root.compact ? 38 : root.fan && !root.verticalLabel ? background.x + 10 : 10
 
-        y: root.verticalLabel ? root.height - 36 : root.compact || root.fan ? 0 : root.tileIconSize + 12
-        width: root.compact ? parent.width - 62 : root.fan && !root.verticalLabel ? parent.width
-                                                                                    - root.tileIconSize - 38 :
+        y: root.verticalLabel ? root.height - 28 : root.compact || root.fan ? 0 : root.tileIconSize + 12
+        width: root.compact ? parent.width - 62 : root.fan && !root.verticalLabel ? background.width - 20 :
                                                                                     parent.width - 20
-        height: root.verticalLabel ? 36 : root.compact || root.fan ? parent.height : 32
+        height: root.verticalLabel ? 28 : root.compact || root.fan ? parent.height : 32
         text: root.fileInfo.name || ""
         textFormat: Text.PlainText
         color: Appearance.colors.colOnSurface
@@ -68,24 +91,32 @@ Item {
         elide: Text.ElideMiddle
         wrapMode: root.compact || root.fan ? Text.NoWrap : Text.Wrap
         maximumLineCount: 2
+        opacity: root.labelReveal
     }
-    MouseArea {
+    HoverHandler {
         id: pointer
-        anchors.fill: parent
-        hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onPressed: drag.dragged = false
-        onClicked: {
-            if (!drag.dragged)
+    }
+    TapHandler {
+        acceptedButtons: Qt.LeftButton
+        onPressedChanged: {
+            if (pressed)
+                fileDrag.dragged = false;
+        }
+        onTapped: {
+            if (!fileDrag.dragged)
                 root.activated(root.fileInfo);
         }
-        StyledToolTip {
-            text: root.fileInfo.name || ""
-            textFormat: Text.PlainText
-        }
+    }
+    StyledToolTip {
+        text: root.fileInfo.name || ""
+        textFormat: Text.PlainText
+        extraVisibleCondition: root.visible && root.opacity === 1 && root.labelReveal === 1 && pointer.hovered
+                               && label.truncated && !fileDrag.dragged && !DockService.fileDragActive
     }
     DockFileDrag {
-        id: drag
+        id: fileDrag
+        enabled: fileUrl !== ""
         fileUrl: String(root.fileInfo.url || "")
         iconItem: artwork
     }

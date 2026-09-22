@@ -6,7 +6,6 @@ import qs.Common
 import qs.Components
 import qs.Services
 import qs.Widgets.common
-import "../../Common/functions/DockLayout.js" as DockLayout
 
 Item {
     id: root
@@ -16,6 +15,7 @@ Item {
     property bool contextMenu: false
     property string edge: "bottom"
     property real anchorOffset: width / 2
+    property point sourceCenter: Qt.point(anchorOffset, height + 32)
     property bool labelsLeft: true
     readonly property var entry: {
         const revision = DockService.revision;
@@ -28,48 +28,90 @@ Item {
     property var menuSurfaces: []
     readonly property bool fan: !contextMenu && !!entry && entry.view === "fan"
     readonly property bool list: !contextMenu && !!entry && entry.view === "list"
-    readonly property bool hovered: fan ? fanItems.some(item => item.hovered) : list ? menuSurfaces.some(item
-                                                                                                         => item.menuHovered) :
-                                                                                       hover.hovered
+    readonly property bool hovered: fan ? fanView.hovered : list ? menuSurfaces.some(item => item
+                                                                                             && item.menuHovered) :
+                                                                   hover.hovered
     readonly property bool directoryAvailable: !!directory.item && directory.item.available
     readonly property int count: directory.item ? directory.item.count : 0
-    readonly property var fanLayout: DockLayout.folderFan(edge, count, maximumWidth, maximumHeight,
-                                                          labelsLeft)
-    readonly property int fanCount: fanLayout.count
-    readonly property var inputItems: !visible ? [] : list ? menuSurfaces : fan ? fanItems : [root]
-    readonly property var blurBackgroundItems: !visible ? [] : list ? menuSurfaces : fan ? fanItems.map(item
-                                                                                                        => item.glassItem
-                                                                                                           || item) :
-                                                                                           bubble.blurItems
-    property var fanItems: []
+    property bool fanPresented: false
+    property bool closing: false
+    readonly property int fanCount: fanView.geometry.count
+    readonly property var fanItems: fanView.tiles
+    readonly property var inputItems: !visible ? [] : list ? menuSurfaces : fan ? [fanView] : [root]
+    readonly property var blurBackgroundItems: !visible || fan ? [] : list ? menuSurfaces : bubble.blurItems
+    readonly property var blurRegions: visible && fan ? fanView.blurRegions : []
     property real progress: 0
+    readonly property int gridColumns: Math.max(1, Math.floor(grid.width / 106))
+    readonly property int gridRows: Math.max(1, Math.min(4, Math.ceil(count / gridColumns)))
     signal dismissed
-    width: fan ? fanLayout.width : Math.min(maximumWidth, contextMenu ? 300 : list ? 360 : 460)
-    height: fan ? fanLayout.height : list ? Math.min(maximumHeight, (count + 2) * 34 + 18) : contextMenu
-                                            ? Math.min(maximumHeight, menuColumn.height + 26) : Math.min(
-                                                  maximumHeight, 400)
+    width: fan ? fanView.implicitWidth : Math.min(maximumWidth, contextMenu ? 300 : list ? 360 : 460)
+    height: fan ? fanView.implicitHeight : list ? Math.min(maximumHeight, (Math.max(1, count) + 1) * 34 + 28) :
+                                                  contextMenu ? Math.min(maximumHeight, menuColumn.height
+                                                                         + 26) : Math.min(maximumHeight, 20 + (
+                                                                                              edge === "bottom"
+                                                                                              ? bubble.tailSize :
+                                                                                                0) + header.implicitHeight
+                                                                                          + footer.implicitHeight
+                                                                                          + gridRows
+                                                                                          * grid.cellHeight)
     onEntryKeyChanged: {
         browsingUrl = "";
         history = [];
         confirmEmpty = false;
     }
     onVisibleChanged: {
-        if (visible) {
-            progress = 0;
-            opening.restart();
-        } else {
+        resetFan();
+        if (!visible) {
             confirmEmpty = false;
             history = [];
             browsingUrl = "";
         }
     }
+    onCurrentUrlChanged: resetFan()
+    onFanChanged: resetFan()
+    function resetFan() {
+        closing = false;
+        opening.stop();
+        progress = 0;
+        fanPresented = false;
+        Qt.callLater(root.presentFan);
+    }
+    function presentFan() {
+        if (!root.visible || !root.fan || !directory.item || !directory.item.ready || fanPresented)
+            return;
+        // Start once after a complete listing; live changes use ListView's
+        // normal model updates and do not replay the opening animation.
+        fanPresented = true;
+        opening.start();
+    }
+    function closeFan() {
+        if (closing)
+            return;
+        opening.stop();
+        closing = true;
+        opening.start();
+    }
+    function reopenFan() {
+        opening.stop();
+        closing = false;
+        opening.start();
+    }
+    function presentList() {
+        if (root.visible && root.list && directory.item && directory.item.ready && nativeList.item &&
+                !nativeList.item.visible)
+            nativeList.item.open();
+    }
     NumberAnimation {
         id: opening
         target: root
         property: "progress"
-        to: 1
-        duration: 220
+        to: root.closing ? 0 : 1
+        duration: root.closing ? 180 : 260
         easing.type: Easing.OutCubic
+        onFinished: {
+            if (root.closing)
+                root.dismissed();
+        }
     }
     HoverHandler {
         id: hover
@@ -88,16 +130,10 @@ Item {
             dismissed();
         }
     }
-    function updateFanItems() {
-        const items = [fanFooter];
-        for (let i = 0; i < fanRows.count; ++i)
-            if (fanRows.itemAt(i))
-                items.push(fanRows.itemAt(i));
-        fanItems = items;
-    }
     Loader {
         id: directory
         active: root.visible && !root.contextMenu && !!root.entry && root.entry.kind === "folder"
+        onLoaded: Qt.callLater(root.presentFan)
         sourceComponent: DockFolderModel {
             folder: root.currentUrl
             sort: root.entry.sort
@@ -105,11 +141,12 @@ Item {
     }
     Connections {
         target: directory.item
-        function onLoadingChanged() {
-            if (root.fan && directory.item && !directory.item.loading) {
-                root.progress = 0;
-                opening.restart();
-            }
+        function onReadyChanged() {
+            Qt.callLater(root.presentFan);
+            Qt.callLater(root.presentList);
+        }
+        function onRevisionChanged() {
+            Qt.callLater(root.presentFan);
         }
     }
     DockBubbleSurface {
@@ -122,8 +159,12 @@ Item {
     Loader {
         id: nativeList
         active: root.visible && root.list
-        onLoaded: item.popup()
+        onLoaded: Qt.callLater(root.presentList)
         sourceComponent: DockFolderMenu {
+            parent: root
+            x: 0
+            y: 0
+            width: root.width
             sharedModel: directory.item
             folderUrl: root.currentUrl
             sort: root.entry.sort
@@ -139,69 +180,33 @@ Item {
             }
         }
     }
-    Item {
-        id: fanContent
+    DockFolderFan {
+        id: fanView
         anchors.fill: parent
-        visible: root.fan
-        Repeater {
-            id: fanRows
-            model: root.visible && root.fan ? root.fanCount : 0
-            onItemAdded: Qt.callLater(root.updateFanItems)
-            onItemRemoved: Qt.callLater(root.updateFanItems)
-            DockFileTile {
-                required property int index
-                fileInfo: directory.item ? directory.item.get(index) : ({})
-                fan: true
-                labelsLeft: root.labelsLeft
-                readonly property var slot: root.fanLayout.slots[index]
-                verticalLabel: root.edge !== "bottom"
-                width: slot.width
-                height: slot.height
-                x: root.edge === "bottom" ? slot.x : (root.edge === "left" ? -32 : root.width - 32) * (1 - root.progress)
-                                            + slot.x * root.progress
-                y: root.edge === "bottom" ? root.height - 64 + root.progress * (slot.y - root.height + 64) : (
-                                                root.height / 2 - 32) * (1 - root.progress) + slot.y
-                                            * root.progress
-                opacity: root.progress
-                scale: 0.7 + 0.3 * root.progress
-                onActivated: info => root.open(info)
-            }
+        visible: root.fan && root.fanPresented
+        enabled: !root.closing
+        model: root.fanPresented && directory.item ? directory.item.model : null
+        count: root.fanPresented ? root.count : 0
+        edge: root.edge
+        labelsLeft: root.labelsLeft
+        maximumWidth: root.maximumWidth
+        maximumHeight: root.maximumHeight
+        sourceCenter: root.sourceCenter
+        progress: root.progress
+        canOpen: root.directoryAvailable
+        canGoBack: root.history.length > 0
+        actionText: root.history.length && directory.item ? directory.item.info.name : !root.directoryAvailable
+                                                            ? qsTr("Folder is unavailable") : root.count
+                                                              ? qsTr("Open in File Manager") : qsTr(
+                                                                    "Folder is empty")
+        onActivated: info => root.open(info)
+        onOpenRequested: {
+            ApplicationService.openUrl(root.currentUrl);
+            root.dismissed();
         }
-        Rectangle {
-            id: fanFooter
-            readonly property bool hovered: footerHover.hovered
-            HoverHandler {
-                id: footerHover
-            }
-            width: Math.max(0, Math.min(330, root.width - 48))
-            height: 48
-            y: root.edge === "bottom" ? 0 : parent.height - height
-            x: root.labelsLeft ? root.width - width - 7 : 7
-            radius: 24
-            color: BlurService.backgroundColor(Appearance.colors.colSurfaceContainer)
-            StyledMenuItem {
-                anchors.fill: parent
-                anchors.leftMargin: root.history.length ? 36 : 0
-                text: !root.directoryAvailable ? qsTr("Folder is unavailable") : root.count ? qsTr(
-                                                                                                  "Open in File Manager") :
-                                                                                              qsTr("Folder is empty")
-                iconName: "open_in_new"
-                enabled: root.directoryAvailable
-                onTriggered: {
-                    ApplicationService.openUrl(root.currentUrl);
-                    root.dismissed();
-                }
-            }
-            StyledMenuItem {
-                visible: root.history.length > 0
-                width: 36
-                height: parent.height
-                iconName: "arrow_back"
-                onTriggered: {
-                    root.browsingUrl = root.history[root.history.length - 1];
-                    root.history = root.history.slice(0, -1);
-                }
-            }
+        onBackRequested: {
+            root.browsingUrl = root.history[root.history.length - 1];
+            root.history = root.history.slice(0, -1);
         }
     }
     Item {
@@ -233,9 +238,10 @@ Item {
                 bottom: footer.top
             }
             clip: true
-            cellWidth: width / Math.max(1, Math.floor(width / 106))
+            cellWidth: width / root.gridColumns
             cellHeight: 112
-            model: directory.item ? directory.item.model : null
+            model: root.visible && !root.contextMenu && !root.fan && !root.list && directory.item
+                   ? directory.item.model : null
             boundsBehavior: Flickable.StopAtBounds
             ScrollBar.vertical: StyledScrollBar {}
             delegate: DockFileTile {

@@ -32,6 +32,7 @@ QtObject {
     property string sort: "name"
     readonly property alias model: sortedModel
     readonly property int count: sorted.count
+    readonly property bool ready: directory.status === FolderListModel.Ready
     readonly property bool loading: directory.status === FolderListModel.Loading
     readonly property var info: {
         const count = sorted.count;
