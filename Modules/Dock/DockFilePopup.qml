@@ -16,6 +16,7 @@ Item {
     property string edge: "bottom"
     property real anchorOffset: width / 2
     property point sourceCenter: Qt.point(anchorOffset, height + 32)
+    property real iconSize: 64
     property bool labelsLeft: true
     readonly property var entry: {
         const revision = DockService.revision;
@@ -36,6 +37,7 @@ Item {
     property bool fanPresented: false
     property bool closing: false
     readonly property int fanCount: fanView.geometry.count
+    readonly property real fanIconInset: fanView.geometry.iconInset
     readonly property var fanItems: fanView.tiles
     readonly property var inputItems: !visible ? [] : list ? menuSurfaces : fan ? [fanView] : [root]
     readonly property var blurBackgroundItems: !visible || fan ? [] : list ? menuSurfaces : bubble.blurItems
@@ -191,6 +193,7 @@ Item {
         labelsLeft: root.labelsLeft
         maximumWidth: root.maximumWidth
         maximumHeight: root.maximumHeight
+        iconSize: root.iconSize
         sourceCenter: root.sourceCenter
         progress: root.progress
         canOpen: root.directoryAvailable

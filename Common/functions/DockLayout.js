@@ -117,19 +117,27 @@ function sectionBoundaries(kinds, pinnedAppCount, order) {
 
 // Fan geometry describes the viewport; the native ListView scrolls all files
 // through these positions instead of discarding entries after the visible ones.
-function folderFan(edge, count, maximumWidth, maximumHeight, labelsLeft) {
+function folderFan(edge, count, maximumWidth, maximumHeight, labelsLeft, requestedIconSize) {
     const availableWidth = Math.max(0, maximumWidth);
     const availableHeight = Math.max(0, maximumHeight);
     const bottom = edge === "bottom";
-    const capacity = Math.max(0, Math.min(10, bottom
-        ? Math.floor((availableHeight - 100) / 60) : Math.floor((availableWidth - 48) / 104)));
+    const iconSize = Math.max(64, Math.round(requestedIconSize || 64));
+    const step = bottom ? iconSize + 12 : iconSize + 56;
+    const baseHeader = iconSize + 52;
+    const initialCapacity = Math.max(0, Math.min(10, bottom
+        ? Math.floor((availableHeight - baseHeader) / step) : Math.floor((availableWidth - 48) / step)));
+    const stackReserve = count > initialCapacity ? 24 : 0;
+    const header = baseHeader + stackReserve;
+    const capacity = bottom ? Math.max(0, Math.min(10, Math.floor((availableHeight - header) / step)))
+                            : initialCapacity;
     const shown = Math.max(0, Math.min(count, capacity));
     const geometry = {
-        width: Math.min(availableWidth, bottom ? 400 : Math.max(220, shown * 104 + 48)),
-        height: Math.min(availableHeight, bottom ? shown * 60 + 100 : 208),
-        count: shown, step: bottom ? 60 : 104,
-        tileWidth: bottom ? Math.max(0, Math.min(324, availableWidth - 76)) : 96,
-        tileHeight: bottom ? 56 : 112,
+        width: Math.min(availableWidth, bottom ? iconSize + 352 : Math.max(220, shown * step + 48)),
+        height: Math.min(availableHeight, bottom ? shown * step + header : iconSize * 2 + 132),
+        count: shown, step: step, header: header, stackReserve: stackReserve,
+        iconSize: iconSize, iconInset: iconSize / 2 + 44,
+        tileWidth: bottom ? Math.max(0, Math.min(iconSize + 276, availableWidth - 76)) : step - 8,
+        tileHeight: bottom ? iconSize + 8 : iconSize + 64,
         slots: []
     };
     for (let i = 0; i < shown; ++i)
@@ -141,13 +149,16 @@ function folderFanSlot(edge, position, geometry, labelsLeft) {
     const fraction = Math.max(0, Math.min(1, position / Math.max(1, geometry.count)));
     const bend = fraction * fraction;
     if (edge === "bottom") {
-        const center = labelsLeft ? geometry.width - 68 + bend * 28 : 68 - bend * 28;
-        const iconCenter = labelsLeft ? geometry.tileWidth - 30 : 30;
-        return {x: Math.max(0, center - iconCenter), y: geometry.height - 58 - position * 60,
+        const center = labelsLeft ? geometry.width - geometry.iconInset + bend * 28
+                                 : geometry.iconInset - bend * 28;
+        const iconOffset = geometry.iconSize / 2 + 6;
+        const iconCenter = labelsLeft ? geometry.tileWidth - iconOffset : iconOffset;
+        return {x: Math.max(0, center - iconCenter), y: geometry.height - geometry.iconSize - 10 - position * geometry.step,
                 width: geometry.tileWidth, height: geometry.tileHeight,
                 rotation: (labelsLeft ? 10 : -10) * fraction};
     }
-    return {x: edge === "left" ? 24 + position * 104 : geometry.width - 120 - position * 104,
+    return {x: edge === "left" ? 24 + position * geometry.step
+                              : geometry.width - 24 - geometry.tileWidth - position * geometry.step,
             y: 28 + bend * 20, width: geometry.tileWidth, height: geometry.tileHeight,
             rotation: (edge === "left" ? 5 : -5) * fraction};
 }

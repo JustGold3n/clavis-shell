@@ -69,7 +69,7 @@ Item {
         MaterialSymbol {
             anchors.centerIn: parent
             text: root.actionIcon
-            iconSize: 22
+            iconSize: Math.max(22, actionBackground.width * 0.55)
             color: Appearance.colors.colOnSurface
         }
     }

@@ -11,6 +11,7 @@ Item {
     property bool labelsLeft: true
     property real maximumWidth: 600
     property real maximumHeight: 800
+    property real iconSize: 64
     property point sourceCenter
     property real progress: 0
     property string actionText: ""
@@ -20,7 +21,8 @@ Item {
     signal openRequested
     signal backRequested
     readonly property bool horizontal: edge !== "bottom"
-    readonly property var geometry: DockLayout.folderFan(edge, count, maximumWidth, maximumHeight, labelsLeft)
+    readonly property var geometry: DockLayout.folderFan(edge, count, maximumWidth, maximumHeight, labelsLeft,
+                                                         iconSize)
     readonly property bool hovered: hover.hovered
     readonly property var tiles: {
         const result = [openItem];
@@ -46,13 +48,17 @@ Item {
     ListView {
         id: view
         x: root.horizontal ? 24 : 0
-        y: root.horizontal ? 0 : 100
+        y: root.horizontal ? 0 : root.geometry.header
         width: root.horizontal ? root.geometry.count * root.geometry.step : root.width
-        height: root.horizontal ? 160 : root.geometry.count * root.geometry.step
+        height: root.horizontal ? root.geometry.iconSize + 112 : root.geometry.count * root.geometry.step
         orientation: root.horizontal ? ListView.Horizontal : ListView.Vertical
         verticalLayoutDirection: ListView.BottomToTop
         layoutDirection: root.edge === "right" ? Qt.RightToLeft : Qt.LeftToRight
         model: root.model
+        // Render the next few entries outside the normal scroll viewport;
+        // their artwork folds back into the small overflow stack.
+        displayMarginBeginning: root.geometry.step * 3
+        displayMarginEnd: root.geometry.step * 3
         cacheBuffer: 0
         boundsBehavior: Flickable.StopAtBounds
         acceptedButtons: Qt.NoButton
@@ -69,28 +75,39 @@ Item {
                                                                                        + view.contentX)
                                                                / width : (view.height - height - y
                                                                           + view.contentY) / height
-            readonly property var slot: DockLayout.folderFanSlot(root.edge, position, root.geometry,
-                                                                 root.labelsLeft)
-            visible: position > -1 && position < root.geometry.count
+            readonly property real stackDepth: Math.max(0, position - root.geometry.count + 1)
+            readonly property var slot: DockLayout.folderFanSlot(root.edge, Math.min(position,
+                                                                                     root.geometry.count - 1),
+                                                                 root.geometry, root.labelsLeft)
+            visible: root.geometry.count > 0 && position > -1 && stackDepth < 4
+            z: -position
             DockFileTile {
                 id: tile
                 fileInfo: row.fileInfo
                 fan: true
                 verticalLabel: root.horizontal
                 labelsLeft: root.labelsLeft
+                tileIconSize: root.geometry.iconSize
+                enabled: row.stackDepth < 0.001
                 width: root.geometry.tileWidth
                 height: root.geometry.tileHeight
                 readonly property point center: Qt.point(iconItem.x + iconItem.width / 2, iconItem.y
                                                          + iconItem.height / 2)
-                readonly property real finalX: root.horizontal ? (row.width - width) / 2 : row.slot.x
-                readonly property real finalY: root.horizontal ? row.slot.y : (row.height - height) / 2
+                readonly property real finalX: row.slot.x + row.stackDepth * (root.horizontal ? (root.edge
+                                                                                                 === "left"
+                                                                                                 ? 7 : -7) : (
+                                                                                                    root.labelsLeft
+                                                                                                    ? 3 : -3))
+                                               - view.x - row.x + view.contentX
+                readonly property real finalY: row.slot.y - (root.horizontal ? 0 : row.stackDepth * 7) - view.y
+                                               - row.y + view.contentY
                 x: finalX + (root.sourceCenter.x - view.x - row.x + view.contentX - finalX - center.x) * (1
                                                                                                           - root.progress)
                 y: finalY + (root.sourceCenter.y - view.y - row.y + view.contentY - finalY - center.y) * (1
                                                                                                           - root.progress)
-                opacity: Math.min(1, root.progress * 2) * Math.min(1, row.position + 1, root.geometry.count
-                                                                   - row.position)
-                labelReveal: Math.max(0, (root.progress - 0.4) / 0.6)
+                opacity: Math.min(1, root.progress * 2) * Math.min(1, row.position + 1) * (1 - row.stackDepth
+                                                                                           / 4)
+                labelReveal: Math.max(0, (root.progress - 0.4) / 0.6) * Math.pow(0.42, row.stackDepth)
                 transform: [
                     Rotation {
                         origin.x: tile.center.x
@@ -100,7 +117,7 @@ Item {
                     Scale {
                         origin.x: tile.center.x
                         origin.y: tile.center.y
-                        xScale: 0.7 + 0.3 * root.progress
+                        xScale: (0.7 + 0.3 * root.progress) * Math.pow(0.94, row.stackDepth)
                         yScale: xScale
                     }
                 ]
@@ -109,7 +126,9 @@ Item {
             DockFanBlur {
                 id: labelBlur
                 sourceItem: tile.glassItem
-                enabled: row.visible && root.progress > 0
+                // A binary compositor blur mask cannot fade with the ghost
+                // labels. Only the fully unfolded row supplies glass.
+                enabled: row.visible && row.stackDepth < 0.001 && root.progress > 0
             }
         }
     }
@@ -123,12 +142,16 @@ Item {
         actionIcon: root.canGoBack ? "arrow_back" : "open_in_new"
         fan: true
         labelsLeft: root.labelsLeft
-        width: root.horizontal ? Math.min(324, root.width - 24) : root.geometry.tileWidth
-        height: 56
+        tileIconSize: root.geometry.iconSize
+        width: root.horizontal ? Math.min(root.geometry.iconSize + 276, root.width - 24) :
+                                 root.geometry.tileWidth
+
+        height: root.geometry.iconSize + 8
         readonly property point center: Qt.point(iconItem.x + iconItem.width / 2, iconItem.y + iconItem.height
                                                  / 2)
         readonly property real finalX: root.horizontal ? (root.width - width) / 2 : slot.x
         readonly property real finalY: root.horizontal ? root.height - height : slot.y
+                                                         - root.geometry.stackReserve
         x: finalX + (root.sourceCenter.x - finalX - center.x) * (1 - root.progress)
         y: finalY + (root.sourceCenter.y - finalY - center.y) * (1 - root.progress)
         opacity: root.progress

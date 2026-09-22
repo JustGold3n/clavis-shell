@@ -26,6 +26,9 @@ Item {
     required property real restingIconSize
     property bool dragged: false
     property bool contextActive: false
+    property bool folderExpanded: false
+    property real folderOpenProgress: folderExpanded ? 1 : 0
+    readonly property alias folderButtonBackground: folderButton
     property bool dropTarget: false
     property string dropHint: ""
     property bool showTooltip: false
@@ -52,6 +55,13 @@ Item {
     signal dragCancelled
 
     opacity: dragged ? 0 : presence
+
+    Behavior on folderOpenProgress {
+        NumberAnimation {
+            duration: 160
+            easing.type: Easing.OutCubic
+        }
+    }
 
     Behavior on iconSize {
         NumberAnimation {
@@ -128,6 +138,25 @@ Item {
             anchors.fill: parent
             visible: root.kind === "file" || root.kind === "folder"
             entryKey: root.entryKey
+            opacity: 1 - root.folderOpenProgress
+        }
+        Rectangle {
+            id: folderButton
+            anchors.fill: parent
+            visible: root.kind === "folder" && opacity > 0
+            opacity: root.folderOpenProgress
+            radius: width * 0.23
+            color: BlurService.backgroundColor(Appearance.colors.colSurfaceContainer)
+            border.width: 1
+            border.color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.2)
+            MaterialSymbol {
+                anchors.centerIn: parent
+                text: root.edge === "bottom" ? "expand_more" : root.edge === "left" ? "chevron_left" :
+                                                                                      "chevron_right"
+
+                iconSize: parent.width * 0.5
+                color: Appearance.colors.colOnSurface
+            }
         }
         Rectangle {
             anchors.fill: parent

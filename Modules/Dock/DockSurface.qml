@@ -77,6 +77,17 @@ PanelWindow {
     property real popupAxis: axisLength / 2
     property real popupCross: 0
     property point popupSourceCenter: Qt.point(width / 2, height)
+    property real popupIconSize: baseLayout.size
+    readonly property var folderButtonItems: {
+        if (!filePopupActive || contextMenu)
+            return [];
+        for (let i = 0; i < iconItems.count; ++i) {
+            const item = iconItems.itemAt(i);
+            if (item && item.entryKey === popupKey)
+                return [item.folderButtonBackground];
+        }
+        return [];
+    }
     property string dragKey: ""
     property bool dragCancelled: false
     property point dragPoint: Qt.point(0, 0)
@@ -214,6 +225,7 @@ PanelWindow {
             return;
         hoverTimer.stop();
         const slot = slotForKey(key);
+        popupIconSize = slot ? slot.size : baseLayout.size;
         popupAxis = slot ? (axisLength - bandLength) / 2 + slot.start + slot.span / 2 - scrollOffset :
                            pointerAxis;
         // Anchor to visible artwork / tray, not the oversized interaction band.
@@ -231,6 +243,7 @@ PanelWindow {
             if (!item || item.entryKey !== key)
                 continue;
             const artwork = item.artworkItem;
+            popupIconSize = Math.max(popupIconSize, artwork.width);
             const start = artwork.mapToItem(content, 0, 0);
             const end = artwork.mapToItem(content, artwork.width, artwork.height);
             popupSourceCenter = Qt.point((start.x + end.x) / 2, (start.y + end.y) / 2);
@@ -759,6 +772,9 @@ PanelWindow {
                         iconSize: retiring ? retirementSize : slot.size
                         restingIconSize: root.baseLayout.size
                         contextActive: root.contextMenu && root.popupKey === key
+                        folderExpanded: kind === "folder" && root.popupKey === key && !root.contextMenu &&
+                                        !filePopup.closing
+
                         showTooltip: !root.contextMenu && !WindowPreviewService.suspended && (kind === "app"
                                                                                               ? root.popupKey
                                                                                                 === key && (
@@ -1043,14 +1059,16 @@ PanelWindow {
             labelsLeft: root.edge === "right" || root.horizontal && root.popupAxis > root.width / 2
             anchorOffset: root.popupAxis - (root.horizontal ? x : y)
             sourceCenter: Qt.point(root.popupSourceCenter.x - x, root.popupSourceCenter.y - y)
+            iconSize: root.popupIconSize
+            readonly property real iconInset: fan ? fanIconInset : 68
             maximumWidth: root.horizontal ? root.width - 32 : (root.edge === "left" ? root.width
                                                                                       - root.popupCross :
                                                                                       root.popupCross) - 24
             maximumHeight: root.horizontal ? root.popupCross - 24 : root.height - 32
             x: root.horizontal ? Math.max(16, Math.min(root.width - width - 16, root.popupAxis - (labelsLeft
-                                                                                                  ? width - 68 :
-                                                                                                    68))) : root.edge
-                                 === "left" ? root.popupCross + 6 : root.popupCross - width - 6
+                                                                                                  ? width - iconInset :
+                                                                                                    iconInset))) :
+                                 root.edge === "left" ? root.popupCross + 6 : root.popupCross - width - 6
             y: root.horizontal ? root.popupCross - height - 6 : Math.max(16, Math.min(root.height - height - 16,
                                                                                       root.popupAxis - height
                                                                                       / 2))
@@ -1084,7 +1102,7 @@ PanelWindow {
         targetWindow: root
         backgroundItem: glass
         additionalBackgroundItems: (popup.visible ? popup.blurBackgroundItems : []).concat(
-                                       filePopup.blurBackgroundItems)
+                                       filePopup.blurBackgroundItems, root.folderButtonItems)
         additionalRegions: filePopup.blurRegions
         blurEnabled: root.shown
         radius: 20

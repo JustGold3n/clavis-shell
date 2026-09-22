@@ -8,13 +8,17 @@ TestCase {
     function test_folderFanFitsAvailableSpace() {
         for (const edge of ["bottom", "left", "right"]) {
             for (const count of [0, 1, 7, 200]) {
-                const layout = DockLayout.folderFan(edge, count, 800, 600, true);
-                verify(layout.count <= 10 && layout.count <= count);
-                verify(layout.width <= 800 && layout.height <= 600);
-                for (const slot of layout.slots) {
-                    verify(slot.x >= 0 && slot.y >= 0);
-                    verify(slot.x + slot.width <= layout.width);
-                    verify(slot.y + slot.height <= layout.height);
+                for (const iconSize of [64, 84, 160]) {
+                    const layout = DockLayout.folderFan(edge, count, 800, 600, true, iconSize);
+                    compare(layout.iconSize, iconSize);
+                    verify(layout.count <= 10 && layout.count <= count);
+                    verify(layout.width <= 800 && layout.height <= 600);
+                    for (const slot of layout.slots) {
+                        verify(slot.x >= 0 && slot.y >= 0);
+                        verify(slot.x + slot.width <= layout.width);
+                        verify(slot.y + slot.height <= layout.height);
+                        verify(slot.height >= iconSize);
+                    }
                 }
             }
         }
