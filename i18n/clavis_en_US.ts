@@ -3962,6 +3962,26 @@ Scroll to adjust</translation>
         <source>Dock settings could not be saved. Changes apply to this session only.</source>
         <translation>Dock settings could not be saved. Changes apply to this session only.</translation>
     </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="227"/>
+        <source>Trash</source>
+        <translation>Trash</translation>
+    </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="245"/>
+        <source>This file or folder is unavailable.</source>
+        <translation>This file or folder is unavailable.</translation>
+    </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="433"/>
+        <source>Some files could not be processed.</source>
+        <translation>Some files could not be processed.</translation>
+    </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="433"/>
+        <source>The file operation failed.</source>
+        <translation>The file operation failed.</translation>
+    </message>
 </context>
 <context>
     <name>DockSurface</name>
@@ -3974,6 +3994,21 @@ Scroll to adjust</translation>
         <location filename="../Modules/Dock/DockDragVisual.qml" line="134"/>
         <source>Remove from Dock</source>
         <translation>Remove from Dock</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockSurface.qml" line="805"/>
+        <source>Move to Trash</source>
+        <translation>Move to Trash</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockSurface.qml" line="805"/>
+        <source>Open with %1</source>
+        <translation>Open with %1</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockSurface.qml" line="899"/>
+        <source>The file operation could not be started.</source>
+        <translation>The file operation could not be started.</translation>
     </message>
 </context>
 <context>
@@ -13830,6 +13865,151 @@ Windows: </translation>
         <location filename="../Services/ApplicationService.qml" line="32"/>
         <source>Drag to Dock to add a blank space</source>
         <translation>Drag to Dock to add a blank space</translation>
+    </message>
+</context>
+<context>
+    <name>DockFilePopup</name>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="165"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="219"/>
+        <source>Folder is unavailable</source>
+        <translation>Folder is unavailable</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="165"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="229"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="295"/>
+        <source>Open in File Manager</source>
+        <translation>Open in File Manager</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="167"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="219"/>
+        <source>Folder is empty</source>
+        <translation>Folder is empty</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="242"/>
+        <source>Permanently delete all items in Trash?</source>
+        <translation>Permanently delete all items in Trash?</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="245"/>
+        <source>Cancel</source>
+        <translation>Cancel</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="249"/>
+        <source>Empty Trash</source>
+        <translation>Empty Trash</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="259"/>
+        <source>Sort by</source>
+        <translation>Sort by</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="261"/>
+        <source>Name</source>
+        <translation>Name</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="261"/>
+        <source>Date Modified</source>
+        <translation>Date Modified</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="261"/>
+        <source>Date Created</source>
+        <translation>Date Created</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="263"/>
+        <source>Kind</source>
+        <translation>Kind</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="263"/>
+        <source>Size</source>
+        <translation>Size</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="271"/>
+        <source>Display as</source>
+        <translation>Display as</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="274"/>
+        <source>Folder</source>
+        <translation>Folder</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="279"/>
+        <source>Stack</source>
+        <translation>Stack</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="284"/>
+        <source>View content as</source>
+        <translation>View content as</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="286"/>
+        <source>Fan</source>
+        <translation>Fan</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="286"/>
+        <source>Grid</source>
+        <translation>Grid</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="286"/>
+        <source>List</source>
+        <translation>List</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="294"/>
+        <source>Open Trash</source>
+        <translation>Open Trash</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="294"/>
+        <source>Open</source>
+        <translation>Open</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="301"/>
+        <source>Empty Trash…</source>
+        <translation>Empty Trash…</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="307"/>
+        <source>Remove from Dock</source>
+        <translation>Remove from Dock</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="336"/>
+        <source>Dismiss</source>
+        <translation>Dismiss</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="343"/>
+        <source>Trash is unavailable. Install or enable GVfs.</source>
+        <translation>Trash is unavailable. Install or enable GVfs.</translation>
+    </message>
+</context>
+<context>
+    <name>DockFolderMenu</name>
+    <message>
+        <location filename="../Modules/Dock/DockFolderMenu.qml" line="140"/>
+        <source>Folder is empty</source>
+        <translation>Folder is empty</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFolderMenu.qml" line="145"/>
+        <source>Open in File Manager</source>
+        <translation>Open in File Manager</translation>
     </message>
 </context>
 </TS>

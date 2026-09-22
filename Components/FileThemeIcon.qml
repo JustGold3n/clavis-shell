@@ -18,7 +18,7 @@ Item {
     readonly property int themeRevision: ThemeService.iconThemeRevision
     readonly property var candidates: {
         if (directory)
-            return ["folder"];
+            return themeIcon && themeIcon !== "folder" ? [themeIcon, "folder"] : ["folder"];
         const mime = mimeType.split(";", 1)[0];
         const family = mime.indexOf("/") > 0 ? mime.split("/", 1)[0] : ["video", "audio", "image"].indexOf(
                                                    category) >= 0 ? category : "text";

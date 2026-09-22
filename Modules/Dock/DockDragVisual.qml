@@ -108,6 +108,15 @@ Item {
         sourceSize: Qt.size(160, 160)
         fillMode: Image.PreserveAspectFit
     }
+    DockFileIcon {
+        anchors.fill: parent
+        visible: !!root.entry && (root.entry.kind === "file" || root.entry.kind === "folder")
+        info: ({
+                   url: root.entry ? root.entry.url : "",
+                   icon: root.entry ? root.entry.icon : "",
+                   isDirectory: !!root.entry && root.entry.kind === "folder"
+               })
+    }
     MaterialSymbol {
         anchors.centerIn: parent
         visible: !!root.entry && root.entry.kind === "app" && !!root.entry.symbol

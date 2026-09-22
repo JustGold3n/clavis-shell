@@ -5,6 +5,34 @@ import "../../Common/functions/DockLayout.js" as DockLayout
 TestCase {
     name: "DockLayout"
 
+    function test_folderFanFitsAvailableSpace() {
+        for (const edge of ["bottom", "left", "right"]) {
+            for (const count of [0, 1, 7, 200]) {
+                const layout = DockLayout.folderFan(edge, count, 800, 600, true);
+                verify(layout.count <= 7 && layout.count <= count);
+                verify(layout.width <= 800 && layout.height <= 600);
+                for (const slot of layout.slots) {
+                    verify(slot.x >= 0 && slot.y >= 0);
+                    verify(slot.x + slot.width <= layout.width);
+                    verify(slot.y + slot.height <= layout.height);
+                }
+            }
+        }
+    }
+
+    function test_fileSectionUsesSameLayoutAndDistinctDividers() {
+        const kinds = ["app", "spacer", "app", "file", "folder", "trash"];
+        const boundaries = DockLayout.sectionBoundaries(kinds, 2);
+        compare(boundaries.join(","), "2,3");
+        const result = DockLayout.layout(kinds, 48, 900, 1.5, 16, NaN, boundaries);
+        compare(result.dividers.length, 2);
+        verifyOrdered(result);
+        compare(DockLayout.sectionBoundaries(["app", "folder", "trash"], 1).join(","), "1");
+        compare(DockLayout.sectionBoundaries(["folder", "trash"], 0).length, 0);
+        const preview = DockLayout.previewOrder(kinds, -1, 4, "folder");
+        compare(DockLayout.sectionBoundaries(preview.kinds, 2, preview.order).join(","), "2,3");
+    }
+
     function test_windowPreviewsAlwaysFitOneRow() {
         for (const available of [0, 8, 100, 600, 1920]) {
             let previous = Infinity;

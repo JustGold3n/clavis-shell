@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
+import Quickshell
 import qs.Common
 import qs.Components
 import qs.Services
@@ -25,9 +26,15 @@ Item {
     required property real restingIconSize
     property bool dragged: false
     property bool contextActive: false
+    property bool dropTarget: false
+    property string dropHint: ""
     property bool showTooltip: false
     readonly property string popupEdge: edge
     readonly property alias artworkItem: artwork
+    readonly property bool trashIconAvailable: {
+        const revision = ThemeService.iconThemeRevision;
+        return kind === "trash" && Quickshell.hasThemeIcon(icon);
+    }
     property real presence: 1
     readonly property bool horizontal: edge === "bottom"
     property real bounce: 0
@@ -104,7 +111,7 @@ Item {
 
         ThemeIcon {
             anchors.fill: parent
-            visible: root.kind === "app" && !root.symbol
+            visible: (root.kind === "app" || root.trashIconAvailable) && !root.symbol
             iconSource: visible ? ApplicationService.iconSource(root.icon) : ""
             sourceSize: Qt.size(160, 160)
             fillMode: Image.PreserveAspectFit
@@ -112,16 +119,30 @@ Item {
         }
         MaterialSymbol {
             anchors.centerIn: parent
-            visible: root.kind === "app" && !!root.symbol
-            text: root.symbol
+            visible: root.kind === "app" && !!root.symbol || root.kind === "trash" && !root.trashIconAvailable
+            text: root.kind === "trash" ? "delete" : root.symbol
             iconSize: root.iconSize * 0.82
             color: Appearance.colors.colPrimary
         }
+        DockFileArtwork {
+            anchors.fill: parent
+            visible: root.kind === "file" || root.kind === "folder"
+            entryKey: root.entryKey
+        }
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: -4
+            radius: 12
+            visible: root.dropTarget
+            color: "transparent"
+            border.width: 2
+            border.color: Appearance.colors.colPrimary
+        }
         StyledToolTip {
-            text: root.name
+            text: root.dropTarget ? root.dropHint : root.name
             textFormat: Text.PlainText
-            extraVisibleCondition: root.showTooltip && pointer.containsMouse && !pointer.pressed &&
-                                   !root.dragged && !root.contextActive
+            extraVisibleCondition: root.dropTarget || root.showTooltip && pointer.containsMouse &&
+                                   !pointer.pressed && !root.dragged && !root.contextActive
         }
     }
 
@@ -166,7 +187,7 @@ Item {
             root.grabOffset = Qt.point(root.pressPoint.x - center.x, root.pressPoint.y - center.y);
         }
         onPositionChanged: mouse => {
-            if (!(pressedButtons & Qt.LeftButton))
+            if (root.kind === "trash" || !(pressedButtons & Qt.LeftButton))
                 return;
             const position = root.mapToItem(null, mouse.x, mouse.y);
             if (!root.moved && Math.hypot(position.x - root.pressPoint.x, position.y - root.pressPoint.y)

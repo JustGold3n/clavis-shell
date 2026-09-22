@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import Quickshell
+import Clavis.Files
 import Quickshell.Wayland
 import qs.Common
 import qs.Components
@@ -27,24 +28,25 @@ PanelWindow {
     }
     readonly property real magnification: DockService.magnification ? DockService.magnificationScale : 1
     readonly property var baseLayout: DockLayout.layout(kinds, DockService.iconSize, availableLength,
-                                                        magnification, 16, NaN, DockLayout.sectionBoundary(
-                                                            kinds, DockService.pinnedEntries.length))
+                                                        magnification, 16, NaN, DockLayout.sectionBoundaries(
+                                                            kinds, DockService.pinnedAppCount))
     readonly property real scrollOffset: horizontal ? icons.contentX - icons.originX : icons.contentY
                                                       - icons.originY
     readonly property real pointerInBase: pointerAxis - (axisLength - Math.min(baseLayout.baseLength,
                                                                                availableLength)) / 2
                                           + scrollOffset
     readonly property bool dragInside: dragKey !== "" && insideDropBand(dragPoint)
-    readonly property int previewSource: dragKey ? DockService.rowIndex(dragKey) : externalOver
-                                                   ? DockService.rowIndex(externalSourceKey) : -1
-    readonly property var preview: DockLayout.previewOrder(kinds, previewSource, dragInside || externalOver
-                                                           ? insertion : -1, draggedEntry ? draggedEntry.kind :
-                                                                                            externalKind)
+    readonly property int previewSource: dragKey ? DockService.rowIndex(dragKey) : externalOver &&
+                                                   !dropTargetKey ? DockService.rowIndex(externalSourceKey) :
+                                                                    -1
+    readonly property var preview: DockLayout.previewOrder(kinds, previewSource, (dragInside || externalOver)
+                                                           && !dropTargetKey ? insertion : -1, draggedEntry
+                                                           ? draggedEntry.kind : externalKind)
     readonly property var layout: DockLayout.layout(preview.kinds, baseLayout.size, availableLength,
                                                     magnification, 16, dragInside || externalOver
                                                     || handoffKey !== "" || (!dragKey && magnificationActive)
-                                                    ? pointerInBase : NaN, DockLayout.sectionBoundary(
-                                                        preview.kinds, DockService.pinnedEntries.length,
+                                                    ? pointerInBase : NaN, DockLayout.sectionBoundaries(
+                                                        preview.kinds, DockService.pinnedAppCount,
                                                         preview.order))
     readonly property var slotsByIndex: {
         const result = [];
@@ -62,9 +64,9 @@ PanelWindow {
                                   !== ""
 
     readonly property bool interacting: bandHover.hovered || edgeHover.hovered || popup.hovered
-                                        || dropArea.containsDrag || dragKey !== ""
-                                        || DockService.externalDragActive || dragGhost.active || handoffKey
-                                        !== ""
+                                        || filePopup.hovered && filePopup.visible || dropArea.containsDrag
+                                        || dragKey !== "" || DockService.externalDragActive
+                                        || dragGhost.active || handoffKey !== ""
     property bool revealed: false
     property real pointerAxis: 0
     property bool magnificationActive: false
@@ -82,6 +84,15 @@ PanelWindow {
     property bool externalOver: false
     property string externalKind: "app"
     property string externalSourceKey: ""
+    property string dropTargetKey: ""
+    property var externalEntries: []
+    readonly property bool externalFiles: externalEntries.some(entry => entry.kind === "file" || entry.kind
+                                                                        === "folder")
+    readonly property bool filePopupActive: {
+        const revision = DockService.revision;
+        const entry = DockService.entryFor(popupKey);
+        return !!entry && (entry.kind === "file" || entry.kind === "folder" || entry.kind === "trash");
+    }
     property string handoffKey: ""
     property int handoffSerial: 0
     property point dragGrabOffset: Qt.point(0, 0)
@@ -92,6 +103,63 @@ PanelWindow {
                                             && DockLayout.removalDistance(edge, dragPoint.x, dragPoint.y,
                                                                           width, height, edgeOffset)
                                             > bandThickness + 48
+
+    function targetAt(point) {
+        if (!insideDropBand(point))
+            return null;
+        const axis = (horizontal ? point.x : point.y) - (axisLength - Math.min(baseLayout.baseLength,
+                                                                               availableLength)) / 2
+              + scrollOffset;
+        for (let i = 0; i < baseLayout.slots.length; ++i) {
+            const slot = baseLayout.slots[i];
+            if (Math.abs(axis - slot.center) < slot.span * 0.3)
+                return DockService.model.get(i);
+        }
+        return null;
+    }
+    function updateDropTarget() {
+        const candidate = root.externalFiles ? root.targetAt(root.dropPoint) : null;
+        root.dropTargetKey = candidate && !DesktopFiles.busy && (candidate.kind === "trash"
+                                                                 && DesktopFiles.trashAvailable
+                                                                 || candidate.kind === "app"
+                                                                 && DesktopFiles.canOpenWith(
+                                                                     candidate.desktopId)) ? candidate.key :
+                                                                                             "";
+        root.insertion = root.dropTargetKey ? -1 : root.insertionAt(root.dropPoint);
+    }
+    property var fileRegions: []
+    function updateFileRegions() {
+        for (const region of fileRegions)
+            region.destroy();
+        fileRegions = filePopup.inputItems.map(item => fileRegionComponent.createObject(fileInputRegion, {
+                                                                                            sourceItem: item
+                                                                                        }));
+        fileInputRegion.regions = fileRegions;
+    }
+    Component {
+        id: fileRegionComponent
+        Region {
+            required property Item sourceItem
+            item: sourceItem
+        }
+    }
+    Connections {
+        target: filePopup
+        function onInputItemsChanged() {
+            Qt.callLater(root.updateFileRegions);
+        }
+    }
+    Connections {
+        target: DockService
+        function onFileDragActiveChanged() {
+            if (!DockService.fileDragActive)
+                root.dismissPopup();
+        }
+        function onFileErrorChanged() {
+            if (DockService.fileError)
+                root.showPopup("trash", true);
+        }
+    }
 
     function updateInteraction() {
         if (interacting) {
@@ -120,6 +188,11 @@ PanelWindow {
             hoverTimer.stop();
             return;
         }
+        const entry = DockService.entryFor(key);
+        if (entry && entry.kind !== "app") {
+            root.dismissPopup();
+            return;
+        }
         if (pendingPopupKey === key && hoverTimer.running)
             return;
         pendingPopupKey = key;
@@ -132,11 +205,11 @@ PanelWindow {
         pendingPopupKey = "";
         hoverTimer.stop();
     }
-    function showPopup(key, context) {
+    function showPopup(key, context, folderClick) {
         if (WindowPreviewService.suspended)
             return;
         const entry = DockService.entryFor(key);
-        if (!entry || (!context && entry.kind !== "app"))
+        if (!entry || (!context && entry.kind !== "app" && !(folderClick && entry.kind === "folder")))
             return;
         hoverTimer.stop();
         const slot = slotForKey(key);
@@ -164,10 +237,12 @@ PanelWindow {
         }
         popupKey = key;
         contextMenu = context;
-        if (context)
+        if (context || folderClick)
             content.forceActiveFocus();
     }
     function dismissPopup() {
+        if (DockService.fileDragActive)
+            return;
         popupKey = "";
         contextMenu = false;
         pendingPopupKey = "";
@@ -179,8 +254,14 @@ PanelWindow {
     function insertionAt(point) {
         const origin = (axisLength - Math.min(baseLayout.baseLength, availableLength)) / 2;
         const coordinate = (horizontal ? point.x : point.y) - origin + scrollOffset;
-        const candidate = Math.min(DockService.pinnedEntries.length, DockLayout.insertionIndex(
-                                       baseLayout.slots, coordinate));
+        const kind = draggedEntry ? draggedEntry.kind : externalKind;
+        const files = kind === "file" || kind === "folder";
+        const candidate = Math.max(files ? DockService.fileStartIndex : 0, Math.min(files
+                                                                                    ? DockService.model.count
+                                                                                      - 1 : DockService.pinnedAppCount,
+                                                                                    DockLayout.insertionIndex(
+                                                                                        baseLayout.slots,
+                                                                                        coordinate)));
         if (insertion >= 0 && Math.abs(candidate - insertion) === 1) {
             const crossed = baseLayout.slots[Math.min(candidate, insertion)];
             if (crossed && Math.abs(coordinate - crossed.center) < 6)
@@ -203,6 +284,7 @@ PanelWindow {
         for (const role of ["key", "kind", "name", "icon", "symbol", "pinned", "focused", "launching",
                             "available", "windowCount"])
             value[role] = entry[role];
+        value.url = String(entry.url || "");
         return value;
     }
     function syncVisualEntries() {
@@ -292,10 +374,10 @@ PanelWindow {
         dragPoint = point;
         const entry = DockService.entryFor(key);
         let removed = false;
-        if (removeOnRelease)
+        if (removeOnRelease || targetAt(point)?.kind === "trash")
             removed = DockService.unpin(key);
         else if (entry && insideDropBand(point)) {
-            const target = insertionAt(point);
+            const target = DockService.pinIndexForSlot(insertionAt(point), entry.kind);
             if (entry.pinned)
                 DockService.movePinned(key, target);
             else if (entry.desktopId)
@@ -379,7 +461,8 @@ PanelWindow {
     WlrLayershell.namespace: "clavis-shell-dock"
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.exclusionMode: ExclusionMode.Normal
-    WlrLayershell.keyboardFocus: dragKey || contextMenu ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: dragKey || contextMenu || filePopupActive ? WlrKeyboardFocus.Exclusive :
+                                                                             WlrKeyboardFocus.None
 
     onInteractingChanged: updateInteraction()
     onShownChanged: {
@@ -582,24 +665,28 @@ PanelWindow {
                 onContentWidthChanged: root.scrollBy(0)
                 onContentHeightChanged: root.scrollBy(0)
 
-                Rectangle {
-                    visible: root.layout.divider >= 0
-                    width: root.horizontal ? 2 : root.restingThickness - 20
-                    height: root.horizontal ? root.restingThickness - 20 : 2
-                    x: root.horizontal ? root.layout.divider - width / 2 : glass.x + 10
-                    y: root.horizontal ? glass.y + 10 : root.layout.divider - height / 2
-                    radius: 1
-                    color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.4)
-                    Behavior on x {
-                        NumberAnimation {
-                            duration: DockMotion.reflowDuration
-                            easing.type: Easing.OutCubic
+                Repeater {
+                    model: root.layout.dividers
+                    delegate: Rectangle {
+                        required property real modelData
+                        visible: true
+                        width: root.horizontal ? 2 : root.restingThickness - 20
+                        height: root.horizontal ? root.restingThickness - 20 : 2
+                        x: root.horizontal ? modelData - width / 2 : glass.x + 10
+                        y: root.horizontal ? glass.y + 10 : modelData - height / 2
+                        radius: 1
+                        color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.4)
+                        Behavior on x {
+                            NumberAnimation {
+                                duration: DockMotion.reflowDuration
+                                easing.type: Easing.OutCubic
+                            }
                         }
-                    }
-                    Behavior on y {
-                        NumberAnimation {
-                            duration: DockMotion.reflowDuration
-                            easing.type: Easing.OutCubic
+                        Behavior on y {
+                            NumberAnimation {
+                                duration: DockMotion.reflowDuration
+                                easing.type: Easing.OutCubic
+                            }
                         }
                     }
                 }
@@ -646,11 +733,20 @@ PanelWindow {
                         iconSize: retiring ? retirementSize : slot.size
                         restingIconSize: root.baseLayout.size
                         contextActive: root.contextMenu && root.popupKey === key
-                        showTooltip: !root.contextMenu && root.popupKey === key && (windowCount === 0 ||
-                                                                                    !DockService.showThumbnails)
-                                     && kind === "app" && !WindowPreviewService.suspended
+                        showTooltip: !root.contextMenu && !WindowPreviewService.suspended && (kind === "app"
+                                                                                              ? root.popupKey
+                                                                                                === key && (
+                                                                                                    windowCount
+                                                                                                    === 0 ||
+                                                                                                    !DockService.showThumbnails) :
+                                                                                                kind !== "spacer"
+                                                                                                && root.hoverKey
+                                                                                                === key
+                                                                                                && root.popupKey
+                                                                                                !== key)
                         dragged: key === root.dragKey || (dragGhost.entry && dragGhost.entry.key === key) || (
-                                     root.externalOver && root.externalSourceKey === key)
+                                     root.externalOver && !root.dropTargetKey && root.externalSourceKey
+                                     === key)
                         enabled: !retiring && !awaitingHandoff
                         presence: 0
                         function animatePresence() {
@@ -722,10 +818,17 @@ PanelWindow {
                         }
                         onHovered: key => root.hoverEntry(key)
                         onHoverLeft: key => root.leaveEntry(key)
+                        dropTarget: root.dropTargetKey === key || !!root.dragKey && root.targetAt(root.dragPoint)
+                                    ?.key === key && kind === "trash"
+                        dropHint: kind === "trash" ? qsTr("Move to Trash") : qsTr("Open with %1").arg(name)
                         onActivated: key => {
                             root.dragCancelled = false;
-                            DockService.activate(key);
-                            root.dismissPopup();
+                            if (kind === "folder")
+                                root.showPopup(key, false, true);
+                            else {
+                                DockService.activate(key);
+                                root.dismissPopup();
+                            }
                         }
                         onContextRequested: key => root.showPopup(key, true)
                         onDragMoved: (key, position, offset, size) => root.moveDrag(key, position, offset,
@@ -764,14 +867,19 @@ PanelWindow {
                     if (!drag.accepted)
                         return;
                     root.cancelExternalHandoff(root.handoffSerial);
-                    root.externalKind = drag.source && drag.source.spaceTemplate ? "spacer" : "app";
-                    root.externalSourceKey = root.externalKind === "app" && drag.source
-                            && typeof drag.source.desktopId === "string" ? "app:"
-                                                                           + drag.source.desktopId.replace(
-                                                                               /\.desktop$/, "") : "";
+                    root.externalEntries = DockService.dropEntries(drag.getDataAsString(
+                                                                       DockService.dragMimeType), drag.urls);
+                    root.externalKind = root.externalEntries.length ? root.externalEntries[0].kind : "app";
+                    root.externalSourceKey = root.externalEntries.length === 1 ? (root.externalKind === "app"
+                                                                                  ? "app:"
+                                                                                    + root.externalEntries[0].desktopId :
+                                                                                    root.externalFiles
+                                                                                    ? "file:"
+                                                                                      + root.externalEntries[0].url :
+                                                                                      "") : "";
                     root.dropPoint = band.mapToItem(content, drag.x, drag.y);
                     root.pointerAxis = root.horizontal ? root.dropPoint.x : root.dropPoint.y;
-                    root.insertion = root.insertionAt(root.dropPoint);
+                    root.updateDropTarget();
                     root.externalOver = true;
                     root.dismissPopup();
                     root.revealed = true;
@@ -779,9 +887,11 @@ PanelWindow {
                 onPositionChanged: drag => {
                     root.dropPoint = band.mapToItem(content, drag.x, drag.y);
                     root.pointerAxis = root.horizontal ? root.dropPoint.x : root.dropPoint.y;
-                    root.insertion = root.insertionAt(root.dropPoint);
+                    root.updateDropTarget();
                 }
                 onExited: {
+                    root.dropTargetKey = "";
+                    root.externalEntries = [];
                     root.externalOver = false;
                     root.externalSourceKey = "";
                     root.insertion = -1;
@@ -793,11 +903,39 @@ PanelWindow {
                     const before = new Set();
                     for (let i = 0; i < DockService.model.count; ++i)
                         before.add(DockService.model.get(i).key);
-                    const accepted = DockService.acceptDrop(text, drop.urls, root.insertion);
+                    root.externalEntries = incoming;
+                    root.updateDropTarget();
+                    if (root.dropTargetKey && root.externalFiles) {
+                        const target = DockService.entryFor(root.dropTargetKey);
+                        const urls = Array.from(drop.urls);
+                        const trash = target.kind === "trash";
+                        const desktopId = String(target.desktopId);
+                        const operation = () => {
+                            const ok = trash ? DesktopFiles.moveToTrash(urls) : DesktopFiles.openWith(
+                                                   desktopId, urls);
+                            if (!ok)
+                                DockService.fileError = qsTr("The file operation could not be started.");
+                        };
+                        if (drop.source && typeof drop.source.deferDrop === "function")
+                            drop.source.deferDrop(operation);
+                        else
+                            operation();
+                        drop.accept(target.kind === "trash" ? Qt.MoveAction : Qt.CopyAction);
+                        root.dropTargetKey = "";
+                        root.externalEntries = [];
+                        root.externalOver = false;
+                        root.externalSourceKey = "";
+                        root.insertion = -1;
+                        return;
+                    }
+                    const accepted = DockService.acceptDrop(text, drop.urls, DockService.pinIndexForSlot(
+                                                                root.insertion, root.externalKind));
                     let landingEntry = null;
                     if (accepted && incoming.length === 1) {
                         if (incoming[0].kind === "app")
                             landingEntry = DockService.entryFor("app:" + incoming[0].desktopId);
+                        else if (incoming[0].kind === "file" || incoming[0].kind === "folder")
+                            landingEntry = DockService.entryFor("file:" + incoming[0].url);
                         else {
                             for (let i = 0; i < DockService.model.count; ++i) {
                                 const candidate = DockService.model.get(i);
@@ -812,6 +950,8 @@ PanelWindow {
                     // ends, then let the actual delegate animate in once.
                     if (landingEntry)
                         root.prepareExternalHandoff(landingEntry, drop.source);
+                    root.dropTargetKey = "";
+                    root.externalEntries = [];
                     root.externalOver = false;
                     root.externalSourceKey = "";
                     root.insertion = -1;
@@ -834,8 +974,9 @@ PanelWindow {
 
         DockPreviewPopup {
             id: popup
-            visible: root.popupKey !== "" && !!entry && (root.contextMenu || (DockService.showThumbnails
-                                                                              && windows.length > 0))
+            visible: !root.filePopupActive && root.popupKey !== "" && !!entry && (root.contextMenu || (
+                                                                                      DockService.showThumbnails
+                                                                                      && windows.length > 0))
             entryKey: root.popupKey
             maximumWidth: root.horizontal ? Math.max(0, root.width - 32) : Math.max(0, (root.edge === "left"
                                                                                         ? root.width
@@ -860,6 +1001,28 @@ PanelWindow {
             onDismissed: root.dismissPopup()
         }
 
+        DockFilePopup {
+            id: filePopup
+            visible: root.filePopupActive
+            entryKey: root.popupKey
+            contextMenu: root.contextMenu
+            edge: root.edge
+            labelsLeft: root.edge === "right" || root.horizontal && root.popupAxis > root.width / 2
+            anchorOffset: root.popupAxis - (root.horizontal ? x : y)
+            maximumWidth: root.horizontal ? root.width - 32 : (root.edge === "left" ? root.width
+                                                                                      - root.popupCross :
+                                                                                      root.popupCross) - 24
+            maximumHeight: root.horizontal ? root.popupCross - 24 : root.height - 32
+            x: root.horizontal ? Math.max(16, Math.min(root.width - width - 16, root.popupAxis - (labelsLeft
+                                                                                                  ? width - 48 :
+                                                                                                    48))) : root.edge
+                                 === "left" ? root.popupCross + 6 : root.popupCross - width - 6
+            y: root.horizontal ? root.popupCross - height - 6 : Math.max(16, Math.min(root.height - height - 16,
+                                                                                      root.popupAxis - height
+                                                                                      / 2))
+            onDismissed: root.dismissPopup()
+        }
+
         DockDragVisual {
             id: dragGhost
             onActiveChanged: root.updateInteraction()
@@ -876,11 +1039,15 @@ PanelWindow {
         Region {
             item: popup.visible ? popup : null
         }
+        Region {
+            id: fileInputRegion
+        }
     }
     CompositorBlurRegion {
         targetWindow: root
         backgroundItem: glass
-        additionalBackgroundItems: popup.visible ? popup.blurBackgroundItems : []
+        additionalBackgroundItems: (popup.visible ? popup.blurBackgroundItems : []).concat(
+                                       filePopup.blurBackgroundItems)
         blurEnabled: root.shown
         radius: 20
     }

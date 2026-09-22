@@ -3961,6 +3961,26 @@ Scroll to adjust</source>
         <source>Dock settings could not be saved. Changes apply to this session only.</source>
         <translation>無法儲存 Dock 設定。變更僅套用於本次工作階段。</translation>
     </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="227"/>
+        <source>Trash</source>
+        <translation>垃圾桶</translation>
+    </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="245"/>
+        <source>This file or folder is unavailable.</source>
+        <translation>此檔案或資料夾無法使用。</translation>
+    </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="433"/>
+        <source>Some files could not be processed.</source>
+        <translation>部分檔案無法處理。</translation>
+    </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="433"/>
+        <source>The file operation failed.</source>
+        <translation>檔案操作失敗。</translation>
+    </message>
 </context>
 <context>
     <name>DockSurface</name>
@@ -3973,6 +3993,21 @@ Scroll to adjust</source>
         <location filename="../Modules/Dock/DockDragVisual.qml" line="134"/>
         <source>Remove from Dock</source>
         <translation>從 Dock 移除</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockSurface.qml" line="805"/>
+        <source>Move to Trash</source>
+        <translation>移至垃圾桶</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockSurface.qml" line="805"/>
+        <source>Open with %1</source>
+        <translation>使用 %1 開啟</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockSurface.qml" line="899"/>
+        <source>The file operation could not be started.</source>
+        <translation>無法開始檔案操作。</translation>
     </message>
 </context>
 <context>
@@ -13822,6 +13857,151 @@ Windows: </source>
         <location filename="../Services/ApplicationService.qml" line="32"/>
         <source>Drag to Dock to add a blank space</source>
         <translation>拖入 Dock 新增空白佔位</translation>
+    </message>
+</context>
+<context>
+    <name>DockFilePopup</name>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="165"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="219"/>
+        <source>Folder is unavailable</source>
+        <translation>資料夾無法使用</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="165"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="229"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="295"/>
+        <source>Open in File Manager</source>
+        <translation>在檔案管理員中開啟</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="167"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="219"/>
+        <source>Folder is empty</source>
+        <translation>資料夾是空的</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="242"/>
+        <source>Permanently delete all items in Trash?</source>
+        <translation>永久刪除垃圾桶中的所有項目？</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="245"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="249"/>
+        <source>Empty Trash</source>
+        <translation>清空垃圾桶</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="259"/>
+        <source>Sort by</source>
+        <translation>排序方式</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="261"/>
+        <source>Name</source>
+        <translation>名稱</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="261"/>
+        <source>Date Modified</source>
+        <translation>修改時間</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="261"/>
+        <source>Date Created</source>
+        <translation>建立時間</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="263"/>
+        <source>Kind</source>
+        <translation>類型</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="263"/>
+        <source>Size</source>
+        <translation>大小</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="271"/>
+        <source>Display as</source>
+        <translation>顯示為</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="274"/>
+        <source>Folder</source>
+        <translation>資料夾</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="279"/>
+        <source>Stack</source>
+        <translation>堆疊</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="284"/>
+        <source>View content as</source>
+        <translation>內容展開方式</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="286"/>
+        <source>Fan</source>
+        <translation>扇形</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="286"/>
+        <source>Grid</source>
+        <translation>格狀</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="286"/>
+        <source>List</source>
+        <translation>列表</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="294"/>
+        <source>Open Trash</source>
+        <translation>開啟垃圾桶</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="294"/>
+        <source>Open</source>
+        <translation>開啟</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="301"/>
+        <source>Empty Trash…</source>
+        <translation>清空垃圾桶…</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="307"/>
+        <source>Remove from Dock</source>
+        <translation>從 Dock 移除</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="336"/>
+        <source>Dismiss</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="343"/>
+        <source>Trash is unavailable. Install or enable GVfs.</source>
+        <translation>垃圾桶無法使用，請安裝或啟用 GVfs。</translation>
+    </message>
+</context>
+<context>
+    <name>DockFolderMenu</name>
+    <message>
+        <location filename="../Modules/Dock/DockFolderMenu.qml" line="140"/>
+        <source>Folder is empty</source>
+        <translation>資料夾是空的</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFolderMenu.qml" line="145"/>
+        <source>Open in File Manager</source>
+        <translation>在檔案管理員中開啟</translation>
     </message>
 </context>
 </TS>

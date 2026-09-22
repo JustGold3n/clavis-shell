@@ -42,7 +42,7 @@ normalize。仅明确格式迁移时使用全树写入 `--all`；`--check-all` �
 
 ```bash
 sudo pacman -S --needed base-devel cmake ninja qt6-base qt6-declarative \
-  qt6-shadertools qt6-tools qt6-wayland qtkeychain-qt6 libpipewire \
+  qt6-shadertools qt6-tools qt6-wayland qtkeychain-qt6 libpipewire glib2 gvfs \
   clang shellcheck python git libxkbcommon systemd-libs wayland wayland-protocols
 # libcava 的 AUR 包提供所需共享库与 pkg-config 接口，另行构建安装。
 # Matugen 集成测试需要：
@@ -50,6 +50,8 @@ sudo pacman -S --needed matugen jq
 # Niri 配置与显示预览集成测试需要 niri validate（不会启动 compositor）：
 sudo pacman -S --needed niri
 ```
+
+Dock 文件区的 `Clavis.Files` 模块使用 Qt Concurrent 和 `gio-unix-2.0`；废纸篓浏览、计数与变更通知需要 GVfs 的 trash backend。图片直接使用 Qt 图像加载，其余文件预览复用有效的 freedesktop 缩略图缓存，未命中时显示系统 MIME 图标。
 
 窗口预览模块需要 `wayland-protocols >= 1.41`；协议代码由构建时的 `wayland-scanner`
 生成。标准 niri 会话未提供单窗口捕获协议时，Dock 自动使用标题模式。

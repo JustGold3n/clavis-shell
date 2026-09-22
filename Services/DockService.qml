@@ -3,8 +3,8 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Clavis.Files
 import Clavis.Niri
-import Clavis.Runtime as Runtime
 import qs.Common
 import qs.Services
 import "../Common/functions/DockModel.js" as DockModel
@@ -20,6 +20,55 @@ Singleton {
     readonly property bool supportsMinimize: false
     property alias model: entries
     readonly property var pinnedEntries: root._pinned
+    readonly property int pinnedAppCount: root._pinned.filter(entry => !DockModel.isFile(entry)).length
+    readonly property int fileStartIndex: {
+        const revision = root._revision;
+        for (let i = 0; i < entries.count; ++i)
+            if (DockModel.isFile(entries.get(i)) || entries.get(i).kind === "trash")
+                return i;
+        return entries.count;
+    }
+    property string fileError: ""
+    function pinIndexForSlot(index, kind) {
+        return kind === "file" || kind === "folder" ? Math.max(root.pinnedAppCount, Math.min(root._pinned.length,
+                                                                                             root.pinnedAppCount
+                                                                                             + index - root.fileStartIndex)) :
+                                                      Math.min(root.pinnedAppCount, index);
+    }
+    function fileRow(pin) {
+        const info = DesktopFiles.info(pin.url);
+        return {
+            key: DockModel.pinnedKey(pin),
+            kind: pin.kind,
+            desktopId: "",
+            name: info.name || pin.url,
+            icon: !info.available && pin.kind === "folder" ? "folder" : info.icon || "text-x-generic",
+            symbol: "",
+            pinned: true,
+            windowCount: 0,
+            focused: false,
+            launching: false,
+            available: !!info.available,
+            url: pin.url,
+            view: pin.view || "fan",
+            sort: pin.sort || "name",
+            display: pin.display || "folder"
+        };
+    }
+    function folderOption(key, name, value) {
+        const allowed = {
+            view: ["fan", "grid", "list"],
+            sort: ["name", "modified", "created", "kind", "size"],
+            display: ["folder", "stack"]
+        };
+        if (!allowed[name] || allowed[name].indexOf(value) < 0)
+            return false;
+        const next = root._pinned.map(entry => DockModel.pinnedKey(entry) === key && entry.kind === "folder"
+                                               ? Object.assign({}, entry, {
+                                                                   [name]: value
+                                                               }) : entry);
+        return root.commitPinned(next);
+    }
     readonly property int revision: root._revision
     readonly property bool enabled: root._options.enabled
     readonly property string position: root._options.position
@@ -32,6 +81,13 @@ Singleton {
     readonly property bool showRecent: root._options.showRecent
     readonly property bool contextPinning: root._options.contextPinning
     property bool externalDragActive: false
+    property bool fileDragActive: false
+    function finishFileDrag(operation) {
+        root.externalDragActive = false;
+        root.fileDragActive = false;
+        if (operation)
+            operation();
+    }
     property bool ready: false
     property bool writable: false
     property string configError: ""
@@ -118,7 +174,7 @@ Singleton {
         for (const key of Object.keys(groups))
             byKey[key] = groups[key].windows;
         root._windowsByKey = byKey;
-        for (const pinned of root._pinned) {
+        for (const pinned of root._pinned.filter(entry => !DockModel.isFile(entry))) {
             const key = DockModel.pinnedKey(pinned);
             used.add(key);
             if (pinned.kind === "spacer") {
@@ -167,12 +223,35 @@ Singleton {
             if (!used.has(key))
                 rows.push(root.appRow(key, ApplicationService.findById(key.slice(4)), [], false));
         }
+        for (const pin of root._pinned.filter(DockModel.isFile))
+            rows.push(root.fileRow(pin));
+        rows.push({
+                      key: "trash",
+                      kind: "trash",
+                      desktopId: "",
+                      name: qsTr("Trash"),
+                      icon: DesktopFiles.trashCount > 0 ? "user-trash-full" : "user-trash",
+                      symbol: "",
+                      pinned: false,
+                      windowCount: 0,
+                      focused: false,
+                      launching: false,
+                      available: true
+                  });
         DockModel.reconcile(entries, rows);
         root._revision++;
         launchTimeout.running = Object.keys(pending).length > 0;
     }
 
     function activate(key) {
+        const entry = root.entryFor(key);
+        if (entry && (DockModel.isFile(entry) || entry.kind === "trash")) {
+            if (entry.kind !== "trash" && !DesktopFiles.info(entry.url).available) {
+                root.fileError = qsTr("This file or folder is unavailable.");
+                return false;
+            }
+            return ApplicationService.openUrl(entry.kind === "trash" ? "trash:///" : entry.url);
+        }
         const windows = root.windowsFor(key);
         const success = windows.length ? root.focusWindow(windows[0].id) : root.launch(key);
         if (success)
@@ -228,7 +307,8 @@ Singleton {
     function commitPinned(next) {
         if (!root.ready || next.length > 128)
             return false;
-        root._pinned = next;
+        root._pinned = DockModel.groupPins(next);
+        DesktopFiles.watchUrls(root._pinned.filter(DockModel.isFile).map(entry => entry.url));
         root.rebuild();
         root.save();
         return true;
@@ -272,18 +352,21 @@ Singleton {
         const result = [];
         const seen = new Set();
         for (const url of Array.from(urls || [])) {
-            const info = Runtime.ClavisFileSystem.localUrlInfo(url);
-            if (!info.valid || info.isDirectory)
+            const info = DesktopFiles.info(url);
+            if (!info.url || !info.available && !info.isLink)
                 return [];
             const id = DockModel.desktopIdForPath(info.path, root._dataRoots);
-            if (!id || !ApplicationService.findById(id))
-                return [];
-            if (!seen.has(id)) {
-                seen.add(id);
-                result.push({
-                                kind: "app",
-                                desktopId: id
-                            });
+            const entry = id && ApplicationService.findById(id) ? {
+                                                                      kind: "app",
+                                                                      desktopId: id
+                                                                  } : {
+                kind: info.isDirectory ? "folder" : "file",
+                url: info.url
+            };
+            const key = DockModel.pinnedKey(entry);
+            if (!seen.has(key)) {
+                seen.add(key);
+                result.push(entry);
             }
         }
         return result;
@@ -335,9 +418,27 @@ Singleton {
         root.writable = canWrite;
         root.configError = error;
         root.ready = true;
+        DesktopFiles.watchUrls(root._pinned.filter(DockModel.isFile).map(entry => entry.url));
         root.rebuild();
     }
 
+    Connections {
+        target: DesktopFiles
+        function onTrashChanged() {
+            if (root.ready)
+                root.rebuild();
+        }
+        function onFilesChanged() {
+            if (root.ready)
+                root.rebuild();
+        }
+        function onFinished(action, succeeded, errors) {
+            if (errors.length)
+                root.fileError = (succeeded > 0 ? qsTr("Some files could not be processed.") : qsTr(
+                                                      "The file operation failed.")) + "\n" + errors.join(
+                            "\n");
+        }
+    }
     Process {
         command: ["mkdir", "-p", Paths.configHome]
         running: true

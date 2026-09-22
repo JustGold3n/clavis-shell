@@ -67,19 +67,34 @@ function decodeConfig(text) {
             } else if ((entry.kind === "spacer" || entry.kind === "separator") && typeof entry.id === "string"
                     && /^[A-Za-z0-9_-]{1,80}$/.test(entry.id)) {
                 normalized = { kind: "spacer", id: entry.id };
+            } else if (isFile(entry) && validFileUrl(entry.url)) {
+                normalized = { kind: entry.kind, url: entry.url };
+                if (entry.kind === "folder") {
+                    normalized.view = ["fan", "grid", "list"].indexOf(entry.view) >= 0 ? entry.view : "fan";
+                    normalized.sort = ["name", "modified", "created", "kind", "size"].indexOf(entry.sort) >= 0 ? entry.sort : "name";
+                    normalized.display = entry.display === "stack" ? "stack" : "folder";
+                }
             } else return null;
             const key = pinnedKey(normalized);
             if (keys.has(key)) return null;
             keys.add(key);
             pinned.push(normalized);
         }
-        return { schemaVersion: 1, options: options, pinned: pinned };
+        return { schemaVersion: 1, options: options, pinned: groupPins(pinned) };
     } catch (error) {
         return null;
     }
 }
 
+function isFile(entry) { return entry.kind === "file" || entry.kind === "folder"; }
+function validFileUrl(value) {
+    if (typeof value !== "string" || !value.startsWith("file:///") || /[?#\u0000-\u001f]/.test(value)) return false;
+    try { return !decodeURIComponent(value).includes("\u0000"); } catch (error) { return false; }
+}
+function groupPins(pins) { return pins.filter(entry => !isFile(entry)).concat(pins.filter(isFile)); }
+
 function pinnedKey(entry) {
+    if (isFile(entry)) return "file:" + entry.url;
     return entry.kind === "spacer" ? "spacer:" + entry.id : "app:" + desktopId(entry.desktopId);
 }
 

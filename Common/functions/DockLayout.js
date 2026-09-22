@@ -21,18 +21,22 @@ function layout(kinds, preferredSize, available, magnification, sectionSpacing, 
     const count = kinds.length;
     const apps = count;
     const maximum = Math.max(1, Math.min(2, magnification));
-    const sectionGap = sectionBoundary > 0 && sectionBoundary < count ? sectionSpacing + gap : 0;
-    const fixed = count * gap + padding * 2 + sectionGap;
+    const boundaries = (Array.isArray(sectionBoundary) ? sectionBoundary : [sectionBoundary])
+        .filter((v, i, list) => v > 0 && v < count && list.indexOf(v) === i);
+    const sectionGap = sectionSpacing + gap;
+    const fixed = count * gap + padding * 2 + sectionGap * boundaries.length;
     const reserve = Math.min(apps, 5) * (maximum - 1);
     const size = Math.max(32, Math.min(preferredSize, (available - fixed) / Math.max(1, apps + reserve)));
     const baseLength = fixed + apps * size;
     let baseCursor = padding;
     let cursor = padding;
     let divider = -1;
+    const dividers = [];
     const slots = [];
     for (let index = 0; index < count; ++index) {
-        if (sectionGap && index === sectionBoundary) {
+        if (boundaries.indexOf(index) >= 0) {
             divider = cursor + sectionGap / 2;
+            dividers.push(divider);
             baseCursor += sectionGap;
             cursor += sectionGap;
         }
@@ -45,7 +49,7 @@ function layout(kinds, preferredSize, available, magnification, sectionSpacing, 
         baseCursor += baseSpan;
         cursor += span;
     }
-    return { size: size, baseLength: baseLength, length: cursor + padding, slots: slots, divider: divider,
+    return { size: size, baseLength: baseLength, length: cursor + padding, slots: slots, divider: divider, dividers: dividers,
              overflow: baseLength + reserve * size > available };
 }
 
@@ -93,4 +97,40 @@ function removalDistance(edge, x, y, width, height, edgeOffset) {
     if (edge === "left") return x - edgeOffset;
     if (edge === "right") return width - x - edgeOffset;
     return height - y - edgeOffset;
+}
+
+// The file area is a separate section even when there are no recent apps.
+function sectionBoundaries(kinds, pinnedAppCount, order) {
+    const result = [];
+    let previous = "";
+    let hasApp = false;
+    for (let i = 0; i < kinds.length; ++i) {
+        const source = order ? order[i] : i;
+        const group = ["file", "folder", "trash"].indexOf(kinds[i]) >= 0 ? "files"
+            : source < pinnedAppCount ? "pinned" : "running";
+        if (i > 0 && group !== previous && (group === "files" || hasApp)) result.push(i);
+        previous = group;
+        if (kinds[i] === "app") hasApp = true;
+    }
+    return result;
+}
+
+function folderFan(edge, count, maximumWidth, maximumHeight, labelsLeft) {
+    const availableWidth = Math.max(0, maximumWidth);
+    const availableHeight = Math.max(0, maximumHeight);
+    const bottom = edge === "bottom";
+    const shown = Math.max(0, Math.min(count, 7, bottom
+        ? Math.floor((availableHeight - 62) / 72) : Math.floor((availableWidth - 24) / 112)));
+    const width = Math.min(availableWidth, bottom ? 380 : Math.max(220, shown * 112 + 24));
+    const height = Math.min(availableHeight, bottom ? shown * 72 + 62 : 190);
+    const slots = [];
+    for (let i = 0; i < shown; ++i) {
+        const bend = Math.pow(i / Math.max(1, shown - 1), 2);
+        slots.push(bottom
+            ? {x: labelsLeft ? 48 - bend * 38 : 10 + bend * 38, y: height - 64 - i * 72,
+               width: Math.max(0, width - 55), height: 64}
+            : {x: 12 + (edge === "left" ? i : shown - 1 - i) * 112, y: 6 + bend * 24,
+               width: 104, height: 112});
+    }
+    return {width: width, height: height, count: shown, slots: slots};
 }

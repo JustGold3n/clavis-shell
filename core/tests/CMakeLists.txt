@@ -169,3 +169,9 @@ target_link_libraries(weather_location_tests PRIVATE ClavisWeatherCore Qt6::Core
 add_test(NAME weather_location_tests COMMAND weather_location_tests)
 
 add_test(NAME search_catalog_contracts COMMAND ${Python3_EXECUTABLE} ${CLAVIS_SOURCE_ROOT}/tests/test_search_catalog.py)
+
+qt_add_executable(desktop_files_tests desktop_files_test.cpp)
+target_include_directories(desktop_files_tests PRIVATE ${CLAVIS_SOURCE_ROOT}/core/plugin/files/src)
+target_link_libraries(desktop_files_tests PRIVATE ClavisFiles Qt6::Core Qt6::Gui Qt6::Qml Qt6::Test)
+add_test(NAME desktop_files_tests COMMAND desktop_files_tests)
+set_tests_properties(desktop_files_tests PROPERTIES ENVIRONMENT "GIO_USE_VFS=local")

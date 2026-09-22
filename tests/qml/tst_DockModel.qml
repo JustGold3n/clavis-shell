@@ -38,6 +38,41 @@ TestCase {
                               });
     }
 
+    function test_fileReferencesSurviveConfigRoundTrip() {
+        const pins = [
+                  {
+                      kind: "folder",
+                      url: "file:///tmp/Folder%20%23%25",
+                      view: "list",
+                      sort: "created",
+                      display: "stack"
+                  },
+                  {
+                      kind: "app",
+                      desktopId: "org.example.App"
+                  },
+                  {
+                      kind: "file",
+                      url: "file:///tmp/%E4%B8%AD%E6%96%87.txt"
+                  }
+              ];
+        const config = DockModel.decodeConfig(JSON.stringify({
+                                                                 schemaVersion: 1,
+                                                                 options: {},
+                                                                 pinned: pins
+                                                             }));
+        verify(config !== null);
+        compare(config.pinned[0].kind, "app");
+        compare(config.pinned[1].view, "list");
+        compare(config.pinned[1].sort, "created");
+        compare(config.pinned[1].display, "stack");
+        compare(config.pinned[2].url, pins[2].url);
+        compare(DockModel.pinnedKey(config.pinned[1]), "file:" + pins[0].url);
+        verify(!DockModel.validFileUrl("file:///tmp/%00"));
+        verify(!DockModel.validFileUrl("file://host/path"));
+        verify(!DockModel.validFileUrl("file:///tmp/%ZZ"));
+    }
+
     function test_configRoundTripAndBounds() {
         const decoded = DockModel.decodeConfig(encodedConfig([
                                                                  {
