@@ -17,6 +17,7 @@ Item {
     property real anchorOffset: width / 2
     property point sourceCenter: Qt.point(anchorOffset, height + 32)
     property real iconSize: 64
+    property real maximumFanOutset: Infinity
     property bool labelsLeft: true
     readonly property var entry: {
         const revision = DockService.revision;
@@ -193,6 +194,7 @@ Item {
         labelsLeft: root.labelsLeft
         maximumWidth: root.maximumWidth
         maximumHeight: root.maximumHeight
+        maximumOutset: root.maximumFanOutset
         iconSize: root.iconSize
         sourceCenter: root.sourceCenter
         progress: root.progress

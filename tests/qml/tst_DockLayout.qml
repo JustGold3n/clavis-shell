@@ -11,7 +11,7 @@ TestCase {
                 for (const iconSize of [64, 84, 160]) {
                     const layout = DockLayout.folderFan(edge, count, 800, 600, true, iconSize);
                     compare(layout.iconSize, iconSize);
-                    verify(layout.count <= 10 && layout.count <= count);
+                    verify(layout.count <= count);
                     verify(layout.width <= 800 && layout.height <= 600);
                     for (const slot of layout.slots) {
                         verify(slot.x >= 0 && slot.y >= 0);
@@ -20,6 +20,86 @@ TestCase {
                         verify(slot.height >= iconSize);
                     }
                 }
+            }
+        }
+    }
+
+    function fanCenter(slot, layout, labelsLeft) {
+        return Qt.point(slot.x + (labelsLeft ? slot.width - layout.iconSize / 2 - 6 : layout.iconSize / 2 + 6),
+                        slot.y + slot.height / 2);
+    }
+
+    function verifyFanBounds(layout, labelsLeft) {
+        // Include the fixed action and fractional positions during scrolling.
+        for (let position = 0; position <= layout.count; position += 0.25) {
+            const slot = DockLayout.folderFanSlot("bottom", position, layout, labelsLeft);
+            const center = fanCenter(slot, layout, labelsLeft);
+            const angle = slot.rotation * Math.PI / 180;
+            for (const x of [slot.x, slot.x + slot.width]) {
+                for (const y of [slot.y, slot.y + slot.height]) {
+                    const dx = x - center.x, dy = y - center.y;
+                    const rotatedX = center.x + dx * Math.cos(angle) - dy * Math.sin(angle);
+                    const rotatedY = center.y + dx * Math.sin(angle) + dy * Math.cos(angle);
+                    verify(rotatedX >= 0 && rotatedX <= layout.width);
+                    verify(rotatedY >= 0 && rotatedY <= layout.height);
+                }
+            }
+        }
+    }
+
+    function test_fanRotatedBoundsFitAndMirror() {
+        for (const width of [260, 800]) {
+            for (const height of [240, 600, 1400]) {
+                for (const size of [64, 84, 160]) {
+                    for (const count of [0, 1, 5, 11, 200]) {
+                        const layout = DockLayout.folderFan("bottom", count, width, height, true, size);
+                        verify(layout.width <= width && layout.height <= height);
+                        verifyFanBounds(layout, true);
+                        verifyFanBounds(layout, false);
+                        for (let position = 0; position <= layout.count; ++position) {
+                            const left = DockLayout.folderFanSlot("bottom", position, layout, true);
+                            const right = DockLayout.folderFanSlot("bottom", position, layout, false);
+                            fuzzyCompare(left.x + right.x + left.width, layout.width, 0.00001);
+                            compare(left.y, right.y);
+                            compare(left.rotation, -right.rotation);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function test_fanCurveAndTiltShareTangent() {
+        const short = DockLayout.folderFan("bottom", 5, 1000, 1600, true, 84);
+        const long = DockLayout.folderFan("bottom", 11, 1000, 1600, true, 84);
+        compare(short.count, 5);
+        compare(long.count, 11);
+        const first = fanCenter(long.slots[0], long, true);
+        const last = fanCenter(long.slots[long.count - 1], long, true);
+        const shortFirst = fanCenter(short.slots[0], short, true);
+        const shortLast = fanCenter(short.slots[short.count - 1], short, true);
+        verify(last.x - first.x > shortLast.x - shortFirst.x);
+        for (let index = 1; index < long.count; ++index) {
+            const before = long.slots[index - 1], after = long.slots[index];
+            const a = fanCenter(before, long, true), b = fanCenter(after, long, true);
+            verify(b.x > a.x && b.y < a.y);
+            verify(Math.hypot(b.x - a.x, b.y - a.y) > long.iconSize);
+            // The connecting chord follows the midpoint tangent. This also
+            // catches separate, unrelated interpolation of position and tilt.
+            fuzzyCompare(Math.atan2(b.x - a.x, a.y - b.y) * 180 / Math.PI, (before.rotation + after.rotation)
+                         / 2, 0.00001);
+        }
+    }
+
+    function test_fanKeepsItsFootAtTheFolderNearOutputEdge() {
+        for (const size of [64, 84, 160]) {
+            for (const outset of [size / 2 + 14, size / 2 + 40, size / 2 + 100]) {
+                const layout = DockLayout.folderFan("bottom", 200, 1000, 1400, true, size, outset);
+                verify(layout.iconInset <= outset);
+                verifyFanBounds(layout, true);
+                verifyFanBounds(layout, false);
+                const first = fanCenter(layout.slots[0], layout, true);
+                fuzzyCompare(first.x, layout.width - layout.iconInset, 0.00001);
             }
         }
     }

@@ -1060,6 +1060,7 @@ PanelWindow {
             anchorOffset: root.popupAxis - (root.horizontal ? x : y)
             sourceCenter: Qt.point(root.popupSourceCenter.x - x, root.popupSourceCenter.y - y)
             iconSize: root.popupIconSize
+            maximumFanOutset: labelsLeft ? root.width - root.popupAxis - 16 : root.popupAxis - 16
             readonly property real iconInset: fan ? fanIconInset : 68
             maximumWidth: root.horizontal ? root.width - 32 : (root.edge === "left" ? root.width
                                                                                       - root.popupCross :

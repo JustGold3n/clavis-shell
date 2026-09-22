@@ -12,6 +12,7 @@ Item {
     property real maximumWidth: 600
     property real maximumHeight: 800
     property real iconSize: 64
+    property real maximumOutset: Infinity
     property point sourceCenter
     property real progress: 0
     property string actionText: ""
@@ -22,7 +23,7 @@ Item {
     signal backRequested
     readonly property bool horizontal: edge !== "bottom"
     readonly property var geometry: DockLayout.folderFan(edge, count, maximumWidth, maximumHeight, labelsLeft,
-                                                         iconSize)
+                                                         iconSize, maximumOutset)
     readonly property bool hovered: hover.hovered
     readonly property var tiles: {
         const result = [openItem];
@@ -151,7 +152,6 @@ Item {
                                                  / 2)
         readonly property real finalX: root.horizontal ? (root.width - width) / 2 : slot.x
         readonly property real finalY: root.horizontal ? root.height - height : slot.y
-                                                         - root.geometry.stackReserve
         x: finalX + (root.sourceCenter.x - finalX - center.x) * (1 - root.progress)
         y: finalY + (root.sourceCenter.y - finalY - center.y) * (1 - root.progress)
         opacity: root.progress

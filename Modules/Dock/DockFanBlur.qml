@@ -13,9 +13,9 @@ Region {
     readonly property Item scene: sourceItem.QsWindow.window ? sourceItem.QsWindow.window.contentItem : null
     readonly property bool active: enabled && scene && BlurService.enabled && sourceItem.visible
                                    && sourceItem.opacity > 0
-    // Fan rotation is bounded by ten degrees. Keep scanline regions alive while
+    // Fan rotation is bounded by sixteen degrees. Keep scanline regions alive while
     // moving; changing the shape only updates their coordinates.
-    readonly property int capacity: Math.ceil(sourceItem.height + sourceItem.width * 0.18) + 2
+    readonly property int capacity: Math.ceil(sourceItem.height + sourceItem.width * 0.28) + 2
     function updateShape() {
         if (!active) {
             rectangles = [];

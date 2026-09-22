@@ -115,50 +115,118 @@ function sectionBoundaries(kinds, pinnedAppCount, order) {
     return result;
 }
 
-// Fan geometry describes the viewport; the native ListView scrolls all files
-// through these positions instead of discarding entries after the visible ones.
-function folderFan(edge, count, maximumWidth, maximumHeight, labelsLeft, requestedIconSize) {
+// The scroll viewport uses uniform steps, while each row's icon and label
+// share a tangent to this arc. Longer fans bend farther without tightening
+// the gap between neighbours. Bounds include the rotated labels and action.
+function bottomFanBounds(geometry) {
+    const halfHeight = geometry.tileHeight / 2;
+    const pivot = geometry.tileWidth - geometry.iconSize / 2 - 6;
+    const right = geometry.iconSize / 2 + 6;
+    const angle = geometry.angle;
+    const radius = geometry.radius;
+    // The lower left corner briefly swings left before following the arc.
+    const leftAngle = Math.min(angle, Math.atan2(halfHeight, radius + pivot));
+    return {
+        left: radius - (radius + pivot) * Math.cos(leftAngle) - halfHeight * Math.sin(leftAngle),
+        right: radius * (1 - Math.cos(angle)) + right * Math.cos(angle) + halfHeight * Math.sin(angle),
+        top: angle > 0 ? -(radius + pivot) * Math.sin(angle) - halfHeight * Math.cos(angle)
+                       : -geometry.count * geometry.step - geometry.stackReserve - halfHeight,
+        bottom: halfHeight
+    };
+}
+
+function bottomFolderFan(count, availableWidth, availableHeight, requestedIconSize, maximumOutset) {
+    const padding = 8;
+    const iconSize = Math.max(1, Math.min(requestedIconSize, availableWidth - padding * 2 - 18,
+                                         availableHeight - padding * 2 - 8));
+    const step = iconSize + Math.max(12, iconSize * 0.16);
+    const preferredWidth = iconSize + 18 + Math.max(260, Math.min(440, iconSize * 4.5));
+    const geometry = {iconSize: iconSize, step: step, tileHeight: iconSize + 8, slots: []};
+    let shown = Math.max(0, Math.min(count, Math.floor((availableHeight - iconSize - 8 - padding * 2) / step)));
+    let bounds;
+    do {
+        geometry.count = shown;
+        geometry.stackReserve = count > shown && shown > 0 ? 24 : 0;
+        geometry.angle = shown > 0 ? Math.min(16, 6 + shown) * Math.PI / 180 : 0;
+        const distance = shown * step + geometry.stackReserve;
+        // Near an output edge, straighten the same arc rather than shifting
+        // its foot away from the folder. The label still faces inward.
+        if (isFinite(maximumOutset) && shown > 0) {
+            let low = 0;
+            let high = geometry.angle;
+            for (let i = 0; i < 16; ++i) {
+                const angle = (low + high) / 2;
+                const outset = distance / angle * (1 - Math.cos(angle))
+                    + (iconSize / 2 + 6) * Math.cos(angle)
+                    + geometry.tileHeight / 2 * Math.sin(angle) + padding;
+                if (outset <= maximumOutset - 1) low = angle;
+                else high = angle;
+            }
+            geometry.angle = low;
+        }
+        geometry.radius = geometry.angle > 0 ? distance / geometry.angle : 0;
+        geometry.tileWidth = preferredWidth;
+        bounds = bottomFanBounds(geometry);
+        const overflow = bounds.right - bounds.left + padding * 2 - availableWidth;
+        if (overflow > 0) {
+            geometry.tileWidth = Math.max(iconSize + 18, preferredWidth - overflow / Math.cos(geometry.angle));
+            bounds = bottomFanBounds(geometry);
+        }
+        if (bounds.right - bounds.left + padding * 2 <= availableWidth
+                && bounds.bottom - bounds.top + padding * 2 <= availableHeight || shown === 0)
+            break;
+        --shown;
+    } while (true);
+    geometry.width = Math.min(availableWidth, Math.ceil(bounds.right - bounds.left + padding * 2));
+    geometry.height = Math.min(availableHeight, Math.ceil(bounds.bottom - bounds.top + padding * 2));
+    geometry.originX = padding - bounds.left;
+    geometry.originY = geometry.height - padding - bounds.bottom;
+    geometry.iconInset = geometry.width - geometry.originX;
+    // ListView's logical viewport stays rectangular. Its delegates map their
+    // fractional scroll positions onto the same curve as the fixed action.
+    geometry.header = geometry.height - shown * step;
+    return geometry;
+}
+
+function folderFan(edge, count, maximumWidth, maximumHeight, labelsLeft, requestedIconSize, maximumOutset) {
     const availableWidth = Math.max(0, maximumWidth);
     const availableHeight = Math.max(0, maximumHeight);
-    const bottom = edge === "bottom";
     const iconSize = Math.max(64, Math.round(requestedIconSize || 64));
-    const step = bottom ? iconSize + 12 : iconSize + 56;
-    const baseHeader = iconSize + 52;
-    const initialCapacity = Math.max(0, Math.min(10, bottom
-        ? Math.floor((availableHeight - baseHeader) / step) : Math.floor((availableWidth - 48) / step)));
-    const stackReserve = count > initialCapacity ? 24 : 0;
-    const header = baseHeader + stackReserve;
-    const capacity = bottom ? Math.max(0, Math.min(10, Math.floor((availableHeight - header) / step)))
-                            : initialCapacity;
-    const shown = Math.max(0, Math.min(count, capacity));
-    const geometry = {
-        width: Math.min(availableWidth, bottom ? iconSize + 352 : Math.max(220, shown * step + 48)),
-        height: Math.min(availableHeight, bottom ? shown * step + header : iconSize * 2 + 132),
-        count: shown, step: step, header: header, stackReserve: stackReserve,
-        iconSize: iconSize, iconInset: iconSize / 2 + 44,
-        tileWidth: bottom ? Math.max(0, Math.min(iconSize + 276, availableWidth - 76)) : step - 8,
-        tileHeight: bottom ? iconSize + 8 : iconSize + 64,
-        slots: []
-    };
-    for (let i = 0; i < shown; ++i)
+    let geometry;
+    if (edge === "bottom") {
+        geometry = bottomFolderFan(count, availableWidth, availableHeight, iconSize, maximumOutset);
+    } else {
+        const step = iconSize + 56;
+        const shown = Math.max(0, Math.min(count, 10, Math.floor((availableWidth - 48) / step)));
+        geometry = {
+            width: Math.min(availableWidth, Math.max(220, shown * step + 48)),
+            height: Math.min(availableHeight, iconSize * 2 + 132),
+            count: shown, step: step, header: 0, stackReserve: count > shown ? 24 : 0,
+            iconSize: iconSize, iconInset: iconSize / 2 + 44,
+            tileWidth: step - 8, tileHeight: iconSize + 64, slots: []
+        };
+    }
+    for (let i = 0; i < geometry.count; ++i)
         geometry.slots.push(folderFanSlot(edge, i, geometry, labelsLeft));
     return geometry;
 }
 
 function folderFanSlot(edge, position, geometry, labelsLeft) {
-    const fraction = Math.max(0, Math.min(1, position / Math.max(1, geometry.count)));
-    const bend = fraction * fraction;
     if (edge === "bottom") {
-        const center = labelsLeft ? geometry.width - geometry.iconInset + bend * 28
-                                 : geometry.iconInset - bend * 28;
+        const distance = position * geometry.step + (position >= geometry.count ? geometry.stackReserve : 0);
+        const angle = geometry.radius > 0 ? distance / geometry.radius : 0;
+        const arcX = geometry.originX + geometry.radius * (1 - Math.cos(angle));
+        const centerX = labelsLeft ? arcX : geometry.width - arcX;
         const iconOffset = geometry.iconSize / 2 + 6;
-        const iconCenter = labelsLeft ? geometry.tileWidth - iconOffset : iconOffset;
-        return {x: Math.max(0, center - iconCenter), y: geometry.height - geometry.iconSize - 10 - position * geometry.step,
+        const pivotX = labelsLeft ? geometry.tileWidth - iconOffset : iconOffset;
+        return {x: centerX - pivotX,
+                y: geometry.originY - (geometry.radius > 0 ? geometry.radius * Math.sin(angle) : distance) - geometry.tileHeight / 2,
                 width: geometry.tileWidth, height: geometry.tileHeight,
-                rotation: (labelsLeft ? 10 : -10) * fraction};
+                rotation: (labelsLeft ? 1 : -1) * angle * 180 / Math.PI};
     }
+    const fraction = Math.max(0, Math.min(1, position / Math.max(1, geometry.count)));
     return {x: edge === "left" ? 24 + position * geometry.step
                               : geometry.width - 24 - geometry.tileWidth - position * geometry.step,
-            y: 28 + bend * 20, width: geometry.tileWidth, height: geometry.tileHeight,
+            y: 28 + fraction * fraction * 20, width: geometry.tileWidth, height: geometry.tileHeight,
             rotation: (edge === "left" ? 5 : -5) * fraction};
 }
