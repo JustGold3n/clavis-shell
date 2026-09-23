@@ -7,23 +7,20 @@ ColumnLayout {
     required property string title
     required property string description
     required property string integrationState
-    property bool banner: false
     property bool busy: false
     property bool blocked: false
     property string error: ""
     signal setupRequested
-    visible: integrationState !== "ready"
+    visible: integrationState !== "ready" && (integrationState !== "loading" || error.length > 0)
     spacing: Metrics.spacingS
 
     SettingsRow {
         Layout.fillWidth: true
-        title: root.title
-        iconName: root.banner ? "warning" : ""
-        color: root.banner ? Appearance.applyAlpha(Appearance.colors.colPrimary, 0.1) : "transparent"
-        border.width: root.banner ? 1 : 0
-        border.color: Appearance.applyAlpha(Appearance.colors.colPrimary, 0.25)
+        title: qsTr("First-time setup")
+        iconName: "warning"
+        color: Appearance.applyAlpha(Appearance.colors.colPrimary, 0.1)
         supportingText: root.integrationState === "unsupported" ? qsTr("Available in a niri session") :
-                                                                  root.description
+                                                                  root.description || root.title
         trailing: ActionButton {
             text: qsTr("Set up")
             enabled: !root.busy && !root.blocked && root.integrationState !== "unsupported"
@@ -31,7 +28,9 @@ ColumnLayout {
 
             onClicked: root.setupRequested()
             InlineBusyIndicator {
-                anchors.centerIn: parent
+                anchors.right: parent.left
+                anchors.rightMargin: Metrics.spacingS
+                anchors.verticalCenter: parent.verticalCenter
                 busy: root.busy
             }
         }

@@ -8258,6 +8258,10 @@ Click to open network settings</source>
 <context>
     <name>NiriSetupPrompt</name>
     <message>
+        <source>First-time setup</source>
+        <translation>首次设置</translation>
+    </message>
+    <message>
         <location filename="../Widgets/common/NiriSetupPrompt.qml" line="20"/>
         <source>Available in a niri session</source>
         <translation>仅在 niri 会话中可用</translation>

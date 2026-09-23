@@ -8260,6 +8260,10 @@ Click to open network settings</translation>
 <context>
     <name>NiriSetupPrompt</name>
     <message>
+        <source>First-time setup</source>
+        <translation>First-time setup</translation>
+    </message>
+    <message>
         <location filename="../Widgets/common/NiriSetupPrompt.qml" line="20"/>
         <source>Available in a niri session</source>
         <translation>Available in a niri session</translation>

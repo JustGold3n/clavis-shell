@@ -25,7 +25,6 @@ StyledFlickable {
                                                                                              !== "loading"
                                                                                              || error.length
                                                                                              > 0)
-            banner: true
             title: qsTr("First-time setup")
             description: qsTr("Set up window minimization animations.")
             integrationState: NiriConfigService.state("minimize-animation")
