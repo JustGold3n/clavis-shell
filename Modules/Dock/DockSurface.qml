@@ -81,10 +81,12 @@ PanelWindow {
                                           + scrollOffset
     readonly property bool dragInside: dragKey !== "" && insideDropBand(dragPoint)
     readonly property int previewSource: dragKey ? DockService.rowIndex(dragKey) : externalOver &&
-                                                   !dropTargetKey ? DockService.rowIndex(externalSourceKey) :
-                                                                    -1
-    readonly property var preview: DockLayout.previewOrder(kinds, previewSource, (dragInside || externalOver)
-                                                           && !dropTargetKey ? insertion : -1, draggedEntry
+                                                   !externalFiles && !dropTargetKey ? DockService.rowIndex(
+                                                                                          externalSourceKey) :
+                                                                                      -1
+    readonly property var preview: DockLayout.previewOrder(kinds, previewSource, (dragInside || externalOver
+                                                                                  && !externalFiles) &&
+                                                           !dropTargetKey ? insertion : -1, draggedEntry
                                                            ? draggedEntry.kind : externalKind)
     readonly property var layout: DockLayout.layout(preview.kinds, baseLayout.size, availableLength,
                                                     magnification, 16, dragInside || externalOver
@@ -189,8 +191,23 @@ PanelWindow {
         }
         return null;
     }
+    // Files follow the pointer without making room for a provisional Dock
+    // entry. Only artwork actually under the pointer is an open-with target.
+    function fileTargetAt(point) {
+        for (let i = 0; i < iconItems.count; ++i) {
+            const item = iconItems.itemAt(i) as DockItem;
+            if (!item || visualEntries.get(i).retiring || item.dragged || (item.kind !== "app" && item.kind
+                                                                           !== "trash"))
+                continue;
+            const artwork = item.artworkItem;
+            const local = artwork.mapFromItem(content, point.x, point.y);
+            if (local.x >= 0 && local.x < artwork.width && local.y >= 0 && local.y < artwork.height)
+                return DockService.entryFor(item.entryKey);
+        }
+        return null;
+    }
     function updateDropTarget() {
-        const candidate = root.externalFiles ? root.targetAt(root.dropPoint) : null;
+        const candidate = root.externalFiles ? root.fileTargetAt(root.dropPoint) : null;
         root.dropTargetKey = candidate && !DesktopFiles.busy && (candidate.kind === "trash"
                                                                  && DesktopFiles.trashAvailable
                                                                  || candidate.kind === "app"
@@ -850,8 +867,8 @@ PanelWindow {
                                                                                                 && root.popupKey
                                                                                                 !== key)
                         dragged: key === root.dragKey || (dragGhost.entry && dragGhost.entry.key === key) || (
-                                     root.externalOver && !root.dropTargetKey && root.externalSourceKey
-                                     === key)
+                                     root.externalOver && !root.externalFiles && !root.dropTargetKey
+                                     && root.externalSourceKey === key)
                         enabled: !retiring && !awaitingHandoff
                         presence: 0
                         function animatePresence() {

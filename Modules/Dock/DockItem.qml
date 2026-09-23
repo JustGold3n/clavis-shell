@@ -108,7 +108,8 @@ Item {
         y: root.horizontal ? root.height - height - 12 - root.bounce : (root.height - height) / 2
         transformOrigin: Item.Center
         scale: DockMotion.iconScale(root.presence)
-        property real pressShade: (pointer.pressed && !root.moved) || root.contextActive ? 0.3 : 0
+        property real pressShade: (pointer.pressed && !root.moved) || root.contextActive || root.dropTarget
+                                  ? 0.3 : 0
         Behavior on pressShade {
             NumberAnimation {
                 duration: 90
@@ -163,15 +164,6 @@ Item {
                 renderType: Text.QtRendering
                 color: Appearance.colors.colOnSurface
             }
-        }
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: -4
-            radius: 12
-            visible: root.dropTarget
-            color: "transparent"
-            border.width: 2
-            border.color: Appearance.colors.colPrimary
         }
         StyledToolTip {
             text: root.dropTarget ? root.dropHint : root.name
