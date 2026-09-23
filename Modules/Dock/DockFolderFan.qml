@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import Clavis.Runtime
 import qs.Services
 import "../../Common/functions/DockLayout.js" as DockLayout
 
@@ -46,12 +47,19 @@ Item {
     HoverHandler {
         id: hover
     }
+    HorizontalWheelArea {
+        anchors.fill: parent
+        z: 100
+        enabled: root.horizontal && view.interactive && root.geometry.count > 0
+        target: view
+        reverseVertical: root.edge === "right"
+    }
     ListView {
         id: view
-        x: root.horizontal ? 24 : 0
+        x: root.horizontal && root.edge === "right" ? root.width - width : 0
         y: root.horizontal ? 0 : root.geometry.header
         width: root.horizontal ? root.geometry.count * root.geometry.step : root.width
-        height: root.horizontal ? root.geometry.iconSize + 112 : root.geometry.count * root.geometry.step
+        height: root.horizontal ? root.height : root.geometry.count * root.geometry.step
         orientation: root.horizontal ? ListView.Horizontal : ListView.Vertical
         verticalLayoutDirection: ListView.BottomToTop
         layoutDirection: root.edge === "right" ? Qt.RightToLeft : Qt.LeftToRight
@@ -142,16 +150,15 @@ Item {
                    })
         actionIcon: root.canGoBack ? "arrow_back" : "open_in_new"
         fan: true
+        verticalLabel: root.horizontal
         labelsLeft: root.labelsLeft
         tileIconSize: root.geometry.iconSize
-        width: root.horizontal ? Math.min(root.geometry.iconSize + 276, root.width - 24) :
-                                 root.geometry.tileWidth
-
-        height: root.geometry.iconSize + 8
+        width: root.geometry.tileWidth
+        height: root.geometry.tileHeight
         readonly property point center: Qt.point(iconItem.x + iconItem.width / 2, iconItem.y + iconItem.height
                                                  / 2)
-        readonly property real finalX: root.horizontal ? (root.width - width) / 2 : slot.x
-        readonly property real finalY: root.horizontal ? root.height - height : slot.y
+        readonly property real finalX: slot.x
+        readonly property real finalY: slot.y
         x: finalX + (root.sourceCenter.x - finalX - center.x) * (1 - root.progress)
         y: finalY + (root.sourceCenter.y - finalY - center.y) * (1 - root.progress)
         opacity: root.progress
@@ -160,7 +167,7 @@ Item {
         transform: Rotation {
             origin.x: openItem.center.x
             origin.y: openItem.center.y
-            angle: root.horizontal ? 0 : openItem.slot.rotation * root.progress
+            angle: openItem.slot.rotation * root.progress
         }
         onActivated: root.canGoBack ? root.backRequested() : root.openRequested()
     }

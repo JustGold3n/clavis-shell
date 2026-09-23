@@ -197,14 +197,30 @@ function folderFan(edge, count, maximumWidth, maximumHeight, labelsLeft, request
     if (edge === "bottom") {
         geometry = bottomFolderFan(count, availableWidth, Math.min(availableHeight, Math.max(iconSize + 24, availableHeight * 0.75)), iconSize, maximumOutset);
     } else {
-        const step = iconSize + 56;
-        const shown = Math.max(0, Math.min(count, 8, Math.floor((availableWidth - 48) / step)));
+        // Reserve a final tile for open/back on the same horizontal arc.
+        // Keep labels close to their icons and include rotated corners in the bounds.
+        const size = Math.max(1, Math.min(iconSize, (availableWidth - 32) / 1.5,
+                                         (availableHeight - 68) / 1.4));
+        const tileHeight = size + 38;
+        const tilt = 10 * Math.PI / 180;
+        const padding = Math.ceil(tileHeight * Math.sin(tilt) + 12);
+        const tileWidth = Math.max(1, Math.min(Math.max(100, size + 32), availableWidth - padding * 2));
+        const step = tileWidth + 12;
+        let shown = Math.max(0, Math.min(count, 8,
+            Math.floor((availableWidth - padding * 2 - tileWidth) / step)));
+        if (count > shown && shown * step + tileWidth + padding * 2 + 24 > availableWidth)
+            shown = Math.max(0, shown - 1);
+        const stackReserve = count > shown && shown > 0 ? 24 : 0;
+        const distance = shown * step + stackReserve;
+        const outset = Math.max(0, Math.min(32, distance * Math.tan(tilt) / 2,
+                                           availableHeight - tileHeight - padding * 2));
         geometry = {
-            width: Math.min(availableWidth, Math.max(220, shown * step + 48)),
-            height: Math.min(availableHeight, iconSize * 2 + 132),
-            count: shown, step: step, header: 0, stackReserve: count > shown ? 24 : 0,
-            iconSize: iconSize, iconInset: iconSize / 2 + 44,
-            tileWidth: step - 8, tileHeight: iconSize + 64, slots: []
+            width: Math.min(availableWidth, distance + tileWidth + padding * 2),
+            height: Math.min(availableHeight, tileHeight + outset + padding * 2),
+            count: shown, step: step, header: 0, stackReserve: stackReserve,
+            iconSize: size, iconInset: padding + tileWidth / 2,
+            tileWidth: tileWidth, tileHeight: tileHeight, outset: outset,
+            padding: padding, distance: distance, slots: []
         };
     }
     for (let i = 0; i < geometry.count; ++i)
@@ -225,9 +241,13 @@ function folderFanSlot(edge, position, geometry, labelsLeft) {
                 width: geometry.tileWidth, height: geometry.tileHeight,
                 rotation: (labelsLeft ? 1 : -1) * angle * 180 / Math.PI};
     }
-    const fraction = Math.max(0, Math.min(1, position / Math.max(1, geometry.count)));
-    return {x: edge === "left" ? 24 + position * geometry.step
-                              : geometry.width - 24 - geometry.tileWidth - position * geometry.step,
-            y: 28 + fraction * fraction * 20, width: geometry.tileWidth, height: geometry.tileHeight,
-            rotation: (edge === "left" ? 5 : -5) * fraction};
+    const distance = position * geometry.step + (position >= geometry.count ? geometry.stackReserve : 0);
+    const fraction = geometry.distance > 0 ? distance / geometry.distance : 0;
+    const x = geometry.padding + distance;
+    const angle = geometry.distance > 0
+        ? Math.atan2(-2 * geometry.outset * fraction, geometry.distance) * 180 / Math.PI : 0;
+    return {x: edge === "left" ? x : geometry.width - x - geometry.tileWidth,
+            y: geometry.padding + geometry.outset * (1 - fraction * fraction),
+            width: geometry.tileWidth, height: geometry.tileHeight,
+            rotation: edge === "left" ? angle : -angle};
 }

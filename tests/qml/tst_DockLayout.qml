@@ -5,6 +5,55 @@ import "../../Common/functions/DockLayout.js" as DockLayout
 TestCase {
     name: "DockLayout"
 
+    function test_sideFansShowEightFilesWhenSpaceAllows() {
+        for (const edge of ["left", "right"]) {
+            for (const count of [8, 9, 200]) {
+                const geometry = DockLayout.folderFan(edge, count, 2000, 1000, edge === "right", 64);
+                compare(geometry.count, 8);
+            }
+        }
+    }
+
+    function test_sideFansFitAndMirror() {
+        for (const width of [180, 360, 1000]) {
+            for (const height of [160, 480, 1080]) {
+                for (const size of [64, 96, 160]) {
+                    for (const count of [0, 1, 8, 200]) {
+                        const left = DockLayout.folderFan("left", count, width, height, false, size);
+                        const right = DockLayout.folderFan("right", count, width, height, true, size);
+                        verify(left.width <= width && left.height <= height);
+                        verify(left.count <= count);
+                        let previousX = -Infinity;
+                        for (let position = 0; position <= left.count; position += 0.25) {
+                            const a = DockLayout.folderFanSlot("left", position, left, false);
+                            const b = DockLayout.folderFanSlot("right", position, right, true);
+                            verify(a.x >= previousX);
+                            previousX = a.x;
+                            fuzzyCompare(a.x + b.x + a.width, left.width, 0.001);
+                            compare(a.y, b.y);
+                            compare(a.rotation, -b.rotation);
+                            const cx = a.x + a.width / 2, cy = a.y + left.iconSize / 2;
+                            const angle = a.rotation * Math.PI / 180;
+                            for (const x of [a.x, a.x + a.width]) {
+                                for (const y of [a.y, a.y + a.height]) {
+                                    const rx = cx + (x - cx) * Math.cos(angle) - (y - cy) * Math.sin(angle);
+                                    const ry = cy + (x - cx) * Math.sin(angle) + (y - cy) * Math.cos(angle);
+                                    verify(rx >= 0 && rx <= left.width);
+                                    verify(ry >= 0 && ry <= left.height);
+                                }
+                            }
+                        }
+                        if (left.count > 0) {
+                            const first = DockLayout.folderFanSlot("left", 0, left, false);
+                            const next = DockLayout.folderFanSlot("left", 1, left, false);
+                            verify(next.x - first.x >= first.width);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     function test_folderFanFitsAvailableSpace() {
         for (const edge of ["bottom", "left", "right"]) {
             for (const count of [0, 1, 7, 200]) {

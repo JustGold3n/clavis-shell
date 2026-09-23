@@ -7,6 +7,8 @@ set_target_properties(ClavisRuntime PROPERTIES
 qt_add_qml_module(ClavisRuntime
     URI Clavis.Runtime
     SOURCES
+        src/horizontal_wheel_area.h
+        src/horizontal_wheel_area.cpp
         src/backlight_state.h
         src/backlight_state.cpp
         src/config_file_watch.h
@@ -30,6 +32,7 @@ target_link_libraries(ClavisRuntime PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Qml
+    Qt6::Quick
 )
 
 qt_add_shaders(ClavisRuntime "clavis_palette_shaders"
