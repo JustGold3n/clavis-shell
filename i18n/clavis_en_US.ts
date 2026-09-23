@@ -13794,32 +13794,42 @@ Windows: </translation>
 <context>
     <name>DockWindowCard</name>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="88"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="91"/>
+        <source>Minimize window</source>
+        <translation>Minimize window</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="104"/>
         <source>Close window</source>
         <translation>Close window</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="109"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="125"/>
         <source>Preview unavailable</source>
         <translation>Preview unavailable</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="146"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="125"/>
+        <source>Minimized</source>
+        <translation>Minimized</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="162"/>
         <source>Previous track</source>
         <translation>Previous track</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="154"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="171"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="154"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="171"/>
         <source>Play</source>
         <translation>Play</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="162"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="180"/>
         <source>Next track</source>
         <translation>Next track</translation>
     </message>

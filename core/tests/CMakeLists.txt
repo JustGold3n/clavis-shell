@@ -161,6 +161,34 @@ qt_add_executable(niri_ipc_async_tests niri_ipc_async_test.cpp)
 target_link_libraries(niri_ipc_async_tests PRIVATE ClavisNiriCore Qt6::Core Qt6::Network Qt6::Test)
 add_test(NAME niri_ipc_async_tests COMMAND niri_ipc_async_tests)
 
+qt_add_executable(niri_minimize_tests niri_minimize_test.cpp)
+target_link_libraries(niri_minimize_tests PRIVATE ClavisNiri ClavisNiriCore Qt6::Core Qt6::Qml Qt6::Network Qt6::Test)
+add_test(NAME niri_minimize_tests COMMAND niri_minimize_tests)
+
+qt_add_executable(window_preview_cache_tests window_preview_cache_test.cpp)
+target_link_libraries(window_preview_cache_tests PRIVATE ClavisWindowPreview Qt6::Gui Qt6::Qml Qt6::Test)
+add_test(NAME window_preview_cache_tests COMMAND window_preview_cache_tests)
+
+# Exercise actual SHM buffers and capture session lifetimes on a private socket.
+pkg_check_modules(WaylandServer REQUIRED IMPORTED_TARGET wayland-server)
+pkg_get_variable(TEST_WAYLAND_PROTOCOLS_DIR wayland-protocols pkgdatadir)
+find_program(TEST_WAYLAND_SCANNER wayland-scanner REQUIRED)
+set(preview_test_protocols)
+foreach(protocol ext-foreign-toplevel-list ext-image-capture-source ext-image-copy-capture)
+    set(xml "${TEST_WAYLAND_PROTOCOLS_DIR}/staging/${protocol}/${protocol}-v1.xml")
+    set(header "${CMAKE_CURRENT_BINARY_DIR}/${protocol}-v1-server-protocol.h")
+    set(code "${CMAKE_CURRENT_BINARY_DIR}/${protocol}-v1-protocol.c")
+    add_custom_command(OUTPUT "${header}" "${code}"
+        COMMAND ${TEST_WAYLAND_SCANNER} server-header "${xml}" "${header}"
+        COMMAND ${TEST_WAYLAND_SCANNER} private-code "${xml}" "${code}"
+        DEPENDS "${xml}" VERBATIM)
+    list(APPEND preview_test_protocols "${header}" "${code}")
+endforeach()
+qt_add_executable(window_preview_protocol_tests window_preview_protocol_test.cpp ${preview_test_protocols})
+target_include_directories(window_preview_protocol_tests PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(window_preview_protocol_tests PRIVATE ClavisWindowPreview Qt6::Gui Qt6::Qml Qt6::Test PkgConfig::WaylandServer)
+add_test(NAME window_preview_protocol_tests COMMAND window_preview_protocol_tests)
+
 add_test(NAME release_contracts COMMAND ${Python3_EXECUTABLE} ${CLAVIS_SOURCE_ROOT}/tests/test_release.py)
 add_test(NAME installer_contracts COMMAND ${Python3_EXECUTABLE} ${CLAVIS_SOURCE_ROOT}/tests/test_installer.py)
 

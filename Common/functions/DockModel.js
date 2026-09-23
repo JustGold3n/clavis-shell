@@ -211,6 +211,16 @@ function pendingLaunches(pending, groups, now) {
     return result;
 }
 
+// An application click never minimizes an entire group or launches a duplicate
+// merely because all of its windows are minimized.
+function activation(windows, supportsMinimize) {
+    if (!windows.length) return { action: "launch" };
+    const window = windows[0];
+    const action = window.isMinimized ? "restore"
+        : supportsMinimize && windows.length === 1 && window.isFocused ? "minimize" : "focus";
+    return { action: action, id: window.id };
+}
+
 // Preserve delegate identity on window metadata changes and application
 // arrivals/removals. This only emits the insert/move/remove operations needed.
 function reconcile(model, rows) {

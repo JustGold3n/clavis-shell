@@ -20,6 +20,7 @@ qt_add_qml_module(ClavisWindowPreview
     URI Clavis.WindowPreview
     SOURCES src/window_capture_probe.h src/window_capture_probe.cpp
         src/window_preview_manager.h src/window_preview_manager.cpp
+        src/window_preview_cache.h src/window_preview_cache.cpp
         src/capture_image.h src/capture_image.cpp ${capture_protocols}
     OUTPUT_DIRECTORY ${CLAVIS_QML_BUILD_DIR}/Clavis/WindowPreview)
 target_include_directories(ClavisWindowPreview PUBLIC src PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

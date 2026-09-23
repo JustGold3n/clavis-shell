@@ -13786,32 +13786,42 @@ Windows: </source>
 <context>
     <name>DockWindowCard</name>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="88"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="91"/>
+        <source>Minimize window</source>
+        <translation>最小化視窗</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="104"/>
         <source>Close window</source>
         <translation>關閉視窗</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="109"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="125"/>
         <source>Preview unavailable</source>
         <translation>預覽無法使用</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="146"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="125"/>
+        <source>Minimized</source>
+        <translation>已最小化</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="162"/>
         <source>Previous track</source>
         <translation>上一首</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="154"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="171"/>
         <source>Pause</source>
         <translation>暫停</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="154"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="171"/>
         <source>Play</source>
         <translation>播放</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="162"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="180"/>
         <source>Next track</source>
         <translation>下一首</translation>
     </message>

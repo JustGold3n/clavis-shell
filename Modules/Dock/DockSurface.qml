@@ -885,7 +885,7 @@ PanelWindow {
                                 } else
                                     root.showPopup(key, false, true);
                             } else {
-                                DockService.activate(key);
+                                DockService.activate(key, root.screen.name);
                                 root.dismissPopup();
                             }
                         }
@@ -1037,6 +1037,7 @@ PanelWindow {
                                                                                       DockService.showThumbnails
                                                                                       && windows.length > 0))
             entryKey: root.popupKey
+            outputName: root.screen.name
             maximumWidth: root.horizontal ? Math.max(0, root.width - 32) : Math.max(0, (root.edge === "left"
                                                                                         ? root.width
                                                                                           - root.popupCross :

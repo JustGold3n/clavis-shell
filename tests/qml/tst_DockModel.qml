@@ -30,6 +30,46 @@ TestCase {
         rows.clear();
     }
 
+    function test_minimizedWindowsStayRunningAndActivateIndividually() {
+        const hidden = {
+            id: 42,
+            appId: "EditorWindow",
+            title: "Same title",
+            isMinimized: true
+        };
+        const other = {
+            id: 43,
+            appId: "EditorWindow",
+            title: "Same title",
+            isMinimized: true
+        };
+        const groups = DockModel.groupWindows([hidden, other], applications, ({}));
+        const group = groups[Object.keys(groups)[0]];
+        compare(group.windows.length, 2);
+        const choice = DockModel.activation(group.windows, true);
+        compare(choice.action, "restore");
+        verify(choice.id === 42 || choice.id === 43);
+        compare(DockModel.activation([], true).action, "launch");
+        compare(DockModel.activation([
+                                         {
+                                             id: 42,
+                                             isFocused: true
+                                         }
+                                     ], true).action, "minimize");
+        compare(DockModel.activation([
+                                         {
+                                             id: 42,
+                                             isFocused: true
+                                         }
+                                     ], false).action, "focus");
+        compare(DockModel.activation([
+                                         {
+                                             id: 42,
+                                             isFocused: true
+                                         },
+                                         other], true).action, "focus");
+    }
+
     function encodedConfig(pinned, options) {
         return JSON.stringify({
                                   schemaVersion: 1,

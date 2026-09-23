@@ -17,7 +17,7 @@ Singleton {
     readonly property bool supportsThumbnails: WindowPreviewService.supported
     readonly property bool showThumbnails: root._options.showThumbnails
     readonly property int previewSize: root._options.previewSize
-    readonly property bool supportsMinimize: false
+    readonly property bool supportsMinimize: Niri.supportsMinimize
     property alias model: entries
     readonly property var pinnedEntries: root._pinned
     readonly property int pinnedAppCount: root._pinned.filter(entry => !DockModel.isFile(entry)).length
@@ -245,7 +245,7 @@ Singleton {
         launchTimeout.running = Object.keys(pending).length > 0;
     }
 
-    function activate(key) {
+    function activate(key, outputName) {
         const entry = root.entryFor(key);
         if (entry && (DockModel.isFile(entry) || entry.kind === "trash")) {
             if (entry.kind !== "trash" && !DesktopFiles.info(entry.url).available) {
@@ -255,7 +255,10 @@ Singleton {
             return ApplicationService.openUrl(entry.kind === "trash" ? "trash:///" : entry.url);
         }
         const windows = root.windowsFor(key);
-        const success = windows.length ? root.focusWindow(windows[0].id) : root.launch(key);
+        const choice = DockModel.activation(windows, root.supportsMinimize);
+        const success = choice.action === "launch" ? root.launch(key) : choice.action === "minimize"
+                                                     ? root.minimizeWindow(choice.id) : root.focusWindow(
+                                                           choice.id, outputName);
         if (success)
             root.activated(key);
         return success;
@@ -284,8 +287,26 @@ Singleton {
         return true;
     }
 
-    function focusWindow(id) {
-        return Niri.connected && Niri.focusWindow(id);
+    function focusWindow(id, outputName) {
+        if (!Niri.connected || WindowPreviewService.suspended)
+            return false;
+        const window = Niri.windowById(id);
+        if (!window || !window.id)
+            return false;
+        return window.isMinimized ? Niri.restoreWindow(id, String(outputName || "")) : Niri.focusWindow(id);
+    }
+
+    function minimizeWindow(id) {
+        if (!root.supportsMinimize || WindowPreviewService.suspended)
+            return false;
+        const window = Niri.windowById(id);
+        if (!window || !window.id || window.isMinimized)
+            return false;
+        return WindowPreviewService.snapshot(id, () => {
+            const current = Niri.windowById(id);
+            if (root.supportsMinimize && current && current.id && !current.isMinimized)
+                Niri.minimizeWindow(id);
+        });
     }
 
     function closeWindow(id) {
