@@ -19,6 +19,23 @@ StyledFlickable {
         y: Metrics.pageMargin
         spacing: Metrics.spacingL
 
+        NiriSetupPrompt {
+            Layout.fillWidth: true
+            visible: DockService.supportsMinimizeEffects && integrationState !== "ready" && (integrationState
+                                                                                             !== "loading"
+                                                                                             || error.length
+                                                                                             > 0)
+            banner: true
+            title: qsTr("First-time setup")
+            description: qsTr("Set up window minimization animations.")
+            integrationState: NiriConfigService.state("minimize-animation")
+            busy: NiriConfigService.busy && NiriConfigService.activeFeature === "minimize-animation"
+            blocked: NiriConfigService.busy
+            error: NiriConfigService.errorFeature === "minimize-animation" ? NiriConfigService.error :
+                                                                             NiriConfigService.readError
+            onSetupRequested: NiriConfigService.setup("minimize-animation")
+        }
+
         SettingsRow {
             Layout.fillWidth: true
             title: qsTr("Show Dock")
@@ -179,19 +196,6 @@ StyledFlickable {
                 }
             }
 
-            NiriSetupPrompt {
-                Layout.fillWidth: true
-                visible: DockService.supportsMinimizeEffects && !NiriConfigService.ready("minimize-animation")
-                title: qsTr("Minimize animation")
-                description: qsTr("Connect window animation settings to your configuration.")
-                integrationState: NiriConfigService.state("minimize-animation")
-                busy: NiriConfigService.busy && NiriConfigService.activeFeature === "minimize-animation"
-                blocked: NiriConfigService.busy
-                error: NiriConfigService.errorFeature === "minimize-animation" ? NiriConfigService.error :
-                                                                                 NiriConfigService.readError
-                onSetupRequested: NiriConfigService.setup("minimize-animation")
-            }
-
             SettingsRow {
                 Layout.fillWidth: true
                 visible: !DockService.supportsMinimizeEffects || NiriConfigService.ready("minimize-animation")
@@ -224,7 +228,9 @@ StyledFlickable {
                         onValueSelected: value => NiriConfigService.setMinimizeEffect(String(value))
                     }
                     InlineBusyIndicator {
-                        anchors.centerIn: parent
+                        anchors.right: effectButtons.left
+                        anchors.rightMargin: Metrics.spacingS
+                        anchors.verticalCenter: effectButtons.verticalCenter
                         busy: NiriConfigService.busy && NiriConfigService.activeFeature
                               === "minimize-animation"
                     }

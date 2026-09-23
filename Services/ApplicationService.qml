@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Clavis.Files
 import qs.Services
 
 Singleton {
@@ -78,11 +79,13 @@ Singleton {
         const value = String(url || "");
         if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value))
             return false;
-        // GIO honors the default desktop entry's Terminal=true and opens a
-        // terminal through the system launcher (e.g. for Yazi). xdg-open's
-        // generic backend executes these file handlers without a terminal.
-        return root.launchCommand(/^(file|trash):/i.test(value) ? ["gio", "open", value] : ["xdg-open",
-                                                                                            value]);
+        if (/^file:/i.test(value)) {
+            const desktopFile = DesktopFiles.defaultApplicationForFile(value);
+            // Launch the MIME handler explicitly: gio open may instead select
+            // x-scheme-handler/file. GIO still honors Terminal=true for TUI apps.
+            return !!desktopFile && root.launchCommand(["gio", "launch", desktopFile, value]);
+        }
+        return root.launchCommand(/^trash:/i.test(value) ? ["gio", "open", value] : ["xdg-open", value]);
     }
 
     function isVisibleApplication(application) {

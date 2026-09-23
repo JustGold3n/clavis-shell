@@ -7,6 +7,7 @@ ColumnLayout {
     required property string title
     required property string description
     required property string integrationState
+    property bool banner: false
     property bool busy: false
     property bool blocked: false
     property string error: ""
@@ -17,6 +18,10 @@ ColumnLayout {
     SettingsRow {
         Layout.fillWidth: true
         title: root.title
+        iconName: root.banner ? "warning" : ""
+        color: root.banner ? Appearance.applyAlpha(Appearance.colors.colPrimary, 0.1) : "transparent"
+        border.width: root.banner ? 1 : 0
+        border.color: Appearance.applyAlpha(Appearance.colors.colPrimary, 0.25)
         supportingText: root.integrationState === "unsupported" ? qsTr("Available in a niri session") :
                                                                   root.description
         trailing: ActionButton {

@@ -189,6 +189,30 @@ bool DesktopFiles::emptyTrash()
 {
     return m_trashAvailable && startProcess("empty", "gio", {"trash", "--empty"});
 }
+QString DesktopFiles::defaultApplicationForFile(const QUrl &url) const
+{
+    const auto local = FileMetadata::localUrl(url);
+    if (local.isEmpty())
+        return {};
+    auto *file = g_file_new_for_path(local.toLocalFile().toUtf8().constData());
+    auto *info = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, G_FILE_QUERY_INFO_NONE,
+                                   nullptr, nullptr);
+    g_object_unref(file);
+    if (!info)
+        return {};
+    // A file:// scheme handler is a file manager, not necessarily the default
+    // application for this file's content. Resolve the MIME association first.
+    const auto *type = g_file_info_get_content_type(info);
+    auto *app = type ? g_app_info_get_default_for_type(type, false) : nullptr;
+    g_object_unref(info);
+    if (!app)
+        return {};
+    QString path;
+    if (G_IS_DESKTOP_APP_INFO(app))
+        path = QString::fromUtf8(g_desktop_app_info_get_filename(G_DESKTOP_APP_INFO(app)));
+    g_object_unref(app);
+    return path;
+}
 bool DesktopFiles::canOpenWith(const QString &desktopId) const
 {
     auto *app = desktopInfo(desktopId);

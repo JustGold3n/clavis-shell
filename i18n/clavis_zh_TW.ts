@@ -3894,9 +3894,12 @@ Scroll to adjust</source>
         <translation>最小化動畫</translation>
     </message>
     <message>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="186"/>
-        <source>Connect window animation settings to your configuration.</source>
-        <translation>將視窗動畫設定接入設定檔。</translation>
+        <source>First-time setup</source>
+        <translation>首次設定</translation>
+    </message>
+    <message>
+        <source>Set up window minimization animations.</source>
+        <translation>設定視窗最小化動畫。</translation>
     </message>
     <message>
         <location filename="../Modules/ControlCenter/DockPage.qml" line="200"/>

@@ -3895,9 +3895,12 @@ Scroll to adjust</translation>
         <translation>Minimize animation</translation>
     </message>
     <message>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="186"/>
-        <source>Connect window animation settings to your configuration.</source>
-        <translation>Connect window animation settings to your configuration.</translation>
+        <source>First-time setup</source>
+        <translation>First-time setup</translation>
+    </message>
+    <message>
+        <source>Set up window minimization animations.</source>
+        <translation>Set up window minimization animations.</translation>
     </message>
     <message>
         <location filename="../Modules/ControlCenter/DockPage.qml" line="200"/>
