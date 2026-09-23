@@ -29,7 +29,6 @@ Button {
 
     signal activated
     signal closeRequested
-    signal minimizeRequested
 
     height: (showThumbnail ? 40 + (logicalWidth - 16) / 1.6 + 8 : 40) * detailScale
     padding: 0
@@ -68,7 +67,7 @@ Button {
                 id: headerTitle
                 x: 30
                 y: 0
-                width: Math.max(0, parent.width - x - (minimizeButton.visible ? 66 : 36))
+                width: Math.max(0, parent.width - x - 36)
                 height: 40
                 text: root.title
                 textFormat: Text.PlainText
@@ -77,19 +76,6 @@ Button {
                 color: Appearance.colors.colOnSurface
                 elide: Text.ElideRight
                 verticalAlignment: Text.AlignVCenter
-            }
-            IconButton {
-                id: minimizeButton
-                x: closeButton.x - width - 2
-                y: 6
-                visible: DockService.supportsMinimize && !root.minimized
-                controlSize: 28
-                iconSize: 16
-                iconName: "minimize"
-                buttonRadius: 5
-                buttonRadiusPressed: 5
-                accessibleName: qsTr("Minimize window")
-                onClicked: root.minimizeRequested()
             }
             IconButton {
                 id: closeButton
@@ -192,7 +178,7 @@ Button {
         text: root.title
         textFormat: Text.PlainText
         extraVisibleCondition: root.hovered && headerTitle.truncated && !closeButton.pointerHovered &&
-                               !minimizeButton.pointerHovered && !mediaHover.hovered
+                               !mediaHover.hovered
     }
 
     HoverHandler {

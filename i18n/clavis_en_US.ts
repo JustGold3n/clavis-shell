@@ -13825,11 +13825,6 @@ Windows: </translation>
 <context>
     <name>DockWindowCard</name>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="91"/>
-        <source>Minimize window</source>
-        <translation>Minimize window</translation>
-    </message>
-    <message>
         <location filename="../Modules/Dock/DockWindowCard.qml" line="104"/>
         <source>Close window</source>
         <translation>Close window</translation>

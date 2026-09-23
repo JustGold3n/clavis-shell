@@ -159,7 +159,6 @@ Item {
                     root.dismissed();
                 }
                 onCloseRequested: DockService.closeWindow(modelData.id)
-                onMinimizeRequested: DockService.minimizeWindow(modelData.id)
             }
         }
     }

@@ -13817,11 +13817,6 @@ Windows: </source>
 <context>
     <name>DockWindowCard</name>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="91"/>
-        <source>Minimize window</source>
-        <translation>最小化視窗</translation>
-    </message>
-    <message>
         <location filename="../Modules/Dock/DockWindowCard.qml" line="104"/>
         <source>Close window</source>
         <translation>關閉視窗</translation>
