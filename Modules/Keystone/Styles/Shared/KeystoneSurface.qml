@@ -1549,6 +1549,8 @@ Variants {
 
                     MediaContent {
                         id: mediaWidget
+                        surfaceTopRightRadius: styleSurface.elongated && longFrame.item
+                                               ? longFrame.item.childRadius : rootSurface.topRightRadius
 
                         anchors.top: parent.top
                         anchors.horizontalCenter: parent.horizontalCenter

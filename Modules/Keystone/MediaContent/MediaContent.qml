@@ -9,6 +9,14 @@ import qs.Widgets.common
 Item {
     id: root
 
+    // Content is inset 20px from the surrounding Keystone surface.
+    property real surfaceTopRightRadius: 24
+    readonly property real sourceBadgeInset: 10
+    // Names describe curve geometry, not the perceived direction of rebound.
+    // Preserve the state-dependent selection and timings below with these values.
+    readonly property var sourceOvershootCurve: [0.16, 0.7, 0.3, 1.06, 0.65, 1.025, 0.8, 1.025, 0.92, 1, 1, 1]
+    readonly property var sourceEaseOutCurve: [0.2, 0, 0, 1, 1, 1]
+
     readonly property bool isActive: root.visible && MediaManager.active
     property bool isPlaying: isActive && MediaManager.active && MediaManager.active.isPlaying
 
@@ -172,9 +180,7 @@ Item {
 
                 // 为药丸预留空间
                 Item {
-                    Layout.preferredWidth: root.caelestiaCover || root.backgroundCover ? Math.max(80,
-                                                                                                  pillRect.width
-                                                                                                  + 8) : 80
+                    Layout.preferredWidth: Math.max(80, pillRect.width + 8)
                     Layout.fillHeight: true
                 }
             }
@@ -244,40 +250,38 @@ Item {
 
         anchors.top: root.top
         anchors.right: root.right
-        anchors.topMargin: 4
-        anchors.rightMargin: 16
+        anchors.topMargin: root.sourceBadgeInset - 20
+        anchors.rightMargin: root.sourceBadgeInset - 20
         z: 999
 
         property bool menuExpanded: false
 
-        color: root.coverColors ? root.accentColor : Appearance.colors.colTertiary
-        width: menuExpanded ? 110 : pillText.width + 24
-        height: menuExpanded ? (30 * MediaManager.list.length + 12) : 26
-        radius: menuExpanded ? 12 : 13
-        scale: (!menuExpanded && pillMa.pressed) ? 0.94 : (!menuExpanded && pillMa.containsMouse ? 1.08 : 1.0)
+        readonly property color baseColor: root.coverColors ? root.accentColor : Appearance.colors.colTertiary
+        color: Qt.tint(baseColor, Qt.rgba(0, 0, 0, pillMa.pressed ? 0.12 : pillMa.containsMouse ? 0.06 : 0))
+        width: menuExpanded ? Math.max(150, pillText.implicitWidth + 28) : pillText.implicitWidth + 28
+        height: menuExpanded ? Math.max(30, 30 * MediaManager.list.length + 12) : 30
+        radius: 8
+        topRightRadius: Math.max(0, root.surfaceTopRightRadius - root.sourceBadgeInset)
 
         Behavior on width {
             NumberAnimation {
-                duration: 300
-                easing.type: Easing.OutQuint
+                duration: pillRect.menuExpanded ? 420 : 220
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: pillRect.menuExpanded ? root.sourceOvershootCurve :
+                                                            root.sourceEaseOutCurve
             }
         }
         Behavior on height {
             NumberAnimation {
-                duration: 300
-                easing.type: Easing.OutQuint
+                duration: pillRect.menuExpanded ? 420 : 220
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: pillRect.menuExpanded ? root.sourceOvershootCurve :
+                                                            root.sourceEaseOutCurve
             }
         }
-        Behavior on radius {
-            NumberAnimation {
-                duration: 300
-                easing.type: Easing.OutQuint
-            }
-        }
-        Behavior on scale {
-            NumberAnimation {
-                duration: 150
-                easing.type: Easing.OutCubic
+        Behavior on color {
+            ColorAnimation {
+                duration: 120
             }
         }
 

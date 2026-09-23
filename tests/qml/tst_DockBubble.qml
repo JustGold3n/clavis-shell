@@ -50,4 +50,32 @@ TestCase {
         verify(!contains(rects, 26, 125));
         compare(DockBubble.regionRects(DockBubble.outline(0, 0, "bottom", 10, 26), 0).length, 0);
     }
+
+    function test_rotatedLabelRegionFollowsItsOutline() {
+        const width = 258, height = 28, radius = 7;
+        for (const degrees of [-10, 0, 10]) {
+            const angle = degrees * Math.PI / 180, cosine = Math.cos(angle), sine = Math.sin(angle);
+            const points = DockBubble.polygon(DockBubble.outline(width, height, "bottom", 0, 0, radius)).map(
+                      point => ({
+                          x: point.x * cosine - point.y * sine,
+                          y: point.x * sine + point.y * cosine
+                      }));
+            const rows = DockBubble.regionRows(points);
+            verify(contains(rows, width / 2 * cosine - height / 2 * sine, width / 2 * sine + height / 2
+                            * cosine));
+            verify(!contains(rows, 0, 0));
+            let area = 0;
+            for (const row of rows) {
+                area += row.width * row.height;
+                for (const x of [row.x + 0.5, row.x + row.width - 0.5]) {
+                    const y = row.y + 0.5;
+                    const localX = x * cosine + y * sine, localY = -x * sine + y * cosine;
+                    verify(localX >= 0 && localX <= width && localY >= 0 && localY <= height);
+                }
+            }
+            const expectedArea = width * height - (4 - Math.PI) * radius * radius;
+            verify(Math.abs(area - expectedArea) < expectedArea * 0.05);
+        }
+        compare(DockBubble.regionRows([]).length, 0);
+    }
 }

@@ -82,6 +82,7 @@ add_subdirectory(plugin/keyboard)
 add_subdirectory(plugin/lyrics)
 add_subdirectory(plugin/i18n)
 add_subdirectory(plugin/runtime)
+add_subdirectory(plugin/files)
 add_subdirectory(plugin/gamma)
 add_subdirectory(plugin/windowpreview)
 

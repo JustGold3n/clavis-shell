@@ -5,13 +5,22 @@ Item {
     id: root
 
     required property string desktopId
-    readonly property bool spaceTemplate: desktopId === ApplicationService.spaceApplication.id
+    readonly property string dockKind: desktopId === ApplicationService.smallSpaceApplication.id
+                                       ? "small-spacer" : desktopId
+                                         === ApplicationService.spaceApplication.id ? "spacer" : "app"
     required property Item iconItem
     property bool dragged: false
     property bool preparing: false
     property bool nativeDragActive: false
     property bool holdsDrag: false
     property var capturedImage: null
+    property QtObject dockHandoffTarget: null
+    property int dockHandoffSerial: 0
+
+    function registerDockHandoff(target, serial) {
+        dockHandoffTarget = target;
+        dockHandoffSerial = serial;
+    }
 
     anchors.fill: parent
     enabled: desktopId !== "" && DockService.enabled
@@ -29,6 +38,12 @@ Item {
     }
 
     function releaseDrag() {
+        // Reveal the Dock entry only after QDrag has returned.
+        // Its model refresh may destroy this source as soon as we release it.
+        if (dockHandoffTarget) {
+            dockHandoffTarget.finishExternalHandoff(dockHandoffSerial);
+            dockHandoffTarget = null;
+        }
         capturedImage = null;
         holdsDrag = false;
         DockService.externalDragActive = false;
@@ -40,8 +55,7 @@ Item {
     Drag.mimeData: ({
                         "application/x-clavis-dock": JSON.stringify({
                                                                         schemaVersion: 1,
-                                                                        kind: root.spaceTemplate ? "spacer" :
-                                                                                                   "app",
+                                                                        kind: root.dockKind,
                                                                         desktopId: root.desktopId
                                                                     })
                     })
@@ -80,6 +94,8 @@ Item {
     }
 
     Component.onDestruction: {
+        if (root.dockHandoffTarget)
+            root.dockHandoffTarget.cancelExternalHandoff(root.dockHandoffSerial);
         if (root.holdsDrag)
             DockService.externalDragActive = false;
     }

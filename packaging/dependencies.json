@@ -290,7 +290,12 @@
     },
     {
       "package": "glib2",
-      "purpose": "GSettings and gio",
+      "purpose": "GSettings and native GIO file operations",
+      "defaultInstall": true
+    },
+    {
+      "package": "gvfs",
+      "purpose": "System trash backend for the Dock",
       "defaultInstall": true
     },
     {
@@ -456,7 +461,12 @@
         },
         {
           "package": "glib2",
-          "purpose": "GSettings and gio",
+          "purpose": "GSettings and native GIO file operations",
+          "defaultInstall": true
+        },
+        {
+          "package": "gvfs",
+          "purpose": "System trash backend for the Dock",
           "defaultInstall": true
         },
         {

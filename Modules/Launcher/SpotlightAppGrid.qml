@@ -87,18 +87,27 @@ GridView {
                 }
             }
 
-            MaterialSymbol {
+            Item {
                 id: appSymbol
-
                 anchors.centerIn: appIcon
+                width: root.style.appGridIconSize
+                height: width
                 visible: !!tile.modelData.symbol
-                text: tile.modelData.symbol || ""
-                iconSize: root.style.appGridIconSize
-                color: root.searchActive && tile.selected ? root.style.selectedContentColor :
-                                                            tile.modelData.appObject?.dragOnly
-                                                            ? Appearance.colors.colOnSurfaceVariant :
-                                                              Appearance.colors.colPrimary
                 scale: appIcon.scale
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    text: tile.modelData.symbol || ""
+                    iconSize: root.style.appGridIconSize
+                    color: root.searchActive && tile.selected ? root.style.selectedContentColor :
+                                                                tile.modelData.appObject?.dragOnly
+                                                                ? Appearance.colors.colOnSurfaceVariant :
+                                                                  Appearance.colors.colPrimary
+                    transform: Scale {
+                        origin.x: appSymbol.width / 2
+                        xScale: tile.modelData.appObject?.id === ApplicationService.smallSpaceApplication.id
+                                ? 0.5 : 1
+                    }
+                }
             }
 
             Text {

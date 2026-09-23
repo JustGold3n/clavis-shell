@@ -48,6 +48,8 @@ Singleton {
     readonly property string revision: snapshot.revision || ""
     readonly property var bindings: snapshot.bindings || []
     readonly property var outputs: snapshot.outputs || []
+    readonly property string minimizeEffect: snapshot.minimizeAnimation?.effect || "scale"
+    readonly property bool minimizeAnimationsDisabled: snapshot.minimizeAnimation?.disabled === true
     signal saved
 
     function state(feature) {
@@ -72,6 +74,11 @@ Singleton {
     }
 
     function options(feature) {
+        if (feature === "minimize-animation")
+            return {
+                effect: minimizeEffect,
+                revision: revision
+            };
         if (feature === "effects")
             return {
                 xray: PersonalizationConfig.shellBlurXray
@@ -112,6 +119,17 @@ Singleton {
         invoke(Object.assign({}, request, {
                                  feature: "binds"
                              }));
+    }
+
+    function setMinimizeEffect(effect) {
+        if (!ready("minimize-animation") || busy || ["scale", "genie"].indexOf(effect) < 0)
+            return;
+        invoke({
+                   operation: "update",
+                   feature: "minimize-animation",
+                   effect: effect,
+                   revision: revision
+               });
     }
 
     function invoke(request) {

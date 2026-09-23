@@ -64,23 +64,40 @@ function decodeConfig(text) {
             let normalized;
             if (entry.kind === "app" && validDesktopId(entry.desktopId)) {
                 normalized = { kind: "app", desktopId: desktopId(entry.desktopId) };
-            } else if ((entry.kind === "spacer" || entry.kind === "separator") && typeof entry.id === "string"
+            } else if ((isSpacer(entry) || entry.kind === "separator") && typeof entry.id === "string"
                     && /^[A-Za-z0-9_-]{1,80}$/.test(entry.id)) {
-                normalized = { kind: "spacer", id: entry.id };
+                normalized = { kind: entry.kind === "small-spacer" ? "small-spacer" : "spacer", id: entry.id };
+            } else if (isFile(entry) && validFileUrl(entry.url)) {
+                normalized = { kind: entry.kind, url: entry.url };
+                if (entry.kind === "folder") {
+                    normalized.view = ["fan", "grid", "list"].indexOf(entry.view) >= 0 ? entry.view : "fan";
+                    normalized.sort = ["name", "modified", "created", "kind", "size"].indexOf(entry.sort) >= 0 ? entry.sort : "name";
+                    normalized.display = entry.display === "stack" ? "stack" : "folder";
+                }
             } else return null;
             const key = pinnedKey(normalized);
             if (keys.has(key)) return null;
             keys.add(key);
             pinned.push(normalized);
         }
-        return { schemaVersion: 1, options: options, pinned: pinned };
+        return { schemaVersion: 1, options: options, pinned: groupPins(pinned) };
     } catch (error) {
         return null;
     }
 }
 
+function isSpacer(entry) { return entry.kind === "spacer" || entry.kind === "small-spacer"; }
+
+function isFile(entry) { return entry.kind === "file" || entry.kind === "folder"; }
+function validFileUrl(value) {
+    if (typeof value !== "string" || !value.startsWith("file:///") || /[?#\u0000-\u001f]/.test(value)) return false;
+    try { return !decodeURIComponent(value).includes("\u0000"); } catch (error) { return false; }
+}
+function groupPins(pins) { return pins.filter(entry => !isFile(entry)).concat(pins.filter(isFile)); }
+
 function pinnedKey(entry) {
-    return entry.kind === "spacer" ? "spacer:" + entry.id : "app:" + desktopId(entry.desktopId);
+    if (isFile(entry)) return "file:" + entry.url;
+    return isSpacer(entry) ? "spacer:" + entry.id : "app:" + desktopId(entry.desktopId);
 }
 
 function applicationForWindow(window, applications) {
@@ -145,7 +162,7 @@ function dropPayload(text) {
     try {
         const value = JSON.parse(text);
         if (!value || value.schemaVersion !== 1) return null;
-        if (value.kind === "spacer") return { kind: "spacer" };
+        if (isSpacer(value)) return { kind: value.kind };
         return value.kind === "app" && validDesktopId(value.desktopId)
                 ? { kind: "app", desktopId: desktopId(value.desktopId) } : null;
     } catch (error) {
@@ -192,6 +209,16 @@ function pendingLaunches(pending, groups, now) {
             result[key] = launch;
     }
     return result;
+}
+
+// An application click never minimizes an entire group or launches a duplicate
+// merely because all of its windows are minimized.
+function activation(windows, supportsMinimize) {
+    if (!windows.length) return { action: "launch" };
+    const window = windows[0];
+    const action = window.isMinimized ? "restore"
+        : supportsMinimize && windows.length === 1 && window.isFocused ? "minimize" : "focus";
+    return { action: action, id: window.id };
 }
 
 // Preserve delegate identity on window metadata changes and application

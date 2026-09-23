@@ -1,10 +1,12 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
+import Quickshell
 import qs.Common
 import qs.Components
 import qs.Services
 import qs.Widgets.common
+import "../../Common/functions/DockMotion.js" as DockMotion
 
 Item {
     id: root
@@ -22,11 +24,21 @@ Item {
     required property string edge
     required property real iconSize
     required property real restingIconSize
+    readonly property bool spacer: kind === "spacer" || kind === "small-spacer"
     property bool dragged: false
     property bool contextActive: false
+    property bool folderExpanded: false
+    property real folderOpenProgress: folderExpanded ? 1 : 0
+    readonly property alias folderButtonBackground: folderButton
+    property bool dropTarget: false
+    property string dropHint: ""
     property bool showTooltip: false
     readonly property string popupEdge: edge
     readonly property alias artworkItem: artwork
+    readonly property bool trashIconAvailable: {
+        const revision = ThemeService.iconThemeRevision;
+        return kind === "trash" && Quickshell.hasThemeIcon(icon);
+    }
     property real presence: 1
     readonly property bool horizontal: edge === "bottom"
     property real bounce: 0
@@ -44,6 +56,13 @@ Item {
     signal dragCancelled
 
     opacity: dragged ? 0 : presence
+
+    Behavior on folderOpenProgress {
+        NumberAnimation {
+            duration: 160
+            easing.type: Easing.OutCubic
+        }
+    }
 
     Behavior on iconSize {
         NumberAnimation {
@@ -87,8 +106,10 @@ Item {
         x: root.horizontal ? (root.width - width) / 2 : root.edge === "left" ? 10 + root.bounce : root.width
                                                                                - width - 10 - root.bounce
         y: root.horizontal ? root.height - height - 12 - root.bounce : (root.height - height) / 2
-        scale: 0.94 + 0.06 * root.presence
-        property real pressShade: (pointer.pressed && !root.moved) || root.contextActive ? 0.3 : 0
+        transformOrigin: Item.Center
+        scale: DockMotion.iconScale(root.presence)
+        property real pressShade: (pointer.pressed && !root.moved) || root.contextActive || root.dropTarget
+                                  ? 0.3 : 0
         Behavior on pressShade {
             NumberAnimation {
                 duration: 90
@@ -98,21 +119,11 @@ Item {
         layer.effect: MultiEffect {
             brightness: -artwork.pressShade
         }
-        transform: Translate {
-            x: root.horizontal ? 0 : (root.edge === "left" ? -1 : 1) * (1 - root.presence) * 6
-            y: root.horizontal ? (1 - root.presence) * 6 : 0
-        }
-        opacity: root.available || root.windowCount > 0 || root.kind === "spacer" ? 1 : 0.45
-        Behavior on scale {
-            NumberAnimation {
-                duration: 120
-                easing.type: Easing.OutCubic
-            }
-        }
+        opacity: root.available || root.windowCount > 0 || root.spacer ? 1 : 0.45
 
         ThemeIcon {
             anchors.fill: parent
-            visible: root.kind === "app" && !root.symbol
+            visible: (root.kind === "app" || root.trashIconAvailable) && !root.symbol
             iconSource: visible ? ApplicationService.iconSource(root.icon) : ""
             sourceSize: Qt.size(160, 160)
             fillMode: Image.PreserveAspectFit
@@ -120,31 +131,48 @@ Item {
         }
         MaterialSymbol {
             anchors.centerIn: parent
-            visible: root.kind === "app" && !!root.symbol
-            text: root.symbol
+            visible: root.kind === "app" && !!root.symbol || root.kind === "trash" && !root.trashIconAvailable
+            text: root.kind === "trash" ? "delete" : root.symbol
             iconSize: root.iconSize * 0.82
             color: Appearance.colors.colPrimary
         }
+        DockFileArtwork {
+            anchors.fill: parent
+            visible: root.kind === "file" || root.kind === "folder"
+            entryKey: root.entryKey
+            opacity: 1 - root.folderOpenProgress
+        }
+        Rectangle {
+            id: folderButton
+            anchors.fill: parent
+            visible: root.kind === "folder" && opacity > 0
+            opacity: root.folderOpenProgress
+            radius: width * 0.23
+            color: BlurService.backgroundColor(Appearance.colors.colSurfaceContainer)
+            border.width: 1
+            border.color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.2)
+            MaterialSymbol {
+                anchors.centerIn: parent
+                anchors.alignWhenCentered: false
+                text: root.edge === "bottom" ? "expand_more" : root.edge === "left" ? "chevron_left" :
+                                                                                      "chevron_right"
+
+                // Magnify one glyph continuously instead of changing hinted
+                // pixel sizes and optical font variants during pointer motion.
+                iconSize: 32
+                scale: parent.width / (iconSize * 2)
+                renderType: Text.QtRendering
+                color: Appearance.colors.colOnSurface
+            }
+        }
         StyledToolTip {
-            text: root.name
+            text: root.dropTarget ? root.dropHint : root.name
             textFormat: Text.PlainText
-            extraVisibleCondition: root.showTooltip && pointer.containsMouse && !pointer.pressed &&
-                                   !root.dragged && !root.contextActive
+            extraVisibleCondition: root.dropTarget || root.showTooltip && pointer.containsMouse &&
+                                   !pointer.pressed && !root.dragged && !root.contextActive
         }
     }
 
-    Rectangle {
-        visible: root.kind === "spacer" && (pointer.containsMouse || root.contextActive
-                                            || DockService.externalDragActive)
-        x: artwork.x
-        y: artwork.y
-        width: artwork.width
-        height: artwork.height
-        radius: width * 0.2
-        color: "transparent"
-        border.width: 1
-        border.color: Appearance.applyAlpha(Appearance.colors.colOnSurface, 0.25)
-    }
     Rectangle {
         visible: root.kind === "app" && root.windowCount > 0 && DockService.showIndicators
         // Scale with the resting icons, so hover magnification does not pulse the dot.
@@ -160,9 +188,9 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: root.spacer ? Qt.ArrowCursor : Qt.PointingHandCursor
         Accessible.role: Accessible.Button
-        Accessible.name: root.kind === "spacer" ? qsTranslate("ApplicationService", "Space") : root.name
+        Accessible.name: root.name
         Accessible.onPressAction: root.activated(root.entryKey)
         onEntered: root.hovered(root.entryKey)
         onExited: root.hoverLeft(root.entryKey)
@@ -174,7 +202,7 @@ Item {
             root.grabOffset = Qt.point(root.pressPoint.x - center.x, root.pressPoint.y - center.y);
         }
         onPositionChanged: mouse => {
-            if (!(pressedButtons & Qt.LeftButton))
+            if (root.kind === "trash" || !(pressedButtons & Qt.LeftButton))
                 return;
             const position = root.mapToItem(null, mouse.x, mouse.y);
             if (!root.moved && Math.hypot(position.x - root.pressPoint.x, position.y - root.pressPoint.y)

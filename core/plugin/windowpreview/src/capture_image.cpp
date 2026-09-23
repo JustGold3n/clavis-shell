@@ -2,12 +2,40 @@
 #include <QPainter>
 
 CaptureImage::CaptureImage(QQuickItem *parent) : QQuickPaintedItem(parent) {}
+void CaptureImage::setFrame(WindowPreviewFrame *frame)
+{
+    if (m_frame == frame)
+        return;
+    if (m_frame)
+        disconnect(m_frame, nullptr, this, nullptr);
+    setCapture(nullptr);
+    m_frame = frame;
+    m_image = frame ? frame->image() : QImage();
+    if (frame) {
+        connect(frame, &WindowPreviewFrame::changed, this, [this] {
+            m_image = m_frame ? m_frame->image() : QImage();
+            update();
+        });
+        connect(frame, &QObject::destroyed, this, [this] {
+            m_image = {};
+            update();
+            emit frameChanged();
+        });
+    }
+    update();
+    emit frameChanged();
+}
 void CaptureImage::setCapture(WindowCaptureProbe *capture)
 {
     if (m_capture == capture)
         return;
     if (m_capture)
         disconnect(m_capture, nullptr, this, nullptr);
+    if (capture && m_frame) {
+        disconnect(m_frame, nullptr, this, nullptr);
+        m_frame = nullptr;
+        emit frameChanged();
+    }
     m_capture = capture;
     m_image = capture ? capture->image() : QImage();
     if (capture) {

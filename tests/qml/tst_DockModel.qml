@@ -30,12 +30,87 @@ TestCase {
         rows.clear();
     }
 
+    function test_minimizedWindowsStayRunningAndActivateIndividually() {
+        const hidden = {
+            id: 42,
+            appId: "EditorWindow",
+            title: "Same title",
+            isMinimized: true
+        };
+        const other = {
+            id: 43,
+            appId: "EditorWindow",
+            title: "Same title",
+            isMinimized: true
+        };
+        const groups = DockModel.groupWindows([hidden, other], applications, ({}));
+        const group = groups[Object.keys(groups)[0]];
+        compare(group.windows.length, 2);
+        const choice = DockModel.activation(group.windows, true);
+        compare(choice.action, "restore");
+        verify(choice.id === 42 || choice.id === 43);
+        compare(DockModel.activation([], true).action, "launch");
+        compare(DockModel.activation([
+                                         {
+                                             id: 42,
+                                             isFocused: true
+                                         }
+                                     ], true).action, "minimize");
+        compare(DockModel.activation([
+                                         {
+                                             id: 42,
+                                             isFocused: true
+                                         }
+                                     ], false).action, "focus");
+        compare(DockModel.activation([
+                                         {
+                                             id: 42,
+                                             isFocused: true
+                                         },
+                                         other], true).action, "focus");
+    }
+
     function encodedConfig(pinned, options) {
         return JSON.stringify({
                                   schemaVersion: 1,
                                   pinned: pinned,
                                   options: options || {}
                               });
+    }
+
+    function test_fileReferencesSurviveConfigRoundTrip() {
+        const pins = [
+                  {
+                      kind: "folder",
+                      url: "file:///tmp/Folder%20%23%25",
+                      view: "list",
+                      sort: "created",
+                      display: "stack"
+                  },
+                  {
+                      kind: "app",
+                      desktopId: "org.example.App"
+                  },
+                  {
+                      kind: "file",
+                      url: "file:///tmp/%E4%B8%AD%E6%96%87.txt"
+                  }
+              ];
+        const config = DockModel.decodeConfig(JSON.stringify({
+                                                                 schemaVersion: 1,
+                                                                 options: {},
+                                                                 pinned: pins
+                                                             }));
+        verify(config !== null);
+        compare(config.pinned[0].kind, "app");
+        compare(config.pinned[1].view, "list");
+        compare(config.pinned[1].sort, "created");
+        compare(config.pinned[1].display, "stack");
+        compare(config.pinned[2].url, pins[2].url);
+        compare(DockModel.pinnedKey(config.pinned[1]), "file:" + pins[0].url);
+        verify(!DockModel.validFileUrl("file:///tmp/%00"));
+        verify(!DockModel.validFileUrl("file://host/path"));
+        verify(!DockModel.validFileUrl("file:///tmp/%ZZ"));
     }
 
     function test_configRoundTripAndBounds() {
@@ -295,6 +370,32 @@ TestCase {
         compare(DockModel.recentIds(history, available, new Set(["app:org.example.Editor",
                                                                  "app:org.example.Browser"]), 3).join(","),
                 "org.clavis.Settings,extra,fourth");
+    }
+
+    function test_smallSpacerDropAndConfigRoundTrip() {
+        const payload = DockModel.dropPayload('{"schemaVersion":1,"kind":"small-spacer"}');
+        compare(payload.kind, "small-spacer");
+        const decoded = DockModel.decodeConfig(encodedConfig([
+                                                                 {
+                                                                     kind: "app",
+                                                                     desktopId: "example"
+                                                                 },
+                                                                 {
+                                                                     kind: payload.kind,
+                                                                     id: "small"
+                                                                 },
+                                                                 {
+                                                                     kind: "spacer",
+                                                                     id: "regular"
+                                                                 }
+                                                             ], {}));
+        verify(decoded !== null);
+        compare(decoded.pinned[1].kind, "small-spacer");
+        compare(DockModel.pinnedKey(decoded.pinned[1]), "spacer:small");
+        compare(DockModel.decodeConfig(JSON.stringify(decoded)), decoded);
+        const moved = DockModel.movePinned(decoded.pinned, "spacer:small", 0);
+        compare(moved[0].kind, "small-spacer");
+        compare(moved[2].kind, "spacer");
     }
 
     function test_dropProtocolAndInstalledPathBoundaries() {

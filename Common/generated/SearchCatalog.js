@@ -1257,7 +1257,11 @@ var catalog = {
         "bounce",
         "recent",
         "indicators",
-        "pin"
+        "pin",
+        "minimize",
+        "animation",
+        "genie",
+        "scale"
       ],
       "anchor": true,
       "context": "DockPage",

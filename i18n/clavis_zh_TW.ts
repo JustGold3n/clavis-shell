@@ -3810,17 +3810,17 @@ Scroll to adjust</source>
 <context>
     <name>DockPage</name>
     <message>
-        <location filename="../Common/generated/SearchCatalog.js" line="1925"/>
+        <location filename="../Common/generated/SearchCatalog.js" line="1942"/>
         <source>Appearance</source>
         <translation>外觀</translation>
     </message>
     <message>
-        <location filename="../Common/generated/SearchCatalog.js" line="1926"/>
+        <location filename="../Common/generated/SearchCatalog.js" line="1943"/>
         <source>Behavior</source>
         <translation>行為</translation>
     </message>
     <message>
-        <location filename="../Common/generated/SearchCatalog.js" line="1927"/>
+        <location filename="../Common/generated/SearchCatalog.js" line="1944"/>
         <source>Window previews</source>
         <translation>視窗預覽</translation>
     </message>
@@ -3888,25 +3888,59 @@ Scroll to adjust</source>
         <translation>顯示執行中指示標記</translation>
     </message>
     <message>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="184"/>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="189"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="185"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="198"/>
+        <source>Minimize animation</source>
+        <translation>最小化動畫</translation>
+    </message>
+    <message>
+        <source>First-time setup</source>
+        <translation>首次設定</translation>
+    </message>
+    <message>
+        <source>Set up window minimization animations.</source>
+        <translation>設定視窗最小化動畫。</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="200"/>
+        <source>Window animation selection is unavailable in this session</source>
+        <translation>目前工作階段不支援選擇視窗動畫</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="203"/>
+        <source>Animations are disabled in your configuration</source>
+        <translation>設定中已停用動畫</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="211"/>
+        <source>Genie</source>
+        <translation>神奇效果</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="215"/>
+        <source>Scale</source>
+        <translation>縮放效果</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="238"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="243"/>
         <source>Show recent applications</source>
         <translation>顯示最近啟動的應用程式</translation>
     </message>
     <message>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="196"/>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="201"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="250"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="255"/>
         <source>Pin applications from the menu</source>
         <translation>允許從選單固定應用程式</translation>
     </message>
     <message>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="223"/>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="227"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="277"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="281"/>
         <source>Show window thumbnails</source>
         <translation>顯示視窗縮圖</translation>
     </message>
     <message>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="232"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="286"/>
         <source>Preview size</source>
         <translation>預覽尺寸</translation>
     </message>
@@ -3961,6 +3995,26 @@ Scroll to adjust</source>
         <source>Dock settings could not be saved. Changes apply to this session only.</source>
         <translation>無法儲存 Dock 設定。變更僅套用於本次工作階段。</translation>
     </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="227"/>
+        <source>Trash</source>
+        <translation>垃圾桶</translation>
+    </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="245"/>
+        <source>This file or folder is unavailable.</source>
+        <translation>此檔案或資料夾無法使用。</translation>
+    </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="433"/>
+        <source>Some files could not be processed.</source>
+        <translation>部分檔案無法處理。</translation>
+    </message>
+    <message>
+        <location filename="../Services/DockService.qml" line="433"/>
+        <source>The file operation failed.</source>
+        <translation>檔案操作失敗。</translation>
+    </message>
 </context>
 <context>
     <name>DockSurface</name>
@@ -3973,6 +4027,21 @@ Scroll to adjust</source>
         <location filename="../Modules/Dock/DockDragVisual.qml" line="134"/>
         <source>Remove from Dock</source>
         <translation>從 Dock 移除</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockSurface.qml" line="805"/>
+        <source>Move to Trash</source>
+        <translation>移至垃圾桶</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockSurface.qml" line="805"/>
+        <source>Open with %1</source>
+        <translation>使用 %1 開啟</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockSurface.qml" line="899"/>
+        <source>The file operation could not be started.</source>
+        <translation>無法開始檔案操作。</translation>
     </message>
 </context>
 <context>
@@ -8188,6 +8257,10 @@ Click to open network settings</source>
 </context>
 <context>
     <name>NiriSetupPrompt</name>
+    <message>
+        <source>First-time setup</source>
+        <translation>首次設定</translation>
+    </message>
     <message>
         <location filename="../Widgets/common/NiriSetupPrompt.qml" line="20"/>
         <source>Available in a niri session</source>
@@ -13751,32 +13824,37 @@ Windows: </source>
 <context>
     <name>DockWindowCard</name>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="88"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="104"/>
         <source>Close window</source>
         <translation>關閉視窗</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="109"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="125"/>
         <source>Preview unavailable</source>
         <translation>預覽無法使用</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="146"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="125"/>
+        <source>Minimized</source>
+        <translation>已最小化</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="162"/>
         <source>Previous track</source>
         <translation>上一首</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="154"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="171"/>
         <source>Pause</source>
         <translation>暫停</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="154"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="171"/>
         <source>Play</source>
         <translation>播放</translation>
     </message>
     <message>
-        <location filename="../Modules/Dock/DockWindowCard.qml" line="162"/>
+        <location filename="../Modules/Dock/DockWindowCard.qml" line="180"/>
         <source>Next track</source>
         <translation>下一首</translation>
     </message>
@@ -13822,6 +13900,157 @@ Windows: </source>
         <location filename="../Services/ApplicationService.qml" line="32"/>
         <source>Drag to Dock to add a blank space</source>
         <translation>拖入 Dock 新增空白佔位</translation>
+    </message>
+    <message>
+        <location filename="../Services/ApplicationService.qml" line="40"/>
+        <location filename="../Services/DockService.qml" line="185"/>
+        <source>Small Space</source>
+        <translation>窄間距</translation>
+    </message>
+</context>
+<context>
+    <name>DockFilePopup</name>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="165"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="219"/>
+        <source>Folder is unavailable</source>
+        <translation>資料夾無法使用</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="165"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="229"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="295"/>
+        <source>Open in File Manager</source>
+        <translation>在檔案管理員中開啟</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="167"/>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="219"/>
+        <source>Folder is empty</source>
+        <translation>資料夾是空的</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="242"/>
+        <source>Permanently delete all items in Trash?</source>
+        <translation>永久刪除垃圾桶中的所有項目？</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="245"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="249"/>
+        <source>Empty Trash</source>
+        <translation>清空垃圾桶</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="259"/>
+        <source>Sort by</source>
+        <translation>排序方式</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="261"/>
+        <source>Name</source>
+        <translation>名稱</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="261"/>
+        <source>Date Modified</source>
+        <translation>修改時間</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="261"/>
+        <source>Date Created</source>
+        <translation>建立時間</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="263"/>
+        <source>Kind</source>
+        <translation>類型</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="263"/>
+        <source>Size</source>
+        <translation>大小</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="271"/>
+        <source>Display as</source>
+        <translation>顯示為</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="274"/>
+        <source>Folder</source>
+        <translation>資料夾</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="279"/>
+        <source>Stack</source>
+        <translation>堆疊</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="284"/>
+        <source>View content as</source>
+        <translation>內容展開方式</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="286"/>
+        <source>Fan</source>
+        <translation>扇形</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="286"/>
+        <source>Grid</source>
+        <translation>格狀</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="286"/>
+        <source>List</source>
+        <translation>列表</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="294"/>
+        <source>Open Trash</source>
+        <translation>開啟垃圾桶</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="294"/>
+        <source>Open</source>
+        <translation>開啟</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="301"/>
+        <source>Empty Trash…</source>
+        <translation>清空垃圾桶…</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="307"/>
+        <source>Remove from Dock</source>
+        <translation>從 Dock 移除</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="336"/>
+        <source>Dismiss</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFilePopup.qml" line="343"/>
+        <source>Trash is unavailable. Install or enable GVfs.</source>
+        <translation>垃圾桶無法使用，請安裝或啟用 GVfs。</translation>
+    </message>
+</context>
+<context>
+    <name>DockFolderMenu</name>
+    <message>
+        <location filename="../Modules/Dock/DockFolderMenu.qml" line="140"/>
+        <source>Folder is empty</source>
+        <translation>資料夾是空的</translation>
+    </message>
+    <message>
+        <location filename="../Modules/Dock/DockFolderMenu.qml" line="145"/>
+        <source>Open in File Manager</source>
+        <translation>在檔案管理員中開啟</translation>
     </message>
 </context>
 </TS>

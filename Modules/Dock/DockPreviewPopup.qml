@@ -12,6 +12,7 @@ Item {
     id: root
 
     required property string entryKey
+    required property string outputName
     required property real maximumWidth
     property real maximumHeight: 600
     property bool contextMenu: false
@@ -33,10 +34,9 @@ Item {
     property var mediaPlayer: null
     onMatchingPlayersChanged: mediaPlayer = DockMedia.selectPlayer(matchingPlayers, mediaPlayer)
     property string previewConsumer: ""
-    readonly property var captureTargets: !visible || contextMenu || !thumbnails
-                                          || WindowPreviewService.suspended ? [] : windows.map(window
-                                                                                               => String(
-                                                                                                      window.id))
+    readonly property var captureTargets: !visible || contextMenu || !thumbnails ||
+                                          !WindowPreviewService.connected ? [] : windows.map(window => String(
+                                                                                                           window.id))
     onCaptureTargetsChanged: WindowPreviewService.setTargets(previewConsumer, captureTargets)
     Component.onCompleted: {
         mediaPlayer = DockMedia.selectPlayer(matchingPlayers, mediaPlayer);
@@ -149,8 +149,13 @@ Item {
                     return root.visible && root.thumbnails ? WindowPreviewService.captureFor(modelData.id) :
                                                              null;
                 }
+                previewFrame: {
+                    const revision = WindowPreviewService.revision;
+                    return root.visible && root.thumbnails ? WindowPreviewService.frameFor(modelData.id) :
+                                                             null;
+                }
                 onActivated: {
-                    DockService.focusWindow(modelData.id);
+                    DockService.focusWindow(modelData.id, root.outputName);
                     root.dismissed();
                 }
                 onCloseRequested: DockService.closeWindow(modelData.id)
@@ -202,7 +207,7 @@ Item {
                         checkable: true
                         checked: !!modelData.isFocused
                         onTriggered: {
-                            DockService.focusWindow(modelData.id);
+                            DockService.focusWindow(modelData.id, root.outputName);
                             root.dismissed();
                         }
                     }

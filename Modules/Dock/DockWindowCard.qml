@@ -15,11 +15,13 @@ Button {
     property string applicationIcon: ""
     property bool showThumbnail: false
     property WindowCaptureProbe capture: null
+    property WindowPreviewFrame previewFrame: null
     property var mediaPlayer: null
     readonly property string title: String(windowData && (windowData.title || windowData.appName
                                                           || windowData.appId) || applicationName)
-    readonly property bool hasFrame: !!capture && capture.active && capture.frameCount > 0
-    readonly property bool busy: !!capture && !hasFrame && capture.error === ""
+    readonly property bool minimized: !!windowData && !!windowData.isMinimized
+    readonly property bool hasFrame: !!previewFrame && previewFrame.hasFrame
+    readonly property bool busy: !minimized && !!capture && !hasFrame && capture.error === ""
     // Below this width, shrink the entire card, including its controls. There
     // is deliberately no minimum width that could overflow the preview row.
     readonly property real detailScale: Math.min(1, width / 160)
@@ -99,14 +101,14 @@ Button {
                 clip: true
                 CaptureImage {
                     anchors.fill: parent
-                    capture: root.capture
+                    frame: root.previewFrame
                     visible: root.hasFrame
                 }
                 Text {
                     anchors.fill: parent
                     anchors.margins: 4
                     visible: !root.hasFrame && !root.busy
-                    text: qsTr("Preview unavailable")
+                    text: root.minimized ? qsTr("Minimized") : qsTr("Preview unavailable")
                     textFormat: Text.PlainText
                     font.family: Fonts.ui
                     font.pixelSize: 11

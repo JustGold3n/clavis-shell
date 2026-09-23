@@ -2,13 +2,14 @@
 
 // One outline drives both the painted bubble and the compositor's integer
 // region. Coordinates include the half-pixel inset for its one-pixel border.
-function outline(width, bodyHeight, edge, tail, offset) {
+function outline(width, bodyHeight, edge, tail, offset, cornerRadius) {
     if (width <= 1 || bodyHeight <= 1) return [];
     const bodyX = edge === "left" ? tail : 0;
     const bodyWidth = width - (edge === "bottom" ? 0 : tail);
     const x = bodyX + 0.5, y = 0.5;
     const right = bodyX + bodyWidth - 0.5, bottom = bodyHeight - 0.5;
-    const radius = Math.max(0, Math.min(12, (right - x) / 2, (bottom - y) / 2));
+    const radius = Math.max(0, Math.min(cornerRadius === undefined ? 12 : cornerRadius,
+                                     (right - x) / 2, (bottom - y) / 2));
     const extent = edge === "bottom" ? bodyWidth : bodyHeight;
     const tip = Math.max(26, Math.min(extent - 26, offset));
     const p = [["M", x + radius, y], ["L", right - radius, y],
@@ -72,9 +73,21 @@ function polygon(commands) {
 }
 
 function regionRects(commands, height) {
-    const points = polygon(commands);
+    return polygonRects(polygon(commands), 0, Math.ceil(height), true);
+}
+
+// Transformed labels need screen-aligned scanlines: Region.item only maps
+// two opposite corners and cannot represent a rotated rounded rectangle.
+function regionRows(points) {
+    if (!points.length) return [];
+    const ys = points.map(point => point.y);
+    return polygonRects(points, Math.floor(Math.min.apply(null, ys)),
+                        Math.ceil(Math.max.apply(null, ys)), false);
+}
+
+function polygonRects(points, top, bottom, merge) {
     const rects = [];
-    for (let y = 0; y < Math.ceil(height); ++y) {
+    for (let y = top; y < bottom; ++y) {
         const scanY = y + 0.5, crossings = [];
         for (let i = 0; i < points.length; ++i) {
             const a = points[i], b = points[(i + 1) % points.length];
@@ -87,7 +100,7 @@ function regionRects(commands, height) {
             const width = Math.floor(crossings[i + 1] - 0.5) + 1 - x;
             if (width <= 0) continue;
             const last = rects[rects.length - 1];
-            if (last && last.x === x && last.width === width && last.y + last.height === y)
+            if (merge && last && last.x === x && last.width === width && last.y + last.height === y)
                 last.height++;
             else
                 rects.push({x: x, y: y, width: width, height: 1});

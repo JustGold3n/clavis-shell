@@ -16,6 +16,8 @@ Singleton {
     property int revision: 0
     property int nextConsumer: 0
     property bool initialized: false
+    property var _snapshots: ({})
+    property string _lastFocusedId: ""
 
     function createConsumer() {
         return "dock-preview-" + (++nextConsumer);
@@ -29,12 +31,44 @@ Singleton {
     function captureFor(id) {
         return backend.captureFor(String(id));
     }
+    function frameFor(id) {
+        return connected ? backend.frameFor(String(id)) : null;
+    }
+    function snapshot(id, callback) {
+        if (!connected)
+            return false;
+        const key = String(id);
+        if (_snapshots[key])
+            return true;
+        _snapshots[key] = {
+            generation: Niri.connectionGeneration,
+            callback: callback
+        };
+        backend.requestSnapshot(key);
+        return true;
+    }
+    function syncWindows() {
+        if (!initialized || !connected)
+            return;
+        const windows = Niri.searchWindows("");
+        backend.setWindows(windows.map(window => String(window.id)), windows.filter(window
+                                                                                    => window.isMinimized).map(
+                               window => String(window.id)));
+        const focused = windows.find(window => window.isFocused);
+        const id = focused ? String(focused.id) : "";
+        if (id && id !== _lastFocusedId)
+            backend.prefetch(id);
+        _lastFocusedId = id;
+    }
     function connectBackend() {
         if (!initialized)
             return;
-        if (connected)
+        _snapshots = ({});
+        _lastFocusedId = "";
+        if (connected) {
             backend.open(Quickshell.env("WAYLAND_DISPLAY"));
-        else
+            syncWindows();
+        } else
             backend.close();
     }
     onConnectedChanged: connectBackend()
@@ -47,6 +81,18 @@ Singleton {
     WindowPreviewManager {
         id: backend
         onCapturesChanged: root.revision++
+        onSnapshotFinished: identifier => {
+            const pending = root._snapshots[identifier];
+            delete root._snapshots[identifier];
+            if (pending && root.connected && pending.generation === Niri.connectionGeneration)
+                pending.callback();
+        }
+    }
+    Connections {
+        target: Niri
+        function onWindowsChanged() {
+            root.syncWindows();
+        }
     }
     Timer {
         interval: 3000

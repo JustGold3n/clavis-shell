@@ -2,6 +2,7 @@ import QtQuick
 import qs.Common
 import qs.Components
 import qs.Services
+import "../../Common/functions/DockMotion.js" as DockMotion
 
 // This snapshot outlives the model row. The pointer owns its position during
 // a drag; only the short release/return transition interpolates that position.
@@ -21,6 +22,8 @@ Item {
     visible: active
     height: width
     opacity: fade * (1 - removalProgress * 0.35)
+    transformOrigin: Item.Center
+    scale: DockMotion.iconScale(fade)
 
     function begin(value, center, size) {
         landing.stop();
@@ -28,7 +31,6 @@ Item {
         root.entry = value;
         root.width = size;
         root.fade = 1;
-        root.scale = 1;
         root.removalArmed = false;
         root.following = true;
         root.follow(center);
@@ -49,6 +51,8 @@ Item {
         removal.restart();
     }
     function clear() {
+        landing.stop();
+        removal.stop();
         root.entry = null;
         root.following = false;
         root.removalArmed = false;
@@ -66,40 +70,33 @@ Item {
             target: root
             property: "x"
             to: root.destination.x - root.destinationSize / 2
-            duration: 180
+            duration: DockMotion.reflowDuration
             easing.type: Easing.OutCubic
         }
         NumberAnimation {
             target: root
             property: "y"
             to: root.destination.y - root.destinationSize / 2
-            duration: 180
+            duration: DockMotion.reflowDuration
             easing.type: Easing.OutCubic
         }
         NumberAnimation {
             target: root
             property: "width"
             to: root.destinationSize
-            duration: 180
+            duration: DockMotion.reflowDuration
             easing.type: Easing.OutCubic
         }
         onFinished: root.clear()
     }
-    ParallelAnimation {
+    SequentialAnimation {
         id: removal
         NumberAnimation {
             target: root
             property: "fade"
             to: 0
-            duration: 140
-            easing.type: Easing.OutQuad
-        }
-        NumberAnimation {
-            target: root
-            property: "scale"
-            to: 0.86
-            duration: 140
-            easing.type: Easing.OutQuad
+            duration: DockMotion.exitDuration
+            easing.type: Easing.OutCubic
         }
         onFinished: root.clear()
     }
@@ -111,6 +108,15 @@ Item {
         sourceSize: Qt.size(160, 160)
         fillMode: Image.PreserveAspectFit
     }
+    DockFileIcon {
+        anchors.fill: parent
+        visible: !!root.entry && (root.entry.kind === "file" || root.entry.kind === "folder")
+        info: ({
+                   url: root.entry ? root.entry.url : "",
+                   icon: root.entry ? root.entry.icon : "",
+                   isDirectory: !!root.entry && root.entry.kind === "folder"
+               })
+    }
     MaterialSymbol {
         anchors.centerIn: parent
         visible: !!root.entry && root.entry.kind === "app" && !!root.entry.symbol
@@ -119,8 +125,10 @@ Item {
         color: Appearance.colors.colPrimary
     }
     Rectangle {
-        anchors.fill: parent
-        visible: !!root.entry && root.entry.kind === "spacer"
+        anchors.centerIn: parent
+        width: parent.width * (root.entry && root.entry.kind === "small-spacer" ? 0.5 : 1)
+        height: parent.height
+        visible: !!root.entry && (root.entry.kind === "spacer" || root.entry.kind === "small-spacer")
         radius: width * 0.2
         color: "transparent"
         border.width: 1

@@ -15,10 +15,13 @@ Item {
     property bool directory: false
     property string fallbackSymbol: directory ? "folder" : "draft"
     property real iconSize: 40
+    // Animated consumers can keep the decoded image stable while scaling it.
+    property real rasterSize: 0
+    property bool transformed: false
     readonly property int themeRevision: ThemeService.iconThemeRevision
     readonly property var candidates: {
         if (directory)
-            return ["folder"];
+            return themeIcon && themeIcon !== "folder" ? [themeIcon, "folder"] : ["folder"];
         const mime = mimeType.split(";", 1)[0];
         const family = mime.indexOf("/") > 0 ? mime.split("/", 1)[0] : ["video", "audio", "image"].indexOf(
                                                    category) >= 0 ? category : "text";
@@ -81,11 +84,15 @@ Item {
     ThemeIcon {
         id: artwork
         anchors.fill: parent
+        smooth: true
+        antialiasing: root.transformed
+        mipmap: root.transformed
         asynchronous: true
         retainWhileLoading: false
         fillMode: Image.PreserveAspectFit
-        sourceSize: Qt.size(Math.ceil(width * Screen.devicePixelRatio), Math.ceil(height
-                                                                                  * Screen.devicePixelRatio))
+        sourceSize: Qt.size(Math.ceil((root.rasterSize || width) * Screen.devicePixelRatio), Math.ceil((root.rasterSize
+                                                                                                        || height)
+                                                                                                       * Screen.devicePixelRatio))
         visible: status === Image.Ready
         onStatusChanged: {
             if (status !== Image.Error)
