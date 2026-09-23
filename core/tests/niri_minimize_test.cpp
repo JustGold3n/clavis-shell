@@ -153,6 +153,7 @@ class NiriMinimizeTest : public QObject {
         NiriPlugin legacy;
         QTRY_VERIFY(legacy.supportsMinimize());
         QVERIFY(!legacy.supportsMinimizeAnimation());
+        QVERIFY(legacy.minimizeEffects().isEmpty());
         server([](auto *peer) {
             peer->capabilityReply = {
                 {"Ok", QJsonObject{{"Capabilities", QJsonObject{{"window_minimization", true},
@@ -160,6 +161,17 @@ class NiriMinimizeTest : public QObject {
         });
         NiriPlugin animated;
         QTRY_VERIFY(animated.supportsMinimizeAnimation());
+        QVERIFY(animated.minimizeEffects().isEmpty());
+        server([](auto *peer) {
+            peer->capabilityReply = {
+                {"Ok", QJsonObject{{"Capabilities",
+                                    QJsonObject{{"window_minimization", true},
+                                                {"window_minimization_animation", true},
+                                                {"window_minimization_effects",
+                                                 QJsonArray{"scale", "genie", "genie", "unknown"}}}}}}};
+        });
+        NiriPlugin selectable;
+        QTRY_COMPARE(selectable.minimizeEffects(), (QStringList{"scale", "genie"}));
     }
     void snapshotEventsAndOutputActions()
     {

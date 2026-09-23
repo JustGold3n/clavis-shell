@@ -59,6 +59,7 @@ void NiriPlugin::connectionChanged()
     ++m_outputRefreshGeneration;
     m_supportsMinimize = false;
     m_supportsMinimizeAnimation = false;
+    m_minimizeEffects.clear();
     emit capabilitiesChanged();
     emit connectedChanged();
     if (!online) {
@@ -81,6 +82,15 @@ void NiriPlugin::connectionChanged()
             m_supportsMinimizeAnimation =
                 m_supportsMinimize &&
                 value.toObject().value(QStringLiteral("window_minimization_animation")).toBool(false);
+            if (m_supportsMinimizeAnimation) {
+                const auto effects =
+                    value.toObject().value(QStringLiteral("window_minimization_effects")).toArray();
+                for (const auto &entry : effects) {
+                    const auto effect = entry.toString();
+                    if ((effect == "scale" || effect == "genie") && !m_minimizeEffects.contains(effect))
+                        m_minimizeEffects.append(effect);
+                }
+            }
             emit capabilitiesChanged();
         });
 }

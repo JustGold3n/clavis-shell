@@ -18,6 +18,8 @@ Singleton {
     readonly property bool showThumbnails: root._options.showThumbnails
     readonly property int previewSize: root._options.previewSize
     readonly property bool supportsMinimize: Niri.supportsMinimize
+    readonly property bool supportsMinimizeEffects: Niri.minimizeEffects.indexOf("scale") >= 0
+                                                    && Niri.minimizeEffects.indexOf("genie") >= 0
     property alias model: entries
     readonly property var pinnedEntries: root._pinned
     readonly property int pinnedAppCount: root._pinned.filter(entry => !DockModel.isFile(entry)).length

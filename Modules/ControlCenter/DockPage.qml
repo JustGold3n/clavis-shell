@@ -140,7 +140,7 @@ StyledFlickable {
 
                 target: behaviorSection
                 declaration:
-                    '{"id":"general.dock.section.behavior","route":"general.dock","title":"Behavior","context":"DockPage","icon":"touch_app","aliases":["auto hide","bounce","recent","indicators","pin"]}'
+                    '{"id":"general.dock.section.behavior","route":"general.dock","title":"Behavior","context":"DockPage","icon":"touch_app","aliases":["auto hide","bounce","recent","indicators","pin","minimize","animation","genie","scale"]}'
             }
 
             SettingsRow {
@@ -177,6 +177,66 @@ StyledFlickable {
                     Accessible.name: qsTr("Show running indicators")
                     onToggled: DockService.setOption("showIndicators", checked)
                 }
+            }
+
+            NiriSetupPrompt {
+                Layout.fillWidth: true
+                visible: DockService.supportsMinimizeEffects && !NiriConfigService.ready("minimize-animation")
+                title: qsTr("Minimize animation")
+                description: qsTr("Connect window animation settings to your configuration.")
+                integrationState: NiriConfigService.state("minimize-animation")
+                busy: NiriConfigService.busy && NiriConfigService.activeFeature === "minimize-animation"
+                blocked: NiriConfigService.busy
+                error: NiriConfigService.errorFeature === "minimize-animation" ? NiriConfigService.error :
+                                                                                 NiriConfigService.readError
+                onSetupRequested: NiriConfigService.setup("minimize-animation")
+            }
+
+            SettingsRow {
+                Layout.fillWidth: true
+                visible: !DockService.supportsMinimizeEffects || NiriConfigService.ready("minimize-animation")
+                title: qsTr("Minimize animation")
+                iconName: "animation"
+                supportingText: !DockService.supportsMinimizeEffects ? qsTr(
+                                                                           "Window animation selection is unavailable in this session") :
+                                                                       NiriConfigService.minimizeAnimationsDisabled
+                                                                       ? qsTr("Animations are disabled in your configuration") :
+                                                                         ""
+                trailing: Item {
+                    implicitWidth: effectButtons.implicitWidth
+                    implicitHeight: effectButtons.implicitHeight
+                    StyledButtonGroup {
+                        id: effectButtons
+                        anchors.fill: parent
+                        enabled: DockService.supportsMinimizeEffects && NiriConfigService.ready(
+                                     "minimize-animation") && !NiriConfigService.busy
+                        model: [
+                            {
+                                value: "genie",
+                                label: qsTr("Genie")
+                            },
+                            {
+                                value: "scale",
+                                label: qsTr("Scale")
+                            }
+                        ]
+                        currentValue: NiriConfigService.minimizeEffect
+                        onValueSelected: value => NiriConfigService.setMinimizeEffect(String(value))
+                    }
+                    InlineBusyIndicator {
+                        anchors.centerIn: parent
+                        busy: NiriConfigService.busy && NiriConfigService.activeFeature
+                              === "minimize-animation"
+                    }
+                }
+            }
+
+            InlineStatusBanner {
+                Layout.fillWidth: true
+                visible: NiriConfigService.ready("minimize-animation") && NiriConfigService.errorFeature
+                         === "minimize-animation" && NiriConfigService.error.length > 0
+                tone: "error"
+                message: NiriConfigService.error
             }
 
             SettingsRow {

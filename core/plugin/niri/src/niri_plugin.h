@@ -19,6 +19,7 @@ class NiriPlugin : public QObject {
 
     Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
     Q_PROPERTY(bool supportsMinimizeAnimation READ supportsMinimizeAnimation NOTIFY capabilitiesChanged)
+    Q_PROPERTY(QStringList minimizeEffects READ minimizeEffects NOTIFY capabilitiesChanged)
     Q_PROPERTY(bool supportsMinimize READ supportsMinimize NOTIFY capabilitiesChanged)
     Q_PROPERTY(quint64 connectionGeneration READ connectionGeneration NOTIFY connectedChanged)
     Q_PROPERTY(QString socketPath READ socketPath NOTIFY connectedChanged)
@@ -39,6 +40,7 @@ class NiriPlugin : public QObject {
     bool connected() const;
     bool supportsMinimize() const { return connected() && m_supportsMinimize; }
     bool supportsMinimizeAnimation() const { return connected() && m_supportsMinimizeAnimation; }
+    QStringList minimizeEffects() const { return m_minimizeEffects; }
     quint64 connectionGeneration() const { return m_connectionGeneration; }
     QString socketPath() const;
     QString lastError() const;
@@ -142,4 +144,5 @@ class NiriPlugin : public QObject {
     bool m_wasConnected = false;
     bool m_supportsMinimize = false;
     bool m_supportsMinimizeAnimation = false;
+    QStringList m_minimizeEffects;
 };

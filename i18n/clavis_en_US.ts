@@ -3811,17 +3811,17 @@ Scroll to adjust</translation>
 <context>
     <name>DockPage</name>
     <message>
-        <location filename="../Common/generated/SearchCatalog.js" line="1925"/>
+        <location filename="../Common/generated/SearchCatalog.js" line="1942"/>
         <source>Appearance</source>
         <translation>Appearance</translation>
     </message>
     <message>
-        <location filename="../Common/generated/SearchCatalog.js" line="1926"/>
+        <location filename="../Common/generated/SearchCatalog.js" line="1943"/>
         <source>Behavior</source>
         <translation>Behavior</translation>
     </message>
     <message>
-        <location filename="../Common/generated/SearchCatalog.js" line="1927"/>
+        <location filename="../Common/generated/SearchCatalog.js" line="1944"/>
         <source>Window previews</source>
         <translation>Window previews</translation>
     </message>
@@ -3889,25 +3889,56 @@ Scroll to adjust</translation>
         <translation>Show running indicators</translation>
     </message>
     <message>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="184"/>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="189"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="185"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="198"/>
+        <source>Minimize animation</source>
+        <translation>Minimize animation</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="186"/>
+        <source>Connect window animation settings to your configuration.</source>
+        <translation>Connect window animation settings to your configuration.</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="200"/>
+        <source>Window animation selection is unavailable in this session</source>
+        <translation>Window animation selection is unavailable in this session</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="203"/>
+        <source>Animations are disabled in your configuration</source>
+        <translation>Animations are disabled in your configuration</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="211"/>
+        <source>Genie</source>
+        <translation>Genie</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="215"/>
+        <source>Scale</source>
+        <translation>Scale</translation>
+    </message>
+    <message>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="238"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="243"/>
         <source>Show recent applications</source>
         <translation>Show recent applications</translation>
     </message>
     <message>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="196"/>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="201"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="250"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="255"/>
         <source>Pin applications from the menu</source>
         <translation>Pin applications from the menu</translation>
     </message>
     <message>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="223"/>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="227"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="277"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="281"/>
         <source>Show window thumbnails</source>
         <translation>Show window thumbnails</translation>
     </message>
     <message>
-        <location filename="../Modules/ControlCenter/DockPage.qml" line="232"/>
+        <location filename="../Modules/ControlCenter/DockPage.qml" line="286"/>
         <source>Preview size</source>
         <translation>Preview size</translation>
     </message>
