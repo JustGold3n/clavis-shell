@@ -17,6 +17,7 @@ Item {
     property real iconSize: 40
     // Animated consumers can keep the decoded image stable while scaling it.
     property real rasterSize: 0
+    property bool transformed: false
     readonly property int themeRevision: ThemeService.iconThemeRevision
     readonly property var candidates: {
         if (directory)
@@ -83,6 +84,9 @@ Item {
     ThemeIcon {
         id: artwork
         anchors.fill: parent
+        smooth: true
+        antialiasing: root.transformed
+        mipmap: root.transformed
         asynchronous: true
         retainWhileLoading: false
         fillMode: Image.PreserveAspectFit

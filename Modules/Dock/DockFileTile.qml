@@ -48,6 +48,7 @@ Item {
         width: root.tileIconSize
         height: width
         info: root.fileInfo
+        transformed: root.fan
         visible: root.actionIcon === ""
         x: root.verticalLabel ? (parent.width - width) / 2 : root.compact ? 8 : root.fan ? (root.labelsLeft
                                                                                             ? parent.width

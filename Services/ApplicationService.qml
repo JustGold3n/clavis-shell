@@ -72,7 +72,21 @@ Singleton {
             return false;
         if (application.id === root.settingsApplication.id)
             return ControlCenterService.openOrFocus();
-        return root.launchCommand(application.command, application.workingDirectory);
+        const command = Array.from(application.command || []);
+        if (command.length === 0 || !String(command[0]).trim())
+            return false;
+        if (application.runInTerminal) {
+            const terminal = ["xdg-terminal-exec"];
+            if (application.workingDirectory)
+                terminal.push("--dir=" + String(application.workingDirectory));
+            // Optional terminal support: let Dock match a TUI's window to its
+            // desktop entry without guessing from the window title.
+            const appId = String(application.startupClass || application.id || "").replace(/\.desktop$/, "");
+            if (appId)
+                terminal.push("--app-id=" + appId);
+            return root.launchCommand(terminal.concat(["--"], command), application.workingDirectory);
+        }
+        return root.launchCommand(command, application.workingDirectory);
     }
 
     function openUrl(url) {
