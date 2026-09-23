@@ -58,6 +58,7 @@ void NiriPlugin::connectionChanged()
     ++m_connectionGeneration;
     ++m_outputRefreshGeneration;
     m_supportsMinimize = false;
+    m_supportsMinimizeAnimation = false;
     emit capabilitiesChanged();
     emit connectedChanged();
     if (!online) {
@@ -70,15 +71,18 @@ void NiriPlugin::connectionChanged()
     const auto generation = m_connectionGeneration;
     // Old compositors reject this optional query. That is a capability result,
     // not an action failure, and must never trigger a probing minimize action.
-    m_client.requestAsync(QStringLiteral("Capabilities"), this,
-                          [this, generation](const QJsonValue &value, const QString &error) {
-                              if (!connected() || generation != m_connectionGeneration)
-                                  return;
-                              m_supportsMinimize =
-                                  error.isEmpty() && value.isObject() &&
-                                  value.toObject().value(QStringLiteral("window_minimization")).toBool(false);
-                              emit capabilitiesChanged();
-                          });
+    m_client.requestAsync(
+        QStringLiteral("Capabilities"), this,
+        [this, generation](const QJsonValue &value, const QString &error) {
+            if (!connected() || generation != m_connectionGeneration)
+                return;
+            m_supportsMinimize = error.isEmpty() && value.isObject() &&
+                                 value.toObject().value(QStringLiteral("window_minimization")).toBool(false);
+            m_supportsMinimizeAnimation =
+                m_supportsMinimize &&
+                value.toObject().value(QStringLiteral("window_minimization_animation")).toBool(false);
+            emit capabilitiesChanged();
+        });
 }
 
 QVariantList NiriPlugin::workspacesForOutput(const QString &outputName) const

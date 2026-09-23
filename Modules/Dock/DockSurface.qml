@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Controls
 import Quickshell
 import Clavis.Files
+import Clavis.Niri
 import Quickshell.Wayland
 import qs.Common
 import qs.Components
@@ -15,6 +16,43 @@ PanelWindow {
     id: root
 
     required property string edge
+
+    NiriAnimationTargets {
+        enabled: Niri.supportsMinimizeAnimation && !WindowPreviewService.suspended && root.visible
+        targets: {
+            const revision = DockService.revision;
+            // mapToItem observes transforms, but does not establish QML dependencies for them.
+            const geometry = [band.x, band.y, band.width, band.height, hideTranslation.x, hideTranslation.y,
+                              root.scrollOffset, root.width, root.height];
+            if (!root.screen || geometry.some(value => !isFinite(value)))
+                return [];
+            const result = [];
+            for (let i = 0; i < iconItems.count; ++i) {
+                const item = iconItems.itemAt(i) as DockItem;
+                if (!item || item.kind !== "app" || visualEntries.get(i).retiring || item.dragged)
+                    continue;
+                const artwork = item.artworkItem;
+                const itemGeometry = [item.x, item.y, item.width, item.height, artwork.x, artwork.y,
+                                      artwork.width, artwork.height, artwork.scale];
+                if (itemGeometry.some(value => !isFinite(value)))
+                    continue;
+                const start = artwork.mapToItem(content, 0, 0);
+                const end = artwork.mapToItem(content, artwork.width, artwork.height);
+                if (end.x <= start.x || end.y <= start.y)
+                    continue;
+                for (const window of DockService.windowsFor(item.entryKey)) {
+                    result.push({
+                                    id: window.id,
+                                    output: root.screen.name,
+                                    layer_namespace: "clavis-shell-dock",
+                                    edge: root.edge,
+                                    rect: [start.x, start.y, end.x - start.x, end.y - start.y]
+                                });
+                }
+            }
+            return result;
+        }
+    }
     readonly property bool horizontal: edge === "bottom"
     readonly property real axisLength: horizontal ? width : height
     readonly property real availableLength: Math.max(80, axisLength - 32)
@@ -654,6 +692,7 @@ PanelWindow {
                 }
             }
             transform: Translate {
+                id: hideTranslation
                 x: root.horizontal ? 0 : root.shown ? 0 : root.edge === "left" ? -band.width
                                                                                  - root.edgeOffset :
                                                                                  band.width + root.edgeOffset

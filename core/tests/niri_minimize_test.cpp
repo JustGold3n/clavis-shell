@@ -1,4 +1,5 @@
 #include "niri_plugin.h"
+#include "niri_animation_targets.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QLocalServer>
@@ -14,6 +15,8 @@ class NiriPeer : public QObject {
   public:
     QLocalServer *server = nullptr;
     QPointer<QLocalSocket> events;
+    QPointer<QLocalSocket> targetPublisher;
+    int targetConnections = 0;
     QList<QJsonValue> requests;
     QJsonObject capabilityReply{
         {"Ok", QJsonObject{{"Capabilities", QJsonObject{{"window_minimization", true}}}}}};
@@ -52,6 +55,11 @@ class NiriPeer : public QObject {
                         } else if (request == QJsonValue("Outputs")) {
                             peer->write("{\"Ok\":{\"Outputs\":{\"DP-2\":{\"current_mode\":0}}}}\n");
                         } else {
+                            if (request.toObject().contains("SetWindowAnimationTargets") &&
+                                targetPublisher != peer) {
+                                targetPublisher = peer;
+                                ++targetConnections;
+                            }
                             peer->write("{\"Ok\":\"Handled\"}\n");
                         }
                     }
@@ -94,6 +102,64 @@ class NiriMinimizeTest : public QObject {
         m_thread.quit();
         m_thread.wait();
         qputenv("NIRI_SOCKET", m_oldSocket);
+    }
+    void targetsUseOneAsyncConnectionAndReleaseOnDisable()
+    {
+        NiriAnimationTargets publisher;
+        const QVariantMap target{{"id", 42},
+                                 {"output", "DP-2"},
+                                 {"edge", "left"},
+                                 {"rect", QVariantList{8.5, 120.25, 40.0, 40.0}}};
+        publisher.setTargets({target});
+        publisher.setEnabled(true);
+        int count = 0;
+        QTRY_VERIFY(([&] {
+            server([&](auto *peer) { count = peer->requests.size(); });
+            return count == 1;
+        })());
+        publisher.setTargets({target});
+        QTest::qWait(80);
+        publisher.setTargets({});
+        QTRY_VERIFY(([&] {
+            server([&](auto *peer) { count = peer->requests.size(); });
+            return count == 2;
+        })());
+        server([&](auto *peer) {
+            QCOMPARE(peer->targetConnections, 1);
+            const auto first =
+                peer->requests.first().toObject().value("SetWindowAnimationTargets").toObject();
+            QCOMPARE(
+                first.value("targets").toArray().at(0).toObject().value("rect").toArray().at(0).toDouble(),
+                8.5);
+            QVERIFY(peer->requests.last()
+                        .toObject()
+                        .value("SetWindowAnimationTargets")
+                        .toObject()
+                        .value("targets")
+                        .toArray()
+                        .isEmpty());
+        });
+        publisher.setEnabled(false);
+        bool disconnected = false;
+        QTRY_VERIFY(([&] {
+            server([&](auto *peer) {
+                disconnected = peer->targetPublisher->state() == QLocalSocket::UnconnectedState;
+            });
+            return disconnected;
+        })());
+    }
+    void separateAnimationCapabilityIsOptional()
+    {
+        NiriPlugin legacy;
+        QTRY_VERIFY(legacy.supportsMinimize());
+        QVERIFY(!legacy.supportsMinimizeAnimation());
+        server([](auto *peer) {
+            peer->capabilityReply = {
+                {"Ok", QJsonObject{{"Capabilities", QJsonObject{{"window_minimization", true},
+                                                                {"window_minimization_animation", true}}}}}};
+        });
+        NiriPlugin animated;
+        QTRY_VERIFY(animated.supportsMinimizeAnimation());
     }
     void snapshotEventsAndOutputActions()
     {
