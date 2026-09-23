@@ -27,12 +27,6 @@ ColumnLayout {
                      && root.integrationState !== "loading"
 
             onClicked: root.setupRequested()
-            InlineBusyIndicator {
-                anchors.right: parent.left
-                anchors.rightMargin: Metrics.spacingS
-                anchors.verticalCenter: parent.verticalCenter
-                busy: root.busy
-            }
         }
     }
     InlineStatusBanner {
