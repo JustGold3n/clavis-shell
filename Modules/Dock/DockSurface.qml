@@ -18,27 +18,33 @@ PanelWindow {
     required property string edge
 
     NiriAnimationTargets {
+        id: animationTargets
         enabled: Niri.supportsMinimizeAnimation && !WindowPreviewService.suspended && root.visible
-        targets: {
-            const revision = DockService.revision;
-            // mapToItem observes transforms, but does not establish QML dependencies for them.
-            const geometry = [band.x, band.y, band.width, band.height, hideTranslation.x, hideTranslation.y,
-                              root.scrollOffset, root.width, root.height];
-            if (!root.screen || geometry.some(value => !isFinite(value)))
-                return [];
-            const result = [];
+        onEnabledChanged: root.updateAnimationTargets()
+    }
+    // Geometry notifications arrive once per animated property, not once per
+    // frame. Coalesce before walking the row and converting the IPC payload;
+    // the native publisher's send throttle happens too late to save that work.
+    readonly property var animationTargetGeometry: [band.x, band.y, band.width, band.height, hideTranslation.x,
+        hideTranslation.y, scrollOffset, width, height, screen ? screen.name : "", edge]
+    onAnimationTargetGeometryChanged: scheduleAnimationTargets()
+
+    function scheduleAnimationTargets() {
+        if (animationTargets.enabled)
+            Qt.callLater(root.updateAnimationTargets);
+    }
+    function updateAnimationTargets() {
+        const result = [];
+        if (animationTargets.enabled && root.screen) {
             for (let i = 0; i < iconItems.count; ++i) {
                 const item = iconItems.itemAt(i) as DockItem;
                 if (!item || item.kind !== "app" || visualEntries.get(i).retiring || item.dragged)
                     continue;
                 const artwork = item.artworkItem;
-                const itemGeometry = [item.x, item.y, item.width, item.height, artwork.x, artwork.y,
-                                      artwork.width, artwork.height, artwork.scale];
-                if (itemGeometry.some(value => !isFinite(value)))
-                    continue;
                 const start = artwork.mapToItem(content, 0, 0);
                 const end = artwork.mapToItem(content, artwork.width, artwork.height);
-                if (end.x <= start.x || end.y <= start.y)
+                if (![start.x, start.y, end.x, end.y].every(value => isFinite(value)) || end.x <= start.x
+                        || end.y <= start.y)
                     continue;
                 for (const window of DockService.windowsFor(item.entryKey)) {
                     result.push({
@@ -50,8 +56,8 @@ PanelWindow {
                                 });
                 }
             }
-            return result;
         }
+        animationTargets.targets = result;
     }
     readonly property bool horizontal: edge === "bottom"
     readonly property real axisLength: horizontal ? width : height
@@ -515,6 +521,7 @@ PanelWindow {
             // Drop commits also clear the provisional gap in this event turn.
             // Create delegates only after that final slot layout has settled.
             Qt.callLater(root.syncVisualEntries);
+            root.scheduleAnimationTargets();
         }
     }
     Connections {
@@ -781,11 +788,18 @@ PanelWindow {
                 Repeater {
                     id: iconItems
                     model: visualEntries
+                    onCountChanged: root.scheduleAnimationTargets()
                     delegate: DockItem {
                         id: dockItem
                         required property string key
                         required property bool retiring
                         property bool appeared: false
+                        // mapToItem() does not track transform dependencies. Each
+                        // delegate only invalidates the shared deferred snapshot.
+                        readonly property var animationTargetGeometry: [x, y, width, height, artworkItem.x,
+                            artworkItem.y, artworkItem.width, artworkItem.height, artworkItem.scale, kind, key,
+                            retiring, dragged]
+                        onAnimationTargetGeometryChanged: root.scheduleAnimationTargets()
                         readonly property bool awaitingHandoff: root.handoffKey === key
                         property real retirementAxis: 0
                         property real retirementSpan: 0
